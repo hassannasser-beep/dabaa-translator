@@ -21,8 +21,7 @@ ADMIN_PASSWORD = "1992002"
 
 # 🔑 وضع الرموز السرية داخل الكود مباشرة (الحل البديل والمضمون)
 GITHUB_TOKEN = "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"
-REPO_NAME = "hassannasser-beep
-/dabaa-translator"
+REPO_NAME = "hassannasser-beep/dabaa-translator"
 
 DB_FILE = "glossary_db.json"
 
