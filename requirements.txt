@@ -1,5 +1,3 @@
 streamlit
-deep-translator
-streamlit
-deep-translator
+google-genai
 PyGithub
