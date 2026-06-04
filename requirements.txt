@@ -1,2 +1,5 @@
 streamlit
 deep-translator
+streamlit
+deep-translator
+PyGithub
