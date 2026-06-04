@@ -18,12 +18,16 @@ languages_dict = {
 }
 
 # 3. 🔒 إعداد كلمة المرور الافتراضية للمسؤول (حسن ناصر)
-ADMIN_PASSWORD = "1992002"  # يمكنك تغيير "1234" لأي كلمة سر قوية تريدها
+ADMIN_PASSWORD = "1992002"  # 
 
 # 4. 🧠 تهيئة الذاكرة التخزينية المؤقتة للقاموس الشامل
 if "global_dict" not in st.session_state:
     # القاموس الافتراضي (يدعم تحديد لغة المصدر والهدف والكلمة والترجمة)
     st.session_state.global_dict = [
+        {"from_lang": "en", "to_lang": "ar", "word": "handover", "translation": "تسليم المواد لشركة دايسون"},
+        {"from_lang": "en", "to_lang": "ar", "word": "scrap", "translation": "المخلفات والسكراب التالف"},
+        {"from_lang": "ru", "to_lang": "ar", "word": "привет", "translation": "أهلاً وسهلاً (ترحيب روسي)"}
+    ]
 
 # 5. تصميم واجهة الموقع (تقسيم الشاشة)
 col_left, col_right = st.columns([2, 1])
