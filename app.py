@@ -4,7 +4,7 @@ from deep_translator import GoogleTranslator
 # إعدادات الصفحة والعنوان
 st.set_page_config(page_title="مترجم مشروع الضبعة الذكي", page_icon="🌐", layout="centered")
 
-st.title("🌐 مترجم المشروع الذكي (El Dabaa Translator)")
+st.title("🌐 HASSAN NASSER (El Dabaa Translator)")
 st.markdown("### أداة سريعة لترجمة المصطلحات الهندسية والمحادثات اليومية")
 st.write("---")
 
@@ -14,7 +14,7 @@ languages_dict = {
     "الإنجليزية (English)": "en",
     "الروسية (Русский)": "ru",
     "الكورية (한국어)": "ko"
-}
+    "الصينية": "zh"
 
 # تصميم واجهة الاختيار باستخدام القوائم الجاهزة بجانب بعضها
 col1, col2 = st.columns(2)
