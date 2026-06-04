@@ -1,11 +1,11 @@
 import streamlit as st
 import requests
 
-# 1. إعدادات الصفحة والعنوان
-st.set_page_config(page_title="HASSAN NASSER ", page_icon="🤖", layout="centered")
+# 1. إعدادات الصفحة والعنوان باسمك
+st.set_page_config(page_title="HASSAN NASSER AI Translator", page_icon="🤖", layout="centered")
 
-st.title("🤖 مترجم المهندس HASSAN NASSER ")
-st.markdown("### أداة ذكية تعرض لك كافة الترجمات والخيارات المتاحة للمصطلحات")
+st.title("🤖 مترجم المهندس HASSAN NASSER بذكاء Gemini الشامل")
+st.markdown("### أداة ذكية وسريعة تعرض لك كافة خيارات الترجمة المتاحة للمصطلحات")
 st.write("---")
 
 # 2. قائمة اللغات المتاحة
@@ -14,16 +14,15 @@ languages_dict = {
     "الروسية (Русский)": "Russian", "الكورية (한국어)": "Korean", "الصينية (中文)": "Chinese"
 }
 
-# 🔒 جعل إدخال الـ API KEY يتم عبر الشاشة للحماية من التعطيل التلقائي لـ GitHub
-st.sidebar.subheader("🔑 إعدادات الأمان والاتصال")
-api_key_input = st.sidebar.text_input("أدخل مفتاح Gemini API Key الخاص بك:", type="password", help="المفتاح يجب أن يبدأ بـ AIzaSy")
+# 🔑 تم دمج مفتاحك الجديد من نوع AQ هنا مباشرة
+GEMINI_API_KEY = "AQ.Ab8RN6Ju1TteQTKBNmvIWB9qbFFVstmyWc935_YLqmyIAuPlIw"
 
 # 3. تصميم واجهة الاختيار (قوائم جاهزة)
 col1, col2 = st.columns(2)
 with col1:
-    source_lang = st.selectbox("ترجم من لغة:", list(languages_dict.keys()), index=1)
+    source_lang = st.selectbox("ترجم من لغة:", list(languages_dict.keys()), index=1) # الافتراضي إنجليزي
 with col2:
-    target_lang = st.selectbox("إلى لغة:", list(languages_dict.keys()), index=0)
+    target_lang = st.selectbox("إلى لغة:", list(languages_dict.keys()), index=0) # الافتراضي عربي
 
 st.write("---")
 
@@ -33,14 +32,19 @@ text_to_translate = st.text_area("اكتب أو الصق النص هنا:", plac
 if st.button("✨ ترجم الآن واستعرض كافة الخيارات", type="primary"):
     if text_to_translate.strip() == "":
         st.warning("⚠️ من فضلك اكتب نصاً أولاً ليتمكن البرنامج من ترجمته.")
-    elif not api_key_input.strip():
-        st.error("❌ يرجى إدخال مفتاح الـ API KEY في القائمة الجانبية اليسرى أولاً لتفعيل المترجم.")
     else:
-        with st.spinner("جاري استخراج كافة الترجمات الممكنة عبر Gemini..."):
+        with st.spinner("جاري الاتصال الآمن بسيرفر Gemini واستخراج الخيارات..."):
             try:
-                # تجهيز الطلب المباشر لسيرفر جوجل جيميناي باستخدام المفتاح المدخل من الشاشة
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key_input.strip()}"
+                # الرابط المباشر بدون دمج المفتاح فيه لحمايته
+                url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
                 
+                # 🔒 الطريقة الصحيحة والآمنة لإرسال مفاتيح AQ الجديدة عبر الـ Bearer Token
+                headers = {
+                    "Authorization": f"Bearer {GEMINI_API_KEY}",
+                    "Content-Type": "application/json"
+                }
+                
+                # الأمر الموجه للذكاء الاصطناعي ليعطي أكثر من ترجمة
                 prompt = (
                     f"You are an expert engineer and professional polyglot translator. "
                     f"Translate the following text/term from {languages_dict[source_lang]} to {languages_dict[target_lang]}. "
@@ -56,18 +60,30 @@ if st.button("✨ ترجم الآن واستعرض كافة الخيارات", t
                     }]
                 }
                 
-                response = requests.post(url, json=payload)
+                # إرسال الطلب مع الرؤوس المشفرة لحل مشكلة الـ AQ Key
+                response = requests.post(url, json=payload, headers=headers)
                 response_json = response.json()
                 
-                # فحص هل استجاب السيرفر بنجاح أم أن المفتاح به مشكلة
+                # استخراج النص وعرضه
                 if 'candidates' in response_json:
                     translated_text = response_json['candidates'][0]['content']['parts'][0]['text']
                     st.success("📝 خيارات الترجمة المتاحة:")
                     st.markdown(translated_text.strip())
-                elif 'error' in response_json:
-                    st.error(f"❌ خطأ من سيرفر جوجل: {response_json['error']['message']}\nتأكد أن المفتاح صحيح ويبدأ بـ AIzaSy.")
                 else:
-                    st.error("❌ تعذر الاتصال، يرجى التأكد من صلاحية المفتاح المستعمل.")
+                    # حل بديل إذا طلب السيرفر الرأس الآخر المخصص للمفاتيح المطورة
+                    headers_backup = {
+                        "x-goog-api-key": GEMINI_API_KEY,
+                        "Content-Type": "application/json"
+                    }
+                    response_backup = requests.post(url, json=payload, headers=headers_backup)
+                    response_json_backup = response_backup.json()
                     
+                    if 'candidates' in response_json_backup:
+                        translated_text = response_json_backup['candidates'][0]['content']['parts'][0]['text']
+                        st.success("📝 خيارات الترجمة المتاحة:")
+                        st.markdown(translated_text.strip())
+                    else:
+                        st.error("❌ واجه السيرفر مشكلة في تفعيل المفتاح، يرجى التأكد من أن المفتاح نشط في حسابك.")
+                
             except Exception as e:
-                st.error("حدث خطأ أثناء الاتصال بـ Gemini. تأكد من استقرار الإنترنت وصلاحية الـ API KEY.")
+                st.error(f"حدث خطأ أثناء الاتصال بـ Gemini: {e}")
