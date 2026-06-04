@@ -15,7 +15,7 @@ languages_dict = {
 }
 
 # 🔑 ضع مفتاح جيميناي الخاص بك هنا بين علامات الاقتباس
-GEMINI_API_KEY = "ضع_هنا_مفتاح_جيميني_السري_API_KEY"
+GEMINI_API_KEY = "AQ.Ab8RN6Kw65ub_b94LxuWmQHARAoRKPfefdT5_HS0VkOVy-ZPEA"
 
 if GEMINI_API_KEY and GEMINI_API_KEY != "ضع_هنا_مفتاح_جيميني_السري_API_KEY":
     genai.configure(api_key=GEMINI_API_KEY)
