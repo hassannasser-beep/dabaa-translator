@@ -1,20 +1,22 @@
 import streamlit as st
 from deep_translator import GoogleTranslator
 
-# إعدادات الصفحة والعنوان
-st.set_page_config(page_title=" HASSAN NASSER", page_icon="🌐", layout="centered")
+# 1. إعدادات الصفحة وتغيير اسم التبويب والأيقونة باسمك
+st.set_page_config(page_title="HASSAN NASSER Translator", page_icon="🏗️", layout="centered")
 
-st.title("🌐 HASSAN NASSER (El Dabaa Translator)")
-st.markdown("### أداة سريعة لترجمة المصطلحات الهندسية والمحادثات اليومية")
+# 2. العنوان الرئيسي للموقع باسمك الشخصي
+st.title("🏗️ مترجم المهندس HASSAN NASSER الذكي")
+st.markdown("### أداة تفاعلية لترجمة المصطلحات الهندسية والمحادثات في موقع الضبعة")
 st.write("---")
 
-# تعريف اللغات المدعومة في المشروع
+# 3. تعريف اللغات المدعومة (مع إضافة اللغة الصينية "zh")
 languages_dict = {
     "العربية": "ar",
     "الإنجليزية (English)": "en",
     "الروسية (Русский)": "ru",
-    "الكورية (한국어)": "ko"
-    "الصينية": "zh"
+    "الكورية (한국어)": "ko",
+    "الصينية (中文)": "zh"
+}
 
 # تصميم واجهة الاختيار باستخدام القوائم الجاهزة بجانب بعضها
 col1, col2 = st.columns(2)
@@ -43,7 +45,7 @@ if st.button("✨ ترجم الآن", type="primary"):
                     target=languages_dict[target_lang]
                 ).translate(text_to_translate)
                 
-                # عرض النتيجة داخل صندوق مجهز وجميل
+                # عرض النتيجة داخل صندوق مجهز وأنيق
                 st.success("📝 النص المترجم:")
                 st.subheader(translated)
                 
