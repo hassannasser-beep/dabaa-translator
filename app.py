@@ -2,7 +2,7 @@ import streamlit as st
 from deep_translator import GoogleTranslator
 
 # إعدادات الصفحة والعنوان
-st.set_page_config(page_title="مترجم مشروع الضبعة الذكي", page_icon="🌐", layout="centered")
+st.set_page_config(page_title="HASSAN NASSER", page_icon="🌐", layout="centered")
 
 st.title("🌐 HASSAN NASSER (El Dabaa Translator)")
 st.markdown("### أداة سريعة لترجمة المصطلحات الهندسية والمحادثات اليومية")
