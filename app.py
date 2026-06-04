@@ -14,7 +14,6 @@ languages_dict = {
     "الروسية (Русский)": "Russian", "الكورية (한국어)": "Korean", "الصينية (中文)": "Chinese"
 }
 
-# 🔑 ضع مفتاح جيميناي الخاص بك هنا بين علامات الاقتباس (المفتاح السري الذي يبدأ بـ AIzaSy)
 GEMINI_API_KEY = "AQ.Ab8RN6Kw65ub_b94LxuWmQHARAoRKPfefdT5_HS0VkOVy-ZPEA"
 
 # 3. تصميم واجهة الاختيار (قوائم جاهزة)
