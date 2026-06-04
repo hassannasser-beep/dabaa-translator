@@ -2,22 +2,19 @@ import streamlit as st
 import requests
 
 # 1. إعدادات الصفحة والعنوان باسمك
-st.set_page_config(page_title="HASSAN NASSER ", page_icon="🤖", layout="centered")
+st.set_page_config(page_title="HASSAN NASSER AI Translator", page_icon="🤖", layout="centered")
 
-st.title("🤖 مترجم  HASSAN NASSER ل")
-st.markdown("### TRANSLATOR")
+st.title("🤖 مترجم المهندس HASSAN NASSER الذكي الفوري")
+st.markdown("### أداة سريعة ومباشرة لترجمة المصطلحات الهندسية والمحادثات بدون انقطاع")
 st.write("---")
 
-# 2. قائمة اللغات المتاحة
+# 2. قائمة اللغات المتاحة (تم ضبط الاختصارات العالمية)
 languages_dict = {
-    "العربية": "Arabic", "الإنجليزية (English)": "English", 
-    "الروسية (Русский)": "Russian", "الكورية (한국어)": "Korean", "الصينية (中文)": "Chinese"
+    "العربية": "ar", "الإنجليزية (English)": "en", 
+    "الروسية (Русский)": "ru", "الكورية (한국어)": "ko", "الصينية (中文)": "zh"
 }
 
-# 🔑 تم دمج المفتاح الدائم المستقر هنا مباشرة ليعمل الموقع تلقائياً للأبد للجميع
-GEMINI_API_KEY = "AIzaSyB3_N6JVfs724eZvmm98A8fP4W5hPS9lU_HassanNasser"
-
-# 3. تصميم واجهة الاختيار (قوائم جاهزة)
+# 3. تصميم واجهة الاختيار (قوائم جاهزة بجانب بعضها)
 col1, col2 = st.columns(2)
 with col1:
     source_lang = st.selectbox("ترجم من لغة:", list(languages_dict.keys()), index=1) # الافتراضي إنجليزي
@@ -29,44 +26,26 @@ st.write("---")
 # 4. صندوق إدخال النص وزر الترجمة
 text_to_translate = st.text_area("اكتب أو الصق النص هنا:", placeholder="Type your text or engineering terms here...")
 
-if st.button("✨ ترجم الآن واستعرض كافة الخيارات", type="primary"):
+if st.button("✨ ترجم الآن واستعرض الخيارات", type="primary"):
     if text_to_translate.strip() == "":
         st.warning("⚠️ من فضلك اكتب نصاً أولاً ليتمكن البرنامج من ترجمته.")
     else:
-        with st.spinner("جاري الاتصال بذكاء Gemini واستخراج كافة خيارات الترجمة..."):
+        with st.spinner("جاري الترجمة الفورية المستقرة..."):
             try:
-                # الرابط المباشر والمستقر مع المفتاح الدائم
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+                # إعداد تركيب اللغات المطلوبة للطلب
+                lang_pair = f"{languages_dict[source_lang]}|{languages_dict[target_lang]}"
+                url = f"https://api.mymemory.translated.net/get?q={text_to_translate.strip()}&langpair={lang_pair}"
                 
-                headers = {"Content-Type": "application/json"}
-                
-                # الأمر الموجه للذكاء الاصطناعي ليعطي أكثر من ترجمة وسياق فني
-                prompt = (
-                    f"You are an expert engineer and professional polyglot translator. "
-                    f"Translate the following text/term from {languages_dict[source_lang]} to {languages_dict[target_lang]}. "
-                    f"If the word or phrase has multiple possible translations, meanings, or contexts (e.g., technical, engineering, general, site jargon), "
-                    f"provide ALL the valid translations formatted as clear, numbered bullet points in {languages_dict[target_lang]}. "
-                    f"Briefly mention the context or usage for each option if applicable. Do not write intros or outros. "
-                    f"Text to translate:\n\n{text_to_translate}"
-                )
-                
-                payload = {
-                    "contents": [{
-                        "parts": [{"text": prompt}]
-                    }]
-                }
-                
-                # إرسال الطلب
-                response = requests.post(url, json=payload, headers=headers)
+                # إرسال الطلب للمحرك المجاني المستقر
+                response = requests.get(url)
                 response_json = response.json()
                 
-                # استخراج النص وعرضه للمستخدم
-                if 'candidates' in response_json:
-                    translated_text = response_json['candidates'][0]['content']['parts'][0]['text']
-                    st.success("📝 خيارات الترجمة المتاحة:")
-                    st.markdown(translated_text.strip())
-                else:
-                    st.error("❌ واجه النظام مشكلة في معالجة المفتاح، يرجى إعادة المحاولة.")
-                
-            except Exception as e:
-                st.error(f"حدث خطأ أثناء الاتصال بـ Gemini: {e}")
+                if 'responseData' in response_json:
+                    translated_text = response_json['responseData']['translatedText']
+                    
+                    # عرض الترجمة الأساسية الكبيرة
+                    st.success("📝 الترجمة المعتمدة:")
+                    st.subheader(translated_text.strip())
+                    
+                    # جلب واستعراض خيارات وترجمات بديلة ومتعددة للمصطلح إن وجدت
+                    if 'matches' in response_json and len(response_json['matches']) > 1:
