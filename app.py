@@ -6,7 +6,7 @@ import streamlit.components.v1 as components
 # 1. إعدادات الصفحة والعنوان الرسمي باسمك
 st.set_page_config(page_title="HASSAN NASSER", page_icon="", layout="wide")
 
-st.title" HASSAN NASSER")
+st.title " HASSAN NASSER")
 st.markdown("### المنصة المركزية المتطورة للترجمة الرقمية والصياغة السياقية الفورية")
 st.write("---")
 
