@@ -157,7 +157,7 @@ with st.form(key="ultimate_ai_form", clear_on_submit=False):
         key="input_ultimate"
     )
     
-    btn_process = st.form_submit_button(" TRANSLATING ( Ctrl+Enter)", use_container_width=True)
+    btn_process = st.form_submit_button(" TRANSLATE ( Ctrl+Enter)", use_container_width=True)
 
 st.write("---")
 
@@ -214,17 +214,17 @@ if btn_process and text_to_translate.strip():
             box_eng, box_legal, box_general = st.columns(3)
             
             with box_eng:
-                st.markdown("### 🛠️ الصيغة 1: الصياغة الهندسية")
+                st.markdown("###  الصيغة 1: الصياغة الهندسية")
                 st.caption("جمل منسقة ومطعمة بالمصطلحات الفنية للموقع والمهندسين والخبراء")
                 st.info(form_1.strip())
                 
             with box_legal:
-                st.markdown("### ⚖️ الصيغة 2: الصياغة التعاقدية")
+                st.markdown("###  الصيغة 2: الصياغة القانونية")
                 st.caption("أسلوب صارم وبليغ مخصص للخطابات الرسمية وعقود المشاريع الكبرى (FIDIC)")
                 st.success(form_2.strip())
                 
             with box_general:
-                st.markdown("### 💬 الصيغة 3: الصيغة المباشرة والسلسة")
+                st.markdown("### الصيغة 3: الصيغة المباشرة ")
                 st.caption("أسلوب بسيط ومفهوم ومباشر مناسب للمراسلات والإيميلات اليومية السريعة")
                 st.warning(form_3.strip())
             
@@ -232,7 +232,7 @@ if btn_process and text_to_translate.strip():
             detected_slang = detect_site_slang(cleaned_text)
             if detected_slang:
                 st.write("---")
-                st.markdown("### 🏗️ معجم المهندس حسن ناصر للمصطلحات الموقعية الدارجة (Site Slang Detector)")
+                st.markdown("###  (Site Slang Detector)")
                 st.markdown("> **💡 ميزة حصرية لمنصتك:** النظام رصد كلمات في تقريرك تترجمها المواقع العادية خطأً، وإليك معناها الهندسي الحقيقي المعتمد في ساحة العمل:")
                 
                 slang_table = """
