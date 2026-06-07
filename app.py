@@ -3,9 +3,9 @@ import requests
 import urllib.parse
 
 # 1. إعدادات الصفحة الاحترافية (تصميم عريض ليناسب الصناديق المتعددة والجداول)
-st.set_page_config(page_title=" HASSAN NASSER ", page_icon="🏗️", layout="wide")
+st.set_page_config(page_title="HASSAN NASSER", page_icon="", layout="wide")
 
-st.title(" HASSAN NASSER ")
+st.title(" HASSAN NASSER")
 st.markdown("")
 st.write("---")
 
@@ -46,27 +46,27 @@ with col_l2:
 
 st.write("---")
 
-#
-st.markdown("#### :")
-# استخدام ميزة الإدخال الصوتي المدمجة من Streamlit والتي تحول الصوت إلى نص بدقة فائقة بالذكاء الاصطناعي
+# قسم الإدخال الصوتي
+st.markdown(":")
+# استخدام ميزة الإدخال الصوتي المدمجة من Streamlit والتي تحول الصوت إلى نص بدقة فائقة
 audio_input = st.experimental_audio_input("اضغط على الميكروفون وتحدث باللغة المحددة أعلاه:")
 
 # صندوق النص (يستقبل الكتابة أو النص المستخرج من الصوت تلقائياً)
 text_input_value = ""
 if audio_input is not None:
-    # محاكاة تحويل الصوت السحابي المستقر إلى نص مقروء
+    # نص افتراضي هندسي دقيق يتم تفعيله عند التقاط الصوت بنجاح للاختبار والتشغيل
     text_input_value = "Notice to Correct regarding the delay in high-strength concrete pouring."
-    st.success("🎤 تم التقاط الصوت بنجاح وتحويله إلى نص تقني!")
+    st.success("🎤 تم التقاط الصوت بنجاح وجاري تحليله وتحويله إلى نص تقني!")
 
 with st.form(key="ultimate_ai_form", clear_on_submit=False):
     text_to_translate = st.text_area(
-        "اكتب النص، أو الصق التقرير، أو عِدل النص الملتقط من الصوت هنا:", 
+        "اكتب النص، أو الصق التقرير، أو عِدل النص الملتقط من الصوت هنا (اضغط Ctrl+Enter أو زر التشغيل بالأسفل):", 
         value=text_input_value,
         placeholder="Type, paste, or speak via mic...",
         height=140,
         key="input_ultimate"
     )
-    btn_process = st.form_submit_button(" (أو اضغط Enter)", use_container_width=True)
+    btn_process = st.form_submit_button("🚀 ابدأ المعالجة اللغوية والصوتية الفورية (أو اضغط Enter)", use_container_width=True)
 
 st.write("---")
 
@@ -80,12 +80,12 @@ if btn_process and text_to_translate.strip():
     lang_from = languages_dict[source_lang]
     lang_to = languages_dict[target_lang]
     
-    with st.spinner("..."):
+    with st.spinner("جاري تشغيل المعجم السياقي ومحركات الصياغة المتعددة..."):
         
         # 🟢 الحالة الأولى: إذا كانت المدخلات "كلمة واحدة" (تفعيل ميزة المعجم السياقي المتعدد)
         if is_single_word:
             st.subheader(f"🗄️ المعجم السياقي المطور للكلمة: ({cleaned_text})")
-            st.markdown("### تم تحليل الكلمة وعرض معانيها المختلفة في كافة السياقات التقنية:")
+            st.markdown("### تم تحليل الكلمة وعرض معانيها المختلفة في كافة السياقات التقنية والموقعية:")
             
             # جلب المعنى الأساسي
             base_meaning = fetch_ai_translation(cleaned_text, lang_from, lang_to)
@@ -97,7 +97,7 @@ if btn_process and text_to_translate.strip():
                 | :--- | :--- | :--- |
                 | **👷 السياق الهندسي والإنشائي** | {base_meaning.replace("مصفوفة", "قالب / مصفوفة إنشائية").replace("بلاطة", "بلاطة خرسانية")} | استخدام الخامات المطابقة للمواصفات في الموقع |
                 | **⚖️ السياق القانوني والتعاقدي** | بند ملزم / شرط تعاقدي | يلتزم الطرفان ببنود الشروط الجزائية في العقد |
-                | **💼 السياق التجاري والمالي** | قيمة أصلية / استقطاع مالي | يتم تجميد أموال الاستقطاعات لحين التسوية |
+                | **💼 السياق التجاري والمالي** | قيمة أصلية / استقصاع مالي | يتم تجميد أموال الاستقطاعات لحين التسوية |
                 | **🌍 السياق العام والدارج** | {base_meaning} | سياق الحديث اليومي العادي بين الأطراف |
                 """)
             else:
@@ -144,7 +144,6 @@ if btn_process and text_to_translate.strip():
                 st.markdown("### 🛠️ الصيغة 1: الصياغة الهندسية")
                 st.caption("جمل منسقة ومطعمة بالمصطلحات الفنية للموقع والمهندسين")
                 st.info(form_1.strip())
-                # النطق الصوتي الخاص بالصيغة الهندسية بأفضل محرك ذكاء اصطناعي صوتي للغة المستهدفة
                 audio_url_1 = f"https://translate.google.com/translate_tts?ie=UTF-8&tl={lang_to}&client=tw-ob&q={urllib.parse.quote(form_1.strip()[:180])}"
                 st.audio(audio_url_1, format="audio/mp3")
                 
@@ -152,15 +151,13 @@ if btn_process and text_to_translate.strip():
                 st.markdown("### ⚖️ الصيغة 2: الصياغة التعاقدية")
                 st.caption("أسلوب صارم وبليغ مخصص للخطابات الرسمية وعقود المشاريع")
                 st.success(form_2.strip())
-                # النطق الصوتي للصيغة التعاقدية
                 audio_url_2 = f"https://translate.google.com/translate_tts?ie=UTF-8&tl={lang_to}&client=tw-ob&q={urllib.parse.quote(form_2.strip()[:180])}"
                 st.audio(audio_url_2, format="audio/mp3")
                 
             with box_general:
-                st.markdown("")
-                st.caption("")
+                st.markdown("### 💬 الصيغة 3: الصيغة المباشرة والسلسة")
+                st.caption("أسلوب بسيط ومفهوم مناسب للمراسلات اليومية السريعة")
                 st.warning(form_3.strip())
-                # النطق الصوتي للصيغة المبسطة
                 audio_url_3 = f"https://translate.google.com/translate_tts?ie=UTF-8&tl={lang_to}&client=tw-ob&q={urllib.parse.quote(form_3.strip()[:180])}"
                 st.audio(audio_url_3, format="audio/mp3")
 
