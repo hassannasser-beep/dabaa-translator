@@ -56,4 +56,4 @@ with tab_text:
             placeholder="اكتب هنا تقارير، كلمات، أو فقرات كاملة ليتم ترجمتها وإعادة صياغتها لغوياً...",
             height=180
         )
-        btn_process
+        btn_process = st.button("...", type="primary")
