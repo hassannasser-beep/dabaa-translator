@@ -5,7 +5,7 @@ import requests
 st.set_page_config(page_title="HASSAN NASSER", page_icon="", layout="centered")
 
 st.title(" - HASSAN NASSER - ")
-st.markdown("### نظام متطور يترجم ويعيد صياغة النصوص سياقياً وقواعدياً بالذكاء الاصطناعي")
+st.markdown("")
 st.write("---")
 
 # اللغات الثمانية المدعومة بالكامل
@@ -39,13 +39,11 @@ def ai_core_translator(text, from_lang, to_lang):
 # 2. بناء الاستمارة (Form) لتفعيل زر ENTER عند الكتابة والضغط مباشرة
 with st.form(key="custom_ai_form", clear_on_submit=False):
     
-    # اختيار اللغات المخصصة حسب رغبتك يا هندسة
     source_lang = st.selectbox("ترجم من لغة:", list(languages_dict.keys()), index=1, key="src_custom")
     target_lang = st.selectbox("إلى لغة (اللغة المستهدفة):", list(languages_dict.keys()), index=0, key="tgt_custom")
     
     st.write("---")
     
-    # صندوق إدخال النص
     text_to_translate = st.text_area(
         "اكتب أو الصق النص هنا (اضغط Ctrl + Enter أو زر التشغيل بالأسفل لبدء الترجمة):", 
         placeholder="Type or paste your text here...",
@@ -53,14 +51,13 @@ with st.form(key="custom_ai_form", clear_on_submit=False):
         key="input_custom"
     )
     
-    # زر تشغيل المحرك
-    btn_process = st.form_submit_button("TRANSLATING", use_container_width=True)
+    btn_process = st.form_submit_button("🚀 ابدأ الترجمة والصياغة بالذكاء الاصطناعي", use_container_width=True)
 
 st.write("---")
 
 # 3. المعالجة وعرض النتيجة في صندوق مخصص واحد بناءً على اختيارك
 if btn_process and text_to_translate.strip():
-    with st.spinner..."):
+    with st.spinner("جاري الترجمة وإعادة ترتيب الجمل لغوياً..."):
         try:
             lang_from = languages_dict[source_lang]
             lang_to = languages_dict[target_lang]
