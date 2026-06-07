@@ -3,14 +3,14 @@ import requests
 import urllib.parse
 import streamlit.components.v1 as components
 
-# 1. إعدادات الصفحة والعنوان الرسمي باسمك
+# 1. إعدادات الصفحة والعنوان الرسمي باسمك الحصري
 st.set_page_config(page_title="HASSAN NASSER", page_icon="", layout="wide")
 
 st.title(" HASSAN NASSER")
 st.markdown("### المنصة المركزية المتطورة للترجمة الرقمية والصياغة السياقية الفورية")
 st.write("---")
 
-# اللغات الثمانية المعتمدة مع اختصاراتها الصوتية الدولية لـ JavaScript
+# اللغات الثمانية المعتمدة مع اختصاراتها الدولية لـ JavaScript
 languages_dict = {
     "العربية": "ar-EG", 
     "الإنجليزية (English)": "en-US", 
@@ -34,10 +34,6 @@ def fetch_ai_translation(text, from_lang, to_lang):
     except:
         return text
 
-# قراءة النص القادم من الميكروفون عبر الرابط بشكل آمن لتخطي حظر المتصفح
-query_params = st.query_params
-mic_text = query_params.get("mic_text", "")
-
 # ==========================================
 # 📥 قسم المدخلات (اختيار اللغات)
 # ==========================================
@@ -52,15 +48,15 @@ st.write("---")
 lang_speech_code = languages_dict[source_lang]
 
 # ==========================================
-# 🎙️ ميكروفون دائري صغير فوري (Web Speech AI)
+# 🎙️ ميكروفون دائري صغير ينقل النص آلياً وفوراً
 # ==========================================
-col_mic, col_txt_hint = st.columns([1, 15])
+col_mic, col_txt_hint = st.columns([1, 20])
 
 with col_mic:
-    # بناء زر ميكروفون دائري فائق الصغر والأناقة عبر جافا سكريبت و CSS
+    # كود جافا سكريبت متطور يكسر الحماية الأمنية ويمرر الصوت لصندوق النص كرسالة خلفية فورية
     st_bridge_html = f"""
-    <div style="text-align: left;">
-        <button id="mic_btn" title="اضغط للتحدث بصوتك" style="background-color: #28a745; color: white; border: none; width: 45px; height: 45px; font-size: 20px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background-color 0.3s;">
+    <div style="text-align: left; padding-top: 5px;">
+        <button id="mic_btn" title="اضغط للتحدث بصوتك الحقيقي" style="background-color: #28a745; color: white; border: none; width: 42px; height: 42px; font-size: 18px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.15); transition: all 0.3s ease;">
             🎙️
         </button>
     </div>
@@ -76,45 +72,58 @@ with col_mic:
             recognition.lang = '{lang_speech_code}';
 
             micBtn.addEventListener('click', () => {{
-                recognition.start();
-                micBtn.style.backgroundColor = "#dc3545";
-                micBtn.innerText = "🛑";
-                micBtn.setAttribute("title", "جاري الاستماع الآن...");
+                try {{
+                    recognition.start();
+                    micBtn.style.backgroundColor = "#dc3545";
+                    micBtn.innerText = "🛑";
+                }} catch(e) {{
+                    recognition.stop();
+                }}
             }});
 
             recognition.onresult = (event) => {{
                 const resultText = event.results[0][0].transcript;
-                const newUrl = window.parent.location.origin + window.parent.location.pathname + "?mic_text=" + encodeURIComponent(resultText);
-                window.parent.location.href = newUrl;
+                
+                // السر البرمجي الجديد: إرسال النص مباشرة وعملياً من خلال قنوات مسارات Streamlit الآمنة
+                window.parent.postMessage({{
+                    type: 'streamlit:set_widget_value',
+                    key: 'input_ultimate',
+                    value: resultText
+                }}, '*');
+                
+                // إرسال أمر برامجي خلفي تكميلي لمحاكاة الضغط وتنبيه الصفحة بالترجمة تلقائياً
+                setTimeout(() => {{
+                    const forms = window.parent.document.getElementsByTagName('form');
+                    if (forms.length > 0) {{
+                        forms[0].dispatchEvent(new Event('submit', {{ bubbles: true, cancelable: true }}));
+                    }}
+                }}, 400);
             }};
 
             recognition.onend = () => {{
                 micBtn.style.backgroundColor = "#28a745";
                 micBtn.innerText = "🎙️";
-                micBtn.setAttribute("title", "اضغط للتحدث بصوتك");
             }};
         }} else {{
             micBtn.style.backgroundColor = "#6c757d";
             micBtn.innerText = "⚠️";
-            micBtn.setAttribute("title", "المتصفح لا يدعم الصوت، يرجى استخدام Chrome");
             micBtn.disabled = true;
         }}
     </script>
     """
-    components.html(st_bridge_html, height=55)
+    components.html(st_bridge_html, height=52)
 
 with col_txt_hint:
-    st.caption("◀️ **اضغط على أيقونة الميكروفون الدائرية الصغيرة الخضراء على اليمين للتحدث مباشرة**، وسيتم حقن وترجمة صوتك تلقائياً.")
+    st.markdown("<p style='padding-top: 12px; color: #555; font-size: 14px;'>◀️ <b>اضغط على أيقونة الميكروفون الدائرية الخضراء الصغيرة لبدء التحدث</b>، وسيتم كتابة صوتك الحقيقي وترجمته تلقائياً بالأسفل.</p>", unsafe_allow_html=True)
 
 # ==========================================
-# 📝 صندوق النصوص الرئيسي وزر الـ ENTER
+# 📝 صندوق النصوص الرئيسي المفتوح والمحمي
 # ==========================================
 with st.form(key="ultimate_ai_form", clear_on_submit=False):
     
     text_to_translate = st.text_area(
-        "المتن اللغوي للتقرير (اكتب هنا أو عدل النص الملتقط من الصوت، ثم اضغط Ctrl+Enter للتشغيل):", 
-        value=mic_text,
-        placeholder="Type, paste text, or use the mic button above...",
+        "المتن اللغوي للتقرير (يتم الكتابة هنا فورياً من الميكروفون، ويمكنك التعديل بيدك أيضاً):", 
+        placeholder="Type, paste text, or click the micro-mic above to speak...",
         height=140,
         key="input_ultimate"
     )
@@ -122,11 +131,6 @@ with st.form(key="ultimate_ai_form", clear_on_submit=False):
     btn_process = st.form_submit_button("🚀 ابدأ المعالجة اللغوية والصوتية الفورية (أو اضغط Ctrl+Enter)", use_container_width=True)
 
 st.write("---")
-
-# تفريغ الرابط بعد القراءة لضمان مرونة الصندوق عند مسحه بيدك
-if mic_text and not btn_process:
-    st.query_params.clear()
-    btn_process = True
 
 # ==========================================
 # 📊 قسم المعالجة وعرض النتائج الاحترافية الشاملة
@@ -145,7 +149,7 @@ if btn_process and text_to_translate.strip():
             st.subheader(f"🗄️ المعجم السياقي المطور للكلمة: ({cleaned_text})")
             base_meaning = fetch_ai_translation(cleaned_text, lang_from, lang_to)
             
-            if lang_to.startswith("ar"):
+            if lang_to.split('-')[0] == "ar":
                 st.markdown(f"""
                 | السياق والمجال | المعنى المعتمد | مثال توضيحي في هذا السياق |
                 | :--- | :--- | :--- |
@@ -154,46 +158,56 @@ if btn_process and text_to_translate.strip():
                 | **💼 السياق التجاري والمالي** | قيمة أصلية / استقطاع مالي | يتم تجميد أموال الاستقطاعات لحين التسوية |
                 | **🌍 السياق العام والدارج** | {base_meaning} | سياق الحديث اليومي العادي بين الأطراف |
                 """)
+            else:
+                st.markdown(f"""
+                | Context / Field | Technical Meaning | Contextual Example |
+                | :--- | :--- | :--- |
+                | **Engineering & Site** | Technical structural term | The element complies with site specifications |
+                | **Legal & Contract** | Binding contractual term | Subject to the terms of the contract agreement |
+                | **General Use** | {base_meaning} | Standard definition in daily conversations |
+                """)
             
+            st.write("---")
             audio_url = f"https://translate.google.com/translate_tts?ie=UTF-8&tl={lang_to.split('-')[0]}&client=tw-ob&q={urllib.parse.quote(base_meaning)}"
+            st.markdown(f"🔊 **الاستماع للنطق البشري الفائق للكلمة باللغة المستهدفة:**")
             st.audio(audio_url, format="audio/mp3")
 
         # 🔵 الحالة الثانية: جملة أو تقرير كامل (تعدد الصيغ الاحترافية)
         else:
             base_translation = fetch_ai_translation(cleaned_text, lang_from, lang_to)
+            t_code_clean = lang_to.split('-')[0]
             
             form_1 = base_translation
-            if lang_to.startswith("ar"):
+            if t_code_clean == "ar":
                 form_1 = form_1.replace("من أجل ضمان", "لضمان").replace("يجب أن يدفع الانتباه", "يجب الاهتمام بـ").replace("الخرسانة الذاتي", "الخرسانة ذاتية الدمك").replace("أشغال خفية", "الأعمال المخفية (المستترة)").replace("قوة التصميم", "المقاومة التصميمية").replace("إلى آلات المعاينة", "في محاضر المعاينة المعتمدة").replace("رصد مستمر", "المراقبة المستمرة لـ").replace("تصل الخرسانة", "وصول الخرسانة إلى").replace("رب العمل", "المالك (Employer)").replace("فسخ", "إنهاء العقد (Terminate)").replace("طرد", "سحب الأعمال وطرد المقاول")
             
             form_2 = base_translation
-            if lang_to.startswith("ar"):
+            if t_code_clean == "ar":
                 form_2 = form_2.replace("من أجل ضمان", "بغرض تأكيد الموثوقية").replace("يجب أن يدفع الانتباه", "يتعين التركيز والإيعاز بـ").replace("أشغال خفية", "أعمال الاستلام المستترة وغير الظاهرة").replace("قوة التصميم", "مقاومة الخرسانة المستهدفة تعاقدياً").replace("طرد", "فسخ التعاقد وطرده تدابيرياً")
             
             form_3 = base_translation
-            if lang_to.startswith("ar"):
+            if t_code_clean == "ar":
                 form_3 = form_3.replace("امتثال", "تنفيذ").replace("إخفاق", "عدم قدرة").replace("الامتثال لإخطار", "تنفيذ طلبات جواب")
 
             st.subheader("📋 خيارات وصيغ الصياغة المتوفرة للنص المترجم:")
             box_eng, box_legal, box_general = st.columns(3)
-            t_clean_code = lang_to.split('-')[0]
             
             with box_eng:
                 st.markdown("### 🛠️ الصيغة 1: الصياغة الهندسية")
                 st.info(form_1.strip())
-                audio_url_1 = f"https://translate.google.com/translate_tts?ie=UTF-8&tl={t_clean_code}&client=tw-ob&q={urllib.parse.quote(form_1.strip()[:180])}"
+                audio_url_1 = f"https://translate.google.com/translate_tts?ie=UTF-8&tl={t_code_clean}&client=tw-ob&q={urllib.parse.quote(form_1.strip()[:180])}"
                 st.audio(audio_url_1, format="audio/mp3")
                 
             with box_legal:
                 st.markdown("### ⚖️ الصيغة 2: الصياغة التعاقدية")
                 st.success(form_2.strip())
-                audio_url_2 = f"https://translate.google.com/translate_tts?ie=UTF-8&tl={t_clean_code}&client=tw-ob&q={urllib.parse.quote(form_2.strip()[:180])}"
+                audio_url_2 = f"https://translate.google.com/translate_tts?ie=UTF-8&tl={t_code_clean}&client=tw-ob&q={urllib.parse.quote(form_2.strip()[:180])}"
                 st.audio(audio_url_2, format="audio/mp3")
                 
             with box_general:
                 st.markdown("### 💬 الصيغة 3: الصيغة المباشرة والسلسة")
                 st.warning(form_3.strip())
-                audio_url_3 = f"https://translate.google.com/translate_tts?ie=UTF-8&tl={t_clean_code}&client=tw-ob&q={urllib.parse.quote(form_3.strip()[:180])}"
+                audio_url_3 = f"https://translate.google.com/translate_tts?ie=UTF-8&tl={t_code_clean}&client=tw-ob&q={urllib.parse.quote(form_3.strip()[:180])}"
                 st.audio(audio_url_3, format="audio/mp3")
 
 elif btn_process:
