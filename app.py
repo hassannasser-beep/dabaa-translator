@@ -5,7 +5,7 @@ import requests
 st.set_page_config(page_title="HASSAN NASSER", page_icon="", layout="wide")
 
 st.title(" HASSAN NASSER")
-st.markdown("### المنصة المركزية المتطورة للترجمة الرقمية والصياغة السياقية المتعددة")
+st.markdown("### SMART TRANSLATOR ")
 st.write("---")
 
 # اللغات الثمانية المعتمدة بالكامل في النظام
@@ -151,13 +151,13 @@ with st.form(key="ultimate_ai_form", clear_on_submit=False):
     st.write("---")
     
     text_to_translate = st.text_area(
-        "المتن اللغوي للتقرير (اكتب أو ألصق الفقرة هنا، ثم اضغط Ctrl+Enter للتشغيل الفوري):", 
+        "   ( CTRL + ENTER ):", 
         placeholder="Type or paste your text, contract clauses, or engineering reports here...",
         height=160,
         key="input_ultimate"
     )
     
-    btn_process = st.form_submit_button("🚀 ابدأ المعالجة اللغوية وضبط الصياغة الفورية (أو اضغط Ctrl+Enter)", use_container_width=True)
+    btn_process = st.form_submit_button(" TRANSLATING ( Ctrl+Enter)", use_container_width=True)
 
 st.write("---")
 
