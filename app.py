@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 
 # 1. إعدادات الصفحة والعنوان الاحترافي باسمك
-st.set_page_config(page_title="HASSAN NASSER", page_icon="", layout="centered")
+st.set_page_config(page_title=" - HASSAN NASSER - ", page_icon="", layout="centered")
 
 st.title(" - HASSAN NASSER - ")
 st.markdown("")
@@ -51,7 +51,7 @@ with st.form(key="custom_ai_form", clear_on_submit=False):
         key="input_custom"
     )
     
-    btn_process = st.form_submit_button("🚀 ابدأ الترجمة والصياغة بالذكاء الاصطناعي", use_container_width=True)
+    btn_process = st.form_submit_button("TRANSLATING", use_container_width=True)
 
 st.write("---")
 
@@ -73,7 +73,7 @@ if btn_process and text_to_translate.strip():
             st.subheader("📝 النتيجة النهائية المصاغة:")
             st.success(final_output.strip())
             
-            # ميزة النطق الصوتي التلقائي للغة المترجم إليها
+            # 
             audio_url = f"https://translate.google.com/translate_tts?ie=UTF-8&tl={lang_to}&client=tw-ob&q={requests.utils.quote(final_output.strip()[:150])}"
             st.markdown("🔊 **الاستماع للنطق الصحيح والسليم للترجمة:**")
             st.audio(audio_url, format="audio/mp3")
