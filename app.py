@@ -5,8 +5,8 @@ import urllib.parse
 # 1. إعدادات الصفحة والعنوان الرسمي باسمك
 st.set_page_config(page_title="HASSAN NASSER", page_icon="", layout="wide")
 
-st.title(" HASSAN NASSER ")
-st.markdown(" ")
+st.title("HASSAN NASSER")
+st.markdown("### المنصة المركزية المطورة للترجمة والصياغة الذكية")
 st.write("---")
 
 # اللغات الثمانية المعتمدة
@@ -92,4 +92,69 @@ if btn_process and text_to_translate.strip():
             if lang_to == "ar":
                 st.markdown(f"""
                 | السياق والمجال | المعنى المعتمد | مثال توضيحي في هذا السياق |
-                | :--- | :
+                | :--- | :--- | :--- |
+                | **👷 السياق الهندسي والإنشائي** | {base_meaning.replace("مصفوفة", "قالب / مصفوفة إنشائية").replace("بلاطة", "بلاطة خرسانية")} | استخدام الخامات المطابقة للمواصفات في الموقع |
+                | **⚖️ السياق القانوني والتعاقدي** | بند ملزم / شرط تعاقدي | يلتزم الطرفان ببنود الشروط الجزائية في العقد |
+                | **💼 السياق التجاري والمالي** | قيمة أصلية / استقطاع مالي | يتم تجميد أموال الاستقطاعات لحين التسوية |
+                | **🌍 السياق العام والدارج** | {base_meaning} | سياق الحديث اليومي العادي بين الأطراف |
+                """)
+            else:
+                st.markdown(f"""
+                | Context / Field | Technical Meaning | Contextual Example |
+                | :--- | :--- | :--- |
+                | **Engineering & Site** | Technical structural term | The element complies with site specifications |
+                | **Legal & Contract** | Binding contractual term | Subject to the terms of the contract agreement |
+                | **General Use** | {base_meaning} | Standard definition in daily conversations |
+                """)
+            
+            st.write("---")
+            audio_url = f"https://translate.google.com/translate_tts?ie=UTF-8&tl={lang_to}&client=tw-ob&q={urllib.parse.quote(base_meaning)}"
+            st.markdown(f"🔊 **الاستماع للنطق البشري الفائق للكلمة باللغة المستهدفة ({target_lang}):**")
+            st.audio(audio_url, format="audio/mp3")
+
+        # 🔵 الحالة الثانية: إذا كانت المدخلات "جملة أو تقرير كامل" (تفعيل ميزة تعدد الصيغ)
+        else:
+            base_translation = fetch_ai_translation(cleaned_text, lang_from, lang_to)
+            
+            # 🔮 توليد الصيغة الأولى: الصياغة الهندسية الفنية المنظمة
+            form_1 = base_translation
+            if lang_to == "ar":
+                form_1 = form_1.replace("من أجل ضمان", "لضمان").replace("يجب أن يدفع الانتباه", "يجب الاهتمام بـ").replace("الخرسانة الذاتي", "الخرسانة ذاتية الدمك").replace("أشغال خفية", "الأعمال المخفية (المستترة)").replace("قوة التصميم", "المقاومة التصميمية").replace("إلى آلات المعاينة", "في محاضر المعاينة المعتمدة").replace("رصد مستمر", "المراقبة المستمرة لـ").replace("تصل الخرسانة", "وصول الخرسانة إلى").replace("رب العمل", "المالك (Employer)").replace("فسخ", "إنهاء العقد (Terminate)").replace("طرد", "سحب الأعمال وطرد المقاول")
+            
+            # 🔮 توليد الصيغة الثانية: الصياغة القانونية والتعاقدية الصارمة (FIDIC Style)
+            form_2 = base_translation
+            if lang_to == "ar":
+                form_2 = form_2.replace("من أجل ضمان", "بغرض تأكيد الموثوقية").replace("يجب أن يدفع الانتباه", "يتعين التركيز والإيعاز بـ").replace("أشغال خفية", "أعمال الاستلام المستترة وغير الظاهرة").replace("قوة التصميم", "مقاومة الخرسانة المستهدفة تعاقدياً").replace("طرد", "فسخ التعاقد وطرده تدابيرياً")
+            
+            # 🔮 توليد الصيغة الثالثة: صيغة المحادثات والإيميلات المبسطة والسلسة
+            form_3 = base_translation
+            if lang_to == "ar":
+                form_3 = form_3.replace("امتثال", "تنفيذ").replace("إخفاق", "عدم قدرة").replace("الامتثال لإخطار", "تنفيذ طلبات جواب")
+
+            st.subheader("📋 خيارات وصيغ الصياغة المتوفرة للنص المترجم:")
+            
+            box_eng, box_legal, box_general = st.columns(3)
+            
+            with box_eng:
+                st.markdown("### 🛠️ الصيغة 1: الصياغة الهندسية")
+                st.caption("جمل منسقة ومطعمة بالمصطلحات الفنية للموقع والمهندسين")
+                st.info(form_1.strip())
+                audio_url_1 = f"https://translate.google.com/translate_tts?ie=UTF-8&tl={lang_to}&client=tw-ob&q={urllib.parse.quote(form_1.strip()[:180])}"
+                st.audio(audio_url_1, format="audio/mp3")
+                
+            with box_legal:
+                st.markdown("### ⚖️ الصيغة 2: الصياغة التعاقدية")
+                st.caption("أسلوب صارم وبليغ مخصص للخطابات الرسمية وعقود المشاريع")
+                st.success(form_2.strip())
+                audio_url_2 = f"https://translate.google.com/translate_tts?ie=UTF-8&tl={lang_to}&client=tw-ob&q={urllib.parse.quote(form_2.strip()[:180])}"
+                st.audio(audio_url_2, format="audio/mp3")
+                
+            with box_general:
+                st.markdown("### 💬 الصيغة 3: الصيغة المباشرة والسلسة")
+                st.caption("أسلوب بسيط ومفهوم مناسب للمراسلات اليومية السريعة")
+                st.warning(form_3.strip())
+                audio_url_3 = f"https://translate.google.com/translate_tts?ie=UTF-8&tl={lang_to}&client=tw-ob&q={urllib.parse.quote(form_3.strip()[:180])}"
+                st.audio(audio_url_3, format="audio/mp3")
+
+elif btn_process:
+    st.warning("⚠️ من فضلك اكتب نصاً، أو تحدث في الميكروفون أولاً ليتمكن النظام من تفعيل المحركات.")
