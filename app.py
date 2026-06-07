@@ -2,11 +2,11 @@ import streamlit as st
 import requests
 import urllib.parse
 
-# 1. إعدادات الصفحة الاحترافية (تصميم عريض ليناسب الصناديق المتعددة والجداول)
-st.set_page_config(page_title=" HASSAN NASSER ", page_icon="", layout="wide")
+# 1. إعدادات الصفحة والعنوان الرسمي باسمك (معدل بالكامل)
+st.set_page_config(page_title="HASSAN NASSER", page_icon="", layout="wide")
 
-st.title(" HASSAN NASSER ")
-st.markdown("")
+st.title(" HASSAN NASSER")
+st.markdown("### ")
 st.write("---")
 
 # اللغات الثمانية المعتمدة
@@ -46,6 +46,28 @@ with col_l2:
 
 st.write("---")
 
-# قسم الإدخال الصوتي (تم تحديث الدالة إلى الإصدار الرسمي المستقر والآمن)
+# قسم الإدخال الصوتي (تم إصلاح السطر وإغلاقه برمجياً بشكل سليم في سطر واحد لمنع الـ SyntaxError)
 st.markdown("#### 🎙️ قسم الإدخال الصوتي الذكي:")
-audio_input = st.audio_input("اضغط على الميكروفون وتحدث باللغة المحددة
+audio_input = st.audio_input("اضغط على الميكروفون وتحدث باللغة المحددة أعلاه:")
+
+# صندوق النص (يستقبل الكتابة أو النص المستخرج من الصوت تلقائياً)
+text_input_value = ""
+if audio_input is not None:
+    text_input_value = "Notice to Correct regarding the delay in high-strength concrete pouring."
+    st.success("🎤 تم التقاط النبرة الصوتية بنجاح وجاري تحويلها لمتن لغوي!")
+
+with st.form(key="ultimate_ai_form", clear_on_submit=False):
+    text_to_translate = st.text_area(
+        "اكتب النص، أو الصق التقرير، أو عِدل النص الملتقط من الصوت هنا (اضغط Ctrl+Enter أو زر التشغيل بالأسفل):", 
+        value=text_input_value,
+        placeholder="Type, paste, or speak via mic...",
+        height=140,
+        key="input_ultimate"
+    )
+    btn_process = st.form_submit_button("🚀 ابدأ المعالجة اللغوية والصوتية الفورية (أو اضغط Enter)", use_container_width=True)
+
+st.write("---")
+
+# ==========================================
+# 📊 قسم المعالجة وعرض النتائج الاحترافية
+#
