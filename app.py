@@ -1,100 +1,82 @@
 import streamlit as st
-from deep_translator import GoogleTranslator
+from g4f.client import Client
+import json
 
 # 1. إعدادات الصفحة والعنوان الرسمي
 st.set_page_config(page_title="HASSAN NASSER", page_icon="🤖", layout="wide")
 
 st.title("🤖 HASSAN NASSER")
-st.markdown("### SMART AI TRANSLATOR | المترجم الذكي المطور (متعدد المترادفات)")
+st.markdown("### 🧠 REAL AI MULTI-CONTEXT TRANSLATOR | المترجم الذكي المربوط بالذكاء الاصطناعي")
 st.write("---")
 
 # اللغات المعتمدة في النظام
 languages_dict = {
-    "العربية": "ar", 
-    " can الإنجليزية (English)": "en", 
-    "الروسية (Русский)": "ru", 
-    "الصينية (中文)": "zh", 
-    "الألمانية (Deutsch)": "de", 
-    "الإسبانية (Español)": "es", 
-    "البرتغالية (Português)": "pt", 
-    "الكورية (한국어)": "ko"
+    "العربية": "Arabic", 
+    " can الإنجليزية (English)": "English", 
+    "الروسية (Русский)": "Russian", 
+    "الصينية (中文)": "Chinese", 
+    "الألمانية (Deutsch)": "German", 
+    "الإسبانية (Español)": "Spanish", 
+    "البرتغالية (Português)": "Portuguese", 
+    "الكورية (한국어)": "Korean"
 }
 
-# قاعدة بيانات موسعة للمصطلحات التخصصية (مختصرة لمنع بتر الكود)
-multi_meaning_db = {
-    "slab": {
-        "engineering": "بلاطة خرسانية / سقف / فرش خرساني مسلح",
-        "legal": "عنصر إنشائي خاضع للمعاينة والاستلام تعاقدياً"
-    },
-    "lean concrete": {
-        "engineering": "خرسانة عادية / خرسانة نظافة / فرشية عمية (ضعيفة)",
-        "legal": "طبقة التأسيس غير المسلحة أسفل القواعد المعتمدة"
-    },
-    "shop drawings": {
-        "engineering": "رسومات تنفيذية / مخططات ورشة / لوحات تشغيلية للموقع",
-        "legal": "المخططات التفصيلية الواجب اعتمادها قبل بدء التنفيذ"
-    },
-    "as-built drawings": {
-        "engineering": "مخططات الواقع الفعلي / رسومات كما نُفذ / لوحات مطابقة الطبيعة",
-        "legal": "الرسومات النهائية والمستند التعاقدي بعد إتمام الأعمال"
-    }
-}
-
-# دالة ذكية لتوليد الصياغات مع إعطاء مرونة وخيارات متعددة داخل السياق
-def generate_all_styles(base_text, text_lower, to_lang):
-    eng_phrases = {
-        "من أجل ضمان": "لضمان [تحقيق / تأكيد] الموثوقية الفنية في", 
-        "يجب أن يدفع الانتباه": "يتعين [الالتزام الصارم بـ / مراعاة] ضوابط", 
-        "الخرسانة الذاتي": "الخرسانة ذاتية الدمك (SCC)", 
-        "أشغال خفية": "الأعمال [المخفية / المستترة / غير الظاهرة]", 
-        "قوة التصميم": "المقاومة التصميمية [المستهدفة] للخرسانة", 
-        "رب العمل": "المالك / صاحب العمل (Employer)", 
-        "فسخ": "إجراءات [إنهاء التعاقد / سحب الأعمال]", 
-        "المهندس": "استشاري المشروع / المهندس المشرف (The Engineer)"
-    }
+# دالة الاتصال بمحرك الذكاء الاصطناعي لجلب تحليل سياقي عميق وشرح مفصل
+def ask_ai_for_translation(text, from_lang, to_lang):
+    # تهيئة عميل الذكاء الاصطناعي المجاني كبديل لكسر الحظر الجغرافي
+    client = Client()
     
-    legal_phrases = {
-        "من أجل ضمان": "بغرض تأكيد الامتثال والوفاء بـ", 
-        "يجب أن يدفع الانتباه": "يتعين قانوناً ولائحياً التركيز والإيعاز بـ", 
-        "رب العمل": "صاحب العمل تعاقدياً / المالك", 
-        "فسخ": "فسخ التعاقد بموجب أحكام الشروط العامة (FIDIC)"
-    }
+    # صياغة أمر صارم وذكي جداً ليتصرف المحرك مثل جيميني تماماً ويعيد شرحاً ومترادفات حقيقية
+    prompt = f"""
+    You are an advanced AI translator like Gemini. Translate the text/word: "{text}" from {from_lang} to {to_lang}.
+    Provide a deeply contextual translation and an explanation for each of the following 7 styles/genres. 
+    If a certain style does not apply to the word at all, return null for that style, but try your best to find a relevant meaning or technical adaptation.
+    
+    Styles required:
+    1. General (عامة): Basic everyday meaning.
+    2. Engineering (هندسة موقعية): Technical site terms, construction slang, structural meaning.
+    3. Legal (قانونية تعاقدية): FIDIC contracts style, binding terms.
+    4. Scientific (علمية): Academic or research terminology.
+    5. Political (سياسية): Diplomatic or official government text.
+    6. Economic (اقتصادية): Financial, BOQ, or market context.
+    7. Religious (دينية): Spiritual or theological dimension.
 
-    word_key = text_lower.strip()
-    if word_key in multi_meaning_db:
-        db_entry = multi_meaning_db[word_key]
-        if to_lang == "ar":
-            return base_text, db_entry["engineering"], db_entry["legal"], f"🔬 [مترادفات أكاديمية]: {db_entry['engineering']}", None, None, None
+    You MUST respond ONLY with a valid JSON object matching this structure. Do not include markdown formatting like ```json or any intro text. Just raw JSON:
+    {{
+      "general": "Detailed translation + short explanation in Arabic",
+      "engineering": "Detailed translation + short explanation in Arabic or null",
+      "legal": "Detailed translation + short explanation in Arabic or null",
+      "scientific": "Detailed translation + short explanation in Arabic or null",
+      "political": "Detailed translation + short explanation in Arabic or null",
+      "economic": "Detailed translation + short explanation in Arabic or null",
+      "religious": "Detailed translation + short explanation in Arabic or null"
+    }}
+    """
 
-    form_general = base_text
-
-    form_engineering = base_text
-    if to_lang == "ar":
-        for key, val in eng_phrases.items():
-            form_engineering = form_engineering.replace(key, val)
-    else:
-        form_engineering = f"[Technical/Field Options]: {base_text}"
-
-    form_legal = base_text
-    if to_lang == "ar":
-        for key, val in legal_phrases.items():
-            form_legal = form_legal.replace(key, val)
-        if "المقاول" in form_legal:
-            form_legal = form_legal.replace("المقاول", "يلتزم الطرف الثاني (المقاول) بـ")
-    else:
-        form_legal = f"[Contractual/Statutory]: {base_text}"
-
-    form_scientific = f"🔬 [أكاديمي]: {base_text}" if any(w in text_lower for w in ["ذرة", "خرسانة", "تفاعل", "concrete", "atom", "test"]) else None
-    form_political = f"🏛️ [رسمي]: {base_text}" if any(w in text_lower for w in ["دولة", "رئيس", "وزير", "president", "government"]) else None
-    form_economic = f"📊 [مالي]: {base_text}" if any(w in text_lower for w in ["مال", "بنوك", "دولار", "money", "price", "boq"]) else None
-    form_religious = f"🌙 [روحي]: {base_text}" if any(w in text_lower for w in ["الله", "رب", "صلاة", "god", "lord"]) else None
-
-    return form_general, form_engineering, form_legal, form_scientific, form_political, form_economic, form_religious
+    try:
+        # إرسال الطلب لمحرك الذكاء الاصطناعي التوليدي
+        response = client.chat.completions.create(
+            model="gpt-4o", # نستخدم gpt-4o المتاح مجاناً والمكافئ لقوة جيميني في فهم السياق الشامل
+            messages=[{"role": "user", "content": prompt}]
+        )
+        
+        # تنظيف النص المستلم وتحويله لقاموس برمجى
+        raw_text = response.choices[0].message.content.strip()
+        # إزالة أي زوائد ماركداون إذا أضافها المحرك خطأً
+        if raw_text.startswith("```json"):
+            raw_text = raw_text.replace("```json", "").replace("```", "").strip()
+        elif raw_text.startswith("```"):
+            raw_text = raw_text.replace("```", "").strip()
+            
+        return json.loads(raw_text)
+    except Exception as e:
+        st.error(f"❌ حدث خطأ أثناء معالجة العقل الذكي: {e}")
+        return None
 
 # ==========================================
 # 📥 واجهة المستخدم (Inputs)
 # ==========================================
-with st.form(key="advanced_translator_form", clear_on_submit=False):
+with st.form(key="ai_translator_form", clear_on_submit=False):
     col_l1, col_l2 = st.columns(2)
     with col_l1:
         source_lang = st.selectbox("ترجم من لغة:", list(languages_dict.keys()), index=1, key="src_lang")
@@ -104,13 +86,13 @@ with st.form(key="advanced_translator_form", clear_on_submit=False):
     st.write("---")
     
     text_to_translate = st.text_area(
-        "أدخل النص أو الكلمة (ستظهر البدائل والمترادفات لحمايتك من الخطأ):", 
-        placeholder="Type or paste your text here...",
+        "أدخل الكلمة أو العبارة (سيقوم العقل الاصطناعي بتشريحها وإعطائك المعاني التفصيلية):", 
+        placeholder="اكتب هنا الكلمة الفنية أو الجملة المراد تحليلها بذكاء...",
         height=150,
         key="input_text"
     )
     
-    btn_process = st.form_submit_button("🚀 TRANSLATE | تشغيل الترجمة فائقة الدقة", use_container_width=True)
+    btn_process = st.form_submit_button("🧠 RUN AI PROMPT | تشغيل الفرز والتحليل الذكي الشامل", use_container_width=True)
 
 st.write("---")
 
@@ -119,57 +101,59 @@ st.write("---")
 # ==========================================
 if btn_process and text_to_translate.strip():
     cleaned_text = text_to_translate.strip()
-    text_lower = cleaned_text.lower()
     
     lang_from = languages_dict[source_lang]
     lang_to = languages_dict[target_lang]
     
-    with st.spinner("جاري الترجمة واستخراج البدائل اللغوية..."):
-        try:
-            base_translation = GoogleTranslator(source=lang_from, target=lang_to).translate(cleaned_text)
-            
-            f_general, f_engineering, f_legal, f_scientific, f_political, f_economic, f_religious = generate_all_styles(base_translation, text_lower, lang_to)
-            
-            st.success("🎯 تم توليد معاني متعددة وبدائل سياقية لتقليل نسبة الخطأ:")
+    with st.spinner("🧠 يتصل التطبيق الآن بعقل الذكاء الاصطناعي التوليدي لتحليل النص..."):
+        result = ask_ai_for_translation(cleaned_text, lang_from, lang_to)
+        
+        if result:
+            st.success("🎯 تم التحليل السياقي بواسطة الذكاء الاصطناعي بدقة تامة:")
             st.write("---")
             
-            st.subheader("🛠️ الصياغات المفتوحة على خيارات متعددة:")
+            st.subheader("🛠️ الصياغات والشروح الأساسية الدائمة:")
             col_a, col_b, col_c = st.columns(3)
             with col_a:
-                st.markdown("### 💬 صياغة عامة مبسطة")
-                st.warning(f_general)
+                st.markdown("### 💬 صياغة عامة وشرحها")
+                st.warning(result.get("general", "غير متوفر"))
             with col_b:
-                st.markdown("### 👷 صياغة هندسية (مترادفات موقعية)")
-                st.info(f_engineering)
+                st.markdown("### 👷 صياغة هندسية موقِعية تفصيلية")
+                eng_res = result.get("engineering")
+                if eng_res: st.info(eng_res)
+                else: st.caption("_لا توجد أبعاد إنشائية أو موقعية لهذه الكلمة_")
             with col_c:
-                st.markdown("### 📜 صياغة تعاقدية قانونية")
-                st.success(f_legal)
+                st.markdown("### 📜 صياغة تعاقدية قانونية (FIDIC)")
+                leg_res = result.get("legal")
+                if leg_res: st.success(leg_res)
+                else: st.caption("_لا توجد صيغة شروط تعاقدية مناسبة_")
                 
             st.write("---")
             
-            st.subheader("🎯 الصياغات التخصصية (تظهر إذا تضمنها النص):")
+            st.subheader("🎯 الصياغات التخصصية المشروحة (تظهر إن وجدت):")
             col1, col2 = st.columns(2)
             
             with col1:
-                st.markdown("### 🧬 الصياغة العلمية")
-                if f_scientific: st.info(f_scientific)
-                else: st.caption("_لا توجد خيارات علمية حيوية لهذا النص_")
+                st.markdown("### 🧬 الصياغة العلمية الأكاديمية")
+                sci_res = result.get("scientific")
+                if sci_res: st.info(sci_res)
+                else: st.caption("_لا توجد تفسيرات علمية مختبرية دقيقة لهذا النص_")
                     
-                st.markdown("### 📊 الصياغة الاقتصادية")
-                if f_economic: st.warning(f_economic)
-                else: st.caption("_لا توجد أبعاد مالية أو حسابات كميات_")
+                st.markdown("### 📊 الصياغة الاقتصادية والمالية")
+                eco_res = result.get("economic")
+                if eco_res: st.warning(eco_res)
+                else: st.caption("_لا توجد دلالات مالية أو حساب كميات ومقايسات_")
 
             with col2:
-                st.markdown("### 🏛️ الصياغة السياسية")
-                if f_political: st.code(f_political, language="")
-                else: st.caption("_لا توجد دلالات سياسية أو دولية_")
+                st.markdown("### 🏛️ الصياغة السياسية والدبلوماسية")
+                pol_res = result.get("political")
+                if pol_res: st.code(pol_res, language="")
+                else: st.caption("_لا توجد تفاسير سياسية أو حكومية رسمية_")
                     
-                st.markdown("### 🌙 الصياغة الدينية")
-                if f_religious: st.markdown(f"> **{f_religious}**")
-                else: st.caption("_لا توجد دلالات لاهوتية أو دينية_")
-
-        except Exception as e:
-            st.error(f"❌ حدث خطأ أثناء المعالجة: {e}")
+                st.markdown("### 🌙 الصياغة الدينية والروحية")
+                rel_res = result.get("religious")
+                if rel_res: st.markdown(f"> **{rel_res}**")
+                else: st.caption("_لا توجد دلالات لاهوتية أو دينية لهذه الكلمة_")
 
 elif btn_process:
-    st.warning("⚠️ من فضلك اكتب أو ألصق نصاً أولاً.")
+    st.warning("⚠️ من فضلك اكتب النص أولاً لتشغيل محرك الذكاء الاصطناعي.")
