@@ -131,9 +131,9 @@ def build_contextual_formulas(base_text, target_lang):
     form_general = form_general.replace("الامتثال لإخطار", "تنفيذ طلبات الجواب").replace("إخفاق", "عدم قدرة")
     
     if form_engineering == base_text:
-        form_engineering = "✨ [صياغة هندسية موقعية]: " + base_text
-    if form_legal == "بموجب أحكام وشروط العقد المبرم، " + base_text:
-        form_legal = "⚖️ [صياغة تعاقدية قانونية]: يتعين بموجب العقد " + base_text
+        form_engineering = "✨ [صياغة هندسية ]: " + base_text
+    if form_legal == "، " + base_text:
+        form_legal = "⚖️ [صياغة تعاقدية قانونية]:  " + base_text
 
     return form_engineering, form_legal, form_general
 
