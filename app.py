@@ -1,17 +1,17 @@
 import streamlit as st
 from duckduckgo_search import DDGS
 
-# 1. إعدادات الصفحة والعنوان الرسمي
+# 1. إعدادات الصفحة والعنوان الرسمي باسمك
 st.set_page_config(page_title="HASSAN NASSER", page_icon="🤖", layout="wide")
 
 st.title("🤖 HASSAN NASSER")
 st.markdown("### 🧠 GEMINI-STYLE AI TRANSLATOR | المترجم الذكي المطور الشامل")
 st.write("---")
 
-# إعادة اللغات الثمانية كاملة
+# إعادة اللغات الثمانية كاملة بدون أي نقص
 languages_dict = {
     "العربية": "Arabic", 
-    "الإنجليزية (English)": "English", 
+    " can الإنجليزية (English)": "English", 
     "الروسية (Русский)": "Russian", 
     "الصينية (中文)": "Chinese", 
     "الألمانية (Deutsch)": "German", 
@@ -20,9 +20,9 @@ languages_dict = {
     "الكورية (한국어)": "Korean"
 }
 
-# دالة ذكية لمخاطبة الذكاء الاصطناعي مباشرة لجلب الشرح والتفصيل
+# دالة ذكية لمخاطبة الذكاء الاصطناعي مباشرة بعد تعديل التحديث الجديد
 def get_ai_translation(text, from_lang, to_lang):
-    # أمر برمجى صارم لتوجيه عقل الذكاء الاصطناعي للتصرف مثل جيميني تماماً
+    # أمر توجيه عقل الذكاء الاصطناعي ليتصرف كخبير ومترجم تفصيلي
     prompt = f"""
     You are an expert technical translator like Gemini. Translate this text: "{text}" from {from_lang} to {to_lang}.
     Provide a deeply detailed translation and an extensive explanation in Arabic for each of these 7 specific domains:
@@ -38,9 +38,9 @@ def get_ai_translation(text, from_lang, to_lang):
     """
     
     try:
-        # استخدام خوادم الذكاء الاصطناعي الحرة والمستقرة لتفادي الحظر الجغرافي
+        # استخدام الأمر الرسمي الجديد .aichat بدلاً من .chat الملغي
         with DDGS() as ddgs:
-            response = ddgs.chat(keywords=prompt, model="gpt-4o-mini")
+            response = ddgs.aichat(keywords=prompt, model="gpt-4o-mini")
             return response
     except Exception as e:
         return f"❌ حدث خطأ أثناء الاتصال بعقل الذكاء الاصطناعي: {e}"
