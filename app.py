@@ -63,7 +63,7 @@ def calculate_distance(s1, s2):
     return previous_row[-1]
 
 # دالة فحص الكلمات وتوليد اقتراح "هل تقصد؟" in حال وجود خطأ إملائي هندسي
-def check_do_you_mean(text):
+def check_do_you_mean(OPTIONS):
     words = text.lower().replace(",", " ").replace(".", " ").replace(";", " ").split()
     suggestions = []
     
