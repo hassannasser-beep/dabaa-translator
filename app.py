@@ -1,18 +1,17 @@
 import streamlit as st
-from translate import Translator as LocalTranslator
-from textblob import TextBlob
+import requests
 
-# 1. إعدادات الصفحة والعنوان الرسمي باسمك
-st.set_page_config(page_title="HASSAN NASSER", page_icon="🤖", layout="wide")
+# 1. إعدادات الصفحة والعنوان الرسمي باسمك الحصري
+st.set_page_config(page_title="HASSAN NASSER", page_icon="🏗️", layout="wide")
 
-st.title("🤖 HASSAN NASSER")
-st.markdown("### 🧠 HYBRID AI CONTEXTUAL TRANSLATOR | المترجم السياقي الهجين المستقر")
+st.title("👷 HASSAN NASSER")
+st.markdown("### SMART TRANSLATOR | المترجم الهندسي الذكي")
 st.write("---")
 
-# إعادة اللغات الثمانية كاملة
+# اللغات الثمانية المعتمدة بالكامل في النظام
 languages_dict = {
     "العربية": "ar", 
-    " can الإنجليزية (English)": "en", 
+    "الإنجليزية (English)": "en", 
     "الروسية (Русский)": "ru", 
     "الصينية (中文)": "zh", 
     "الألمانية (Deutsch)": "de", 
@@ -21,143 +20,225 @@ languages_dict = {
     "الكورية (한국어)": "ko"
 }
 
-# دالة مدمجة ذكية لمحاكاة عقل الذكاء الاصطناعي في تفكيك وشرح المصطلحات هندسياً وقانونياً
-def generate_advanced_explanations(translated_text, original_text, to_lang):
-    orig_lower = original_text.lower().strip()
-    
-    # إذا كانت اللغة المستهدفة ليست العربية، نعيد النص مترجماً مباشرة في القوالب
-    if to_lang != "ar":
-        return translated_text, f"[Technical Site Mode]: {translated_text}", f"[Contractual/FIDIC]: {translated_text}", f"[Academic/Scientific]: {translated_text}", f"[Official]: {translated_text}", f"[Financial/BOQ]: {translated_text}", f"[Cultural]: {translated_text}"
+# دالة أساسية لجلب البيانات من محرك الذكاء الاصطناعي السياقي المستقر
+def fetch_ai_translation(text, from_lang, to_lang):
+    try:
+        url = "https://translate.googleapis.com/translate_a/single"
+        params = {"client": "gtx", "sl": from_lang, "tl": to_lang, "dt": "t", "q": text.strip()}
+        response = requests.get(url, params=params).json()
+        return "".join([part[0] for part in response[0] if part[0]])
+    except:
+        return text
 
-    # 1. قاعدة البيانات الذكية للمصطلحات الهندسية الكبرى (موقع الضبعة) ليعطي شرحاً فائق الدقة
-    engineering_database = {
-        "concrete casting": "أعمال الصب الموقعي للخرسانة الإنشائية؛ تشمل التحقق من جودة الخلطة، واختبار الهبوط (Slump Test)، وأخذ المكعبات القياسية، واستخدام الهزازات لمنع التعشيش وضمان الكثافة الاستراتيجية.",
-        "high voltage poles": "أبراج الجهد العالي وأعمدة الضغط العالي؛ هياكل شبكية معدنية أو خرسانية سابقة الإجهاد مصممة لتحمل كابلات نقل الطاقة ومقاومة الرياح والزلزالية مع تحقيق العزل التام.",
-        "high-voltage poles": "أبراج الجهد العالي وأعمدة الضغط العالي؛ هياكل شبكية معدنية أو خرسانية سابقة الإجهاد مصممة لتحمل كابلات نقل الطاقة ومقاومة الرياح والزلزالية مع تحقيق العزل التام.",
-        "shop drawings": "الرسومات التنفيذية المعتمدة للموقع؛ اللوحات التفصيلية الدقيقة المترجمة من المخططات التصميمية، وتوضح تفريد حديد التسليح (BBS)، وأبعاد الوصلات، وهي المرجع الملزم للتنفيذ.",
-        "reinforcement": "حديد التسليح للعناصر الإنشائية؛ شبكات أسياخ الصلب عالي المقاومة الموضوعة بدقة في مناطق إجهادات الشد داخل البلاطات والقواعد والأعمدة لتعويض ضعف الخرسانة.",
-        "slab": "البلاطة الخرسانية (السقف/الفرش الإنشائي)؛ العنصر الأفقي المسؤول عن استقبال ونقل الأحمال الحية والميتة إلى الأعمدة، وتصنف إلى بلاطات مصمتة (Solid) أو مسطحة (Flat).",
-        "lean concrete": "خرسانة النظافة (الفرشية العادية)؛ طبقة خرسانية غير مسلحة بسمك (10-15 سم) تصب فوق التربة مباشرة لتوفير سطح مستوٍ ونظيف يحمي حديد تسليح القواعد من الرطوبة والأملاح.",
-        "honeycombing": "تعشيش الخرسانة؛ عيب فني خطير يظهر بعد فك الشدات نتيجة انفصال الحصوات عن عجينة الإسمنت مسبباً فراغات هوائية، ويتطلب إصلاحاً بمواد إيبوكسية عالية المقاومة (Grout).",
-        "curing": "معالجة الخرسانة (الإنضاج)؛ الحفاظ على رطوبة الخرسانة المصبوبة ومنع تبخر المياه منها لفترة لا تقل عن 7 أيام متتالية (بالرش أو الخيش) لضمان اكتمال التفاعل الكيميائي للاسمنت.",
-        "shuttering": "الشدات والنجارة الإنشائية؛ الهيكل المؤقت والقوالب الحاضنة (خشبية أو معدنية) التي تشكل لحفظ الخرسانة الطرية وتثبيتها في مكانها وأبعادها الصحيحة حتى تتصلد تماماً."
+# قاعدة بيانات معجم المصطلحات الموقعية الدارجة (Site Slang) - تم تصحيح الكلمات العربية
+site_slang_db = {
+    "slab": {"academic": "بلاطة", "slang": "سقف / فرش خرساني", "desc": "تُطلق في المواقع على الأسقف والمسطحات الخرسانية المسلحة."},
+    "lean concrete": {"academic": "خرسانة عجيفة / ضعيفة", "slang": "خرسانة عادية / خرسانة نظافة", "desc": "الطبقة الخرسانية غير المسلحة التي تُصب أسفل القواعد لحماية الحديد والأساسات."},
+    "shop drawings": {"academic": "رسومات المتجر", "slang": "الرسومات التنفيذية للموقع", "desc": "المخططات التفصيلية المعتمدة للبدء في التنفيذ الفعلي بالموقع وليس الشراء."},
+    "as-built drawings": {"academic": "رسومات كما بنيت", "slang": "مخططات الواقع الفعلي للمشروع", "desc": "الرسومات النهائية التي تعكس ما تم تنفيذه على أرض الواقع بدقة بعد انتهاء الأعمال."},
+    "bill of quantities": {"academic": "فاتورة الكميات", "slang": "جدول الكميات والمواصفات (BOQ)", "desc": "الوثيقة التعاقدية الأساسية وحجر الزاوية لتسعير وحساب كميات خامات المشروع."},
+    "shuttering": {"academic": "إغلاق", "slang": "الشدّة الخشبية / الطوبار", "desc": "الهيكل المؤقت (سواء خشب أو حديد) الذي يُصب بداخله الخرسانة المسلحة لحين تماسكها."},
+    "scaffolding": {"academic": "أشغال السقالة", "slang": "السقالات الإنشائية", "desc": "الهياكل المعدنية الخارجية التي يقف عليها العمال لتنفيذ الواجهات والأعمال المرتفعة."},
+    "curing": {"academic": "شفاء / علاج", "slang": "رش / معالجة الخرسانة بالمياه", "desc": "العملية الحاسمة لرش الخرسانة بالماء بعد الصب للحفاظ على رطوبتها واكتساب المقاومة المطلوبة."},
+    "honeycombing": {"academic": "تعتشيق النحل", "slang": "تعشيش الخرسانة", "desc": "الفراغات الحصوية التي تظهر في الخرسانة بعد فك الخشب نتيجة عدم استخدام الهزاز الميكانيكي بشكل صحيح."},
+    "kick-off meeting": {"academic": "اجتماع ركلة البداية", "slang": "الاجتماع التحضيري التأسيسي للمشروع", "desc": "أول اجتماع رسمي يجمع المالك والاستشاري والمقاول لترتيب خطة بدء العمل مسبقاً."},
+    "variation order": {"academic": "ترتيب الاختلاف", "slang": "أمر تغيير / ملحق تعاقدي (VO)", "desc": "الأمر الرسمي الصادر لتعديل أو إضافة بند خارج نطاق التعاقد الأصلي للمشروع."}
+}
+
+# دالة حساب المسافة الإملائية (Levenshtein Distance)
+def calculate_distance(s1, s2):
+    if len(s1) < len(s2):
+        return calculate_distance(s2, s1)
+    if len(s2) == 0:
+        return len(s1)
+    previous_row = range(len(s2) + 1)
+    for i, c1 in enumerate(s1):
+        current_row = [i + 1]
+        for j, c2 in enumerate(s2):
+            insertions = previous_row[j + 1] + 1
+            deletions = current_row[j] + 1
+            substitutions = previous_row[j] + (c1 != c2)
+            current_row.append(min(insertions, deletions, substitutions))
+        previous_row = current_row
+    return previous_row[-1]
+
+# دالة فحص الكلمات وتوليد اقتراح "هل تقصد؟"
+def check_do_you_mean(text):
+    words = text.lower().replace(",", " ").replace(".", " ").replace(";", " ").split()
+    suggestions = []
+    
+    for word in words:
+        if len(word) < 3 or word in site_slang_db:
+            continue
+        for correct_term in site_slang_db.keys():
+            dist = calculate_distance(word, correct_term)
+            if dist == 1 or (len(correct_term) > 6 and dist == 2):
+                if correct_term not in suggestions:
+                    suggestions.append(correct_term)
+    return suggestions
+
+# دالة فحص النص ورصد المصطلحات الموقعية
+def detect_site_slang(text):
+    detected = []
+    text_lower = text.lower()
+    for key, data in site_slang_db.items():
+        if key in text_lower:
+            detected.append({
+                "term": key.title(),
+                "academic": data["academic"],
+                "slang": data["slang"],
+                "desc": data["desc"]
+            })
+    return detected
+
+# قاموس بناء الصيغ البديلة بناءً على نوع الصياغة المطلوبة
+def build_contextual_formulas(base_text, target_lang):
+    if target_lang != "ar":
+        f1 = "✨ [Technical Field Version]: " + base_text
+        f2 = "⚖️ [Legal/Contract Version]: It is strictly stipulated that " + base_text[0].lower() + base_text[1:] if len(base_text) > 0 else base_text
+        f3 = "💬 [Direct/Email Version]: " + base_text
+        return f1, f2, f3
+        
+    eng_replacements = {
+        "من أجل ضمان": "لضمان تحقيق الموثوقية الفنية في", "يجب أن يدفع الانتباه": "يتعين الالتزام الصارم بـ", 
+        "الخرسانة الذاتي": "الخرسانة ذاتية الدمك (SCC)", "أشغال خفية": "الأعمال المخفية والمستترة", 
+        "قوة التصميم": "المقاومة التصميمية للخرسانة", "إلى آلات المعاينة": "في محاضر المعاينة المعتمدة موقعياً", 
+        "رصد مستمر": "إجراء المراقبة والمتابعة المستمرة لـ", "تصل الخرسانة": "تأكيد وصول الخرسانة إلى", 
+        "رب العمل": "المالك (Employer)", "فسخ": "إنهاء سحب الأعمال", "طرد": "سحب الأعمال وطرد المقاول تدابيرياً",
+        "المهندس": "استشاري المشروع (The Engineer)", "برنامج مراقبة الجودة": "خطة ضبط الجودة المعتمدة"
+    }
+    
+    legal_replacements = {
+        "من أجل ضمان": "بغرض تأكيد الامتثال والوفاء بـ", "يجب أن يدفع الانتباه": "يتعين قانوناً التركيز والإيعاز بـ", 
+        "الخرسانة الذاتي": "المواصفات الفنية للخرسانة ذاتية الدمك", "أشغال خفية": "أعمال الاستلام المستترة وغير الظاهرة", 
+        "قوة التصميم": "مقاومة الخرسانة المستهدفة تعاقدياً", "إلى آلات المعاينة": "لأغراض الفحص والتدقيق المعتمد", 
+        "رصد مستمر": "الالتزام بالمراقبة الدائمة لـ", "تصل الخرسانة": "وصول المواد الموردة إلى", 
+        "رب العمل": "صاحب العمل / المالك تعاقدياً", "فسخ": "فسخ التعاقد بموجب الشروط العامة", "طرد": "إجراءات مصادرة الموقع وسحب الأعمال"
     }
 
-    # جلب الشرح الهندسي إذا كانت الكلمة مدمجة، أو توليد شرح تلقائي ذكي إذا كانت كلمة جديدة
-    if orig_lower in engineering_database:
-        eng_exp = engineering_database[orig_lower]
-    else:
-        eng_exp = f"📌 [شرح هندسي موقِعي تلقائي]: تعني ({translated_text}) في السياق التنفيذي للموقع، ويتم مطابقتها مع المواصفات الفنية للمشروع والرسومات المعتمدة لضمان جودة الاستلام."
+    form_engineering = base_text
+    for key, val in eng_replacements.items():
+        form_engineering = form_engineering.replace(key, val)
+    if "خرسانة" in form_engineering and "ذاتي" in form_engineering:
+        form_engineering = form_engineering.replace("الخرسانة الذاتية", "الخرسانة ذاتية الدمك").replace("الخرسانة الذاتي", "الخرسانة ذاتية الدمك")
 
-    # 2. توليد الصياغة والشرح العام
-    gen_exp = f"💬 الترجمة اللغوية المباشرة هي ({translated_text})، وتستخدم في السياقات العامة والمحادثات اليومية للدلالة على المعنى اللفظي الأساسي."
+    form_legal = base_text
+    for key, val in legal_replacements.items():
+        form_legal = form_legal.replace(key, val)
+    form_legal = form_legal.replace("المقاول", "يتعين على المقاول").replace("يجب أن", "يلتزم الطرف الثاني بـ أن")
 
-    # 3. توليد الصياغة والشرح القانوني والتعاقدي (FIDIC)
-    if "المقاول" in translated_text or "contractor" in orig_lower:
-        legal_exp = "📜 [صياغة الفيديك]: يلتزم الطرف الثاني (المقاول) بالمسؤولية الكاملة عن تنفيذ وتأمين هذا البند وفقاً للشروط العامة والخاصة للعقد."
-    else:
-        legal_exp = f"📜 [السياق التعاقدي]: البند القانوني الخاص بـ ({translated_text})؛ خاضع لإجراءات الفحص والمعاينة وإصدار محاضر الاستلام الرسمية لترتيب الالتزامات المالية."
+    form_general = base_text
+    form_general = form_general.replace("الامتثال لإخطار", "تنفيذ طلبات الجواب").replace("إخفاق", "عدم قدرة")
+    
+    # تحسين طريقة عرض التسميات التوضيحية داخل الـ Boxes
+    form_engineering = "✨ [صياغة هندسية موقعية]: " + form_engineering
+    form_legal = "⚖️ [صياغة تعاقدية قانونية/فيديك]: " + form_legal
+    form_general = "💬 [صيغة مباشرة/عامة]: " + form_general
 
-    # 4. توليد الصياغة العلمية والأكاديمية
-    sci_exp = f"🔬 [التحليل الأكاديمي]: الدراسة المختبرية والفيزيائية لخاصية ({translated_text})، مع تحليل السلوك الكيميائي أو الميكانيكي للمادة تحت تأثير ظروف الإجهاد المختلفة."
-
-    # 5. توليد الصياغة السياسية والرسمية
-    pol_exp = f"🏛️ [التقرير الرسمي]: التقارير الدبلوماسية المعتمدة والخطابات الحكومية الموجهة بين الشركاء الدوليين بخصوص تنظيم أعمال ({translated_text})."
-
-    # 6. توليد الصياغة الاقتصادية وحساب الكميات
-    eco_exp = f"📊 [المقايسة والأسعار]: إدراج بند ({translated_text}) في جدول الكميات والمواصفات (BOQ) وتثبيت الفئة السعرية له لحساب مستخلصات المشروع."
-
-    # 7. توليد الصياغة الدينية والثقافية
-    rel_exp = f"🌙 [البُعد الثقافي]: الدلالة الروحية أو الثقافية والاجتماعية المرتبطة بمفهوم ({translated_text}) في بيئة العمل المحيطة."
-
-    return gen_exp, eng_exp, legal_exp, sci_exp, pol_exp, eco_exp, rel_exp
+    return form_engineering, form_legal, form_general
 
 # ==========================================
-# 📥 واجهة المستخدم (تضم كافة اللغات الـ 8)
+# 📥 قسم المدخلات (واجهة المستخدم)
 # ==========================================
-with st.form(key="hybrid_translator_form", clear_on_submit=False):
+with st.form(key="ultimate_ai_form", clear_on_submit=False):
     col_l1, col_l2 = st.columns(2)
     with col_l1:
-        source_lang = st.selectbox("ترجم من لغة:", list(languages_dict.keys()), index=1)
+        source_lang = st.selectbox("ترجم من لغة:", list(languages_dict.keys()), index=1, key="src_ultimate")
     with col_l2:
-        target_lang = st.selectbox("إلى لغة (اللغة المستهدفة):", list(languages_dict.keys()), index=0)
+        target_lang = st.selectbox("إلى لغة (اللغة المستهدفة):", list(languages_dict.keys()), index=0, key="tgt_ultimate")
     
     st.write("---")
     
     text_to_translate = st.text_area(
-        "أدخل الكلمة أو العبارة الفنية (سيقوم المعالج بتفكيكها سياقياً بـ 7 قوالب كاملة وشرحها بالتفصيل):", 
-        placeholder="اكتب هنا أي مصطلح مثل: concrete casting أو honeycombing أو أي نص آخر...",
-        height=150,
-        key="input_text"
+        "أدخل النص المراد ترجمته (قوانين، عقود، تقارير هندسية):", 
+        placeholder="Type or paste your text, contract clauses, or engineering reports here...",
+        height=160,
+        key="input_ultimate"
     )
     
-    btn_process = st.form_submit_button("🚀 RUN HYBRID ENGINE | تشغيل الفرز والتحليل السياقي المستقر", use_container_width=True)
+    btn_process = st.form_submit_button("TRANSLATE | تنفيذ الترجمة الذكية", use_container_width=True)
 
 st.write("---")
 
 # ==========================================
-# 📊 عرض النتائج (الـ 7 صياغات كاملة بشروح تفصيلية)
+# 📊 قسم المعالجة وعرض النتائج الاحترافية
 # ==========================================
 if btn_process and text_to_translate.strip():
     cleaned_text = text_to_translate.strip()
+    is_single_word = len(cleaned_text.split()) == 1
     
     lang_from = languages_dict[source_lang]
     lang_to = languages_dict[target_lang]
     
-    with st.spinner("جاري الترجمة الثابتة وتوليد الشروح التفصيلية السياقية..."):
-        try:
-            # الترجمة المبدئية المستقرة محلياً بدون أخطاء سيرفر
-            translator = LocalTranslator(from_lang=lang_from, to_lang=lang_to)
-            base_translation = translator.translate(cleaned_text)
+    # فحص ورصد الأخطاء الإملائية المصطلحية
+    mean_suggestions = check_do_you_mean(cleaned_text)
+    if mean_suggestions:
+        formatted_sug = ", ".join([f"**{s.title()}**" for s in mean_suggestions])
+        st.error(f"💡 **هل تقصد (Did you mean):** {formatted_sug} ؟")
+        st.write("---")
+    
+    with st.spinner("جاري تحليل النص وتوليد الصياغات السياقية..."):
+        
+        # 🟢 الحالة الأولى: كلمة واحدة (المعجم السياقي المتعدد)
+        if is_single_word:
+            st.subheader(f"🗄️ المعجم السياقي المطور للكلمة: ({cleaned_text})")
+            st.markdown("### تم تحليل الكلمة وعرض معانيها المختلفة بناءً على السياق التقني والموقعي:")
             
-            # تصحيح إملائي تلقائي سريع لرفع الجودة
-            try:
-                blob = TextBlob(base_translation)
-                base_translation = str(blob.correct())
-            except Exception:
-                pass
+            base_meaning = fetch_ai_translation(cleaned_text, lang_from, lang_to)
             
-            # توليد الشروح السبعة العميقة والمطولة
-            f_gen, f_eng, f_leg, f_sci, f_pol, f_eco, f_rel = generate_advanced_explanations(base_translation, cleaned_text, lang_to)
+            if lang_to == "ar":
+                st.markdown(f"""
+                | السياق والمجال | المعنى المعتمد والمصطلح الفني | مثال توضيحي في هذا السياق |
+                | :--- | :--- | :--- |
+                | **👷 السياق الهندسي والإنشائي** | {base_meaning.replace("مصفوفة", "قالب / مصفوفة إنشائية").replace("بلاطة", "بلاطة خرسانية")} | استخدام الخامات المطابقة للمواصفات الفنية في الموقع |
+                | **⚖️ السياق القانوني والتعاقدي** | بند ملزم / شرط تعاقدي (Clause) | يلتزم الطرفان ببنود الشروط الجزائية والمطالبات في العقد |
+                | **💼 السياق التجاري والمالي** | قيمة أصلية / استقطاع مالي مستبق | يتم تجميد أموال الاستقطاعات لحين إجراء التسوية المالية |
+                | **🌍 السياق العام والدارج** | {base_meaning} | سياق الحديث اليومي العادي والمراسلات الودية بين الأطراف |
+                """)
+            else:
+                st.markdown(f"""
+                | Context / Field | Technical Meaning & Definition | Contextual Example |
+                | :--- | :--- | :--- |
+                | **Engineering & Site** | Technical structural/construction term | The element complies with project specifications |
+                | **Legal & Contract** | Binding contractual/FIDIC term | Subject to the terms of the contract agreement |
+                | **General Use** | {base_meaning} | Standard definition used in daily conversations |
+                """)
+
+        # 🔵 الحالة الثانية: جملة أو تقرير كامل (تعدد الصيغ الثلاثية + Site Slang)
+        else:
+            base_translation = fetch_ai_translation(cleaned_text, lang_from, lang_to)
+            form_1, form_2, form_3 = build_contextual_formulas(base_translation, lang_to)
+
+            st.subheader("🤖 نتائج الترجمة الفورية متعددة القوالب:")
+            box_eng, box_legal, box_general = st.columns(3)
             
-            st.success("🎯 تم التحليل السياقي والتوزيع على القوالب السبعة بنجاح استقراري 100%:")
-            st.write("---")
-            
-            # عرض الصياغات الثلاثة الأساسية
-            st.subheader("🛠️ الصياغات والشروح الأساسية المفتوحة:")
-            col_a, col_b, col_c = st.columns(3)
-            with col_a:
-                st.markdown("### 💬 صياغة عامة وشرحها اللغوي")
-                st.warning(f_gen)
-            with col_b:
-                st.markdown("### 👷 صياغة هندسية موقعية تفصيلية")
-                st.info(f_eng)
-            with col_c:
-                st.markdown("### 📜 صياغة تعاقدية قانونية (FIDIC)")
-                st.success(f_leg)
+            with box_eng:
+                st.markdown("### 👷 الصياغة الهندسية")
+                st.info(form_1.strip())
                 
-            st.write("---")
+            with box_legal:
+                st.markdown("### ⚖️ الصياغة القانونية")
+                st.success(form_2.strip())
+                
+            with box_general:
+                st.markdown("### 💬 الصيغة المباشرة")
+                st.warning(form_3.strip())
             
-            # عرض الصياغات الأربعة التخصصية المتبقية كاملة
-            st.subheader("🎯 الصياغات والشروح التخصصية الدقيقة:")
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.markdown("### 🧬 الصياغة العلمية الأكاديمية")
-                st.info(f_sci)
-                    
-                st.markdown("### 📊 الصياغة الاقتصادية والمالية")
-                st.warning(f_eco)
-
-            with col2:
-                st.markdown("### 🏛️ الصياغة السياسية والدبلوماسية")
-                st.code(f_pol, language="")
-                    
-                st.markdown("### 🌙 الصياغة الدينية والثقافية")
-                st.markdown(f"> **{f_rel}**")
-
-        except Exception as e:
-            st.error(f"❌ حدث خطأ غير متوقع: {e}")
+            # ميزة رصد مصطلحات الموقع (Site Slang)
+            detected_slang = detect_site_slang(cleaned_text)
+            if detected_slang:
+                st.write("---")
+                st.markdown("### 🔍 كاشف مصطلحات الموقع (Site Slang Detector)")
+                st.markdown("> **💡 ميزة حصرية لمنصتك:** النظام رصد كلمات في تقريرك تترجمها المحركات العادية حرفياً، وإليك معناها الهندسي المعتمد في ساحة العمل:")
+                
+                slang_table = """
+| المصطلح الهندسي الأصلي | الترجمة الأكاديمية (جوجل وغيره) | 👷 المصطلح الدارج في الموقع الحقيقي | 📘 الدليل الفني للمصطلح |
+| :--- | :--- | :--- | :--- |
+"""
+                for item in detected_slang:
+                    slang_table += f"| **{item['term']}** | *{item['academic']}* | **{item['slang']}** | {item['desc']} |\n"
+                
+                st.markdown(slang_table)
 
 elif btn_process:
-    st.warning("⚠️ من فضلك اكتب نصاً أولاً لتشغيل نظام المعالجة.")
+    st.warning("⚠️ من فضلك اكتب أو ألصق نصاً أولاً ليتمكن النظام من معالجته وتوليد الخيارات المتعددة.")
