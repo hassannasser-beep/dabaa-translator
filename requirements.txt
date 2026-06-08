@@ -1,4 +1,1 @@
-streamlit
-requests
-streamlit
-streamlit-mic-recorder
+deep_translator
