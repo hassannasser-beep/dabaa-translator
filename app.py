@@ -122,7 +122,7 @@ def build_contextual_formulas(base_text, target_lang):
     if "خرسانة" in form_engineering and "ذاتي" in form_engineering:
         form_engineering = form_engineering.replace("الخرسانة الذاتية", "الخرسانة ذاتية الدمك").replace("الخرسانة الذاتي", "الخرسانة ذاتية الدمك")
 
-    form_legal = "بموجب أحكام وشروط العقد المبرم، " + base_text
+    form_legal = "، " + base_text
     for key, val in legal_replacements.items():
         form_legal = form_legal.replace(key, val)
     form_legal = form_legal.replace("المقاول", "يتعين على المقاول").replace("يجب", "يلتزم الطرف الثاني بـ")
