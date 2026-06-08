@@ -215,17 +215,17 @@ if btn_process and text_to_translate.strip():
             
             with box_eng:
                 st.markdown("###  الصيغة 1: الصياغة الهندسية")
-                st.caption("جمل منسقة ومطعمة بالمصطلحات الفنية للموقع والمهندسين والخبراء")
+                st.caption("")
                 st.info(form_1.strip())
                 
             with box_legal:
                 st.markdown("###  الصيغة 2: الصياغة القانونية")
-                st.caption("أسلوب صارم وبليغ مخصص للخطابات الرسمية وعقود المشاريع الكبرى (FIDIC)")
+                st.caption(" ")
                 st.success(form_2.strip())
                 
             with box_general:
                 st.markdown("### الصيغة 3: الصيغة المباشرة ")
-                st.caption("أسلوب بسيط ومفهوم ومباشر مناسب للمراسلات والإيميلات اليومية السريعة")
+                st.caption("")
                 st.warning(form_3.strip())
             
             # ميزة التميز الحصرية: كرت رصد وتصحيح مصطلحات الموقع (Site Slang)
