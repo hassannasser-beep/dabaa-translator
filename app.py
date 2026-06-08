@@ -95,12 +95,18 @@ def detect_site_slang(text):
 def build_contextual_formulas(base_text, target_lang):
     if target_lang != "ar":
         f1 = "✨ [Technical Field Version]: " + base_text
-        f2 = "⚖️ [Legal Field Version]:  " + base_text[0].lower() + base_text[1:]
-        f3 = "💬 [Political Version]: " + base_text
+        f2 = "⚖️ [Contractual Formal Clause]: It is strictly stipulated that " + base_text[0].lower() + base_text[1:]
+        f3 = "💬 [Direct/Email Version]: " + base_text
         return f1, f2, f3
         
     eng_replacements = {
-    }: 
+        "من أجل ضمان": "لضمان تحقيق الموثوقية الفنية في", "يجب أن يدفع الانتباه": "يتعين الالتزام الصارم بـ", 
+        "الخرسانة الذاتي": "الخرسانة ذاتية الدمك (SCC)", "أشغال خفية": "الأعمال المخفية والمستترة", 
+        "قوة التصميم": "المقاومة التصميمية للخرسانة", "إلى آلات المعاينة": "في محاضر المعاينة المعتمدة موقعياً", 
+        "رصد مستمر": "إجراء المراقبة والمتابعة المستمرة لـ", "تصل الخرسانة": "تأكيد وصول الخرسانة إلى", 
+        "رب العمل": "المالك (Employer)", "فسخ": "إنهاء سحب الأعمال", "طرد": "سحب الأعمال وطرد المقاول تدابيرياً",
+        "المهندس": "استشاري المشروع (The Engineer)", "برنامج مراقبة الجودة": "خطة ضبط الجودة المعتمدة"
+    }
     
     legal_replacements = {
         "من أجل ضمان": "بغرض تأكيد الامتثال والوفاء بـ", "يجب أن يدفع الانتباه": "يتعين قانوناً التركيز والإيعاز بـ", 
