@@ -95,7 +95,7 @@ def detect_site_slang(text):
 def build_contextual_formulas(base_text, target_lang):
     if target_lang != "ar":
         f1 = "✨ [Technical Field Version]: " + base_text
-        f2 = "⚖️ [Legal Field Version]: It is strictly stipulated that " + base_text[0].lower() + base_text[1:]
+        f2 = "⚖️ [Legal Field Version]:  " + base_text[0].lower() + base_text[1:]
         f3 = "💬 [Political Version]: " + base_text
         return f1, f2, f3
         
