@@ -122,7 +122,7 @@ def build_contextual_formulas(base_text, target_lang):
     if "خرسانة" in form_engineering and "ذاتي" in form_engineering:
         form_engineering = form_engineering.replace("الخرسانة الذاتية", "الخرسانة ذاتية الدمك").replace("الخرسانة الذاتي", "الخرسانة ذاتية الدمك")
 
-    form_legal = "، " + base_text
+    form_legal = " " + base_text
     for key, val in legal_replacements.items():
         form_legal = form_legal.replace(key, val)
     form_legal = form_legal.replace("المقاول", "يتعين على المقاول").replace("يجب", "يلتزم الطرف الثاني بـ")
@@ -178,7 +178,7 @@ if btn_process and text_to_translate.strip():
         st.error(f"💡 **هل تقصد (Did you mean):** {formatted_sug} ؟")
         st.write("---")
     
-    with st.spinner("جاري معالجة القواعد اللغوية وتوليد الصياغات الاحترافية المتعددة..."):
+    with st.spinner("PROCESSING..."):
         
         # 🟢 الحالة الأولى: كلمة واحدة (تفعيل ميزة المعجم السياقي المتعدد)
         if is_single_word:
@@ -210,7 +210,7 @@ if btn_process and text_to_translate.strip():
             base_translation = fetch_ai_translation(cleaned_text, lang_from, lang_to)
             form_1, form_2, form_3 = build_contextual_formulas(base_translation, lang_to)
 
-            st.subheader(":")
+            st.subheader("")
             box_eng, box_legal, box_general = st.columns(3)
             
             with box_eng:
