@@ -1,122 +1,125 @@
 import streamlit as st
-import translators as ts
 
 # 1. إعدادات الصفحة والعنوان الرسمي
 st.set_page_config(page_title="HASSAN NASSER", page_icon="🤖", layout="wide")
 
 st.title("🤖 HASSAN NASSER")
-st.markdown("### 🧠 ADVANCED CONTEXTUAL TRANSLATOR | المترجم السياقي المطور بدون مفاتيح")
+st.markdown("### 🧠 INTERNAL CONTEXTUAL DICTIONARY | القاموس الهندسي والسياقي المفصل الذاتي")
 st.write("---")
 
-# اللغات المعتمدة في النظام
+# اللغات المدعومة للواجهة
 languages_dict = {
     "العربية": "ar", 
-    " can الإنجليزية (English)": "en", 
-    "الروسية (Русский)": "ru", 
-    "الصينية (中文)": "zh", 
-    "الألمانية (Deutsch)": "de", 
-    "الإسبانية (Español)": "es", 
-    "البرتغالية (Português)": "pt", 
-    "الكورية (한국어)": "ko"
+    "الإنجليزية (English)": "en", 
+    "الروسية (Русский)": "ru"
 }
 
-# دالة ذكية لتوليد شروح تفصيلية ومترادفات بناءً على نوع الكلمة وسياقها
-def generate_detailed_explanation(translated_text, original_lower, to_lang):
-    if to_lang != "ar":
-        return translated_text, f"[Site Context]: {translated_text}", f"[Contractual]: {translated_text}", f"[Academic]: {translated_text}"
-    
-    # قاموس الشروح الهندسية والموقِعية المخصصة (تضاف تلقائياً عند كتابة الكلمات المفتاحية)
-    engineering_db = {
-        "concrete casting": "صب الخرسانة الإنشائية - يشمل عمليات التجهيز، الصب الموقعيري، وضبط الجودة بالموقع.",
-        "high voltage poles": "أبراج الجهد العالي / أعمدة الضغط العالي - الهياكل المعدنية أو الخرسانية الحاملة لخطوط الطاقة الكهربائية.",
-        "high-voltage poles": "أبراج الجهد العالي / أعمدة الضغط العالي - الهياكل المعدنية أو الخرسانية الحاملة لخطوط الطاقة الكهربائية.",
-        "reinforcement": "حديد التسليح - شبكات الصلب المستخدمة لتدعيم العناصر الإنشائية ومقاومة قوى الشد والقص.",
-        "shop drawings": "الرسومات التنفيذية للموقع - المخططات التفصيلية المعتمدة التي يلتزم مهندس الموقع بالتنفيذ بناءً عليها.",
-        "site engineer": "مهندس الموقع التنفيذي - المسؤول الفني عن متابعة العمالة، استلام الأعمال، ومطابقة التنفيذ بالمخططات.",
-        "subcontractor": "مقاول الباطن - الجهة أو الشركة المسؤولة عن تنفيذ بنود محددة تحت إشراف المقاول الرئيسي."
+# 🗺️ العقل المركزي للتطبيق: قاعدة بيانات الشروح المفصلة والمترادفات (المصطلحات الأكثر أهمية)
+dictionary_db = {
+    "concrete casting": {
+        "general": "صب الخرسانة - عملية سكب المخلوط الخرساني في القوالب.",
+        "engineering": "أعمال الصب الموقعي - تشمل التحقق من جودة الخرسانة الموردة (Slump Test)، أخذ المكعبات، والتأكد من استخدام الهزازات الميكانيكية لمنع التعشيش وضمان الكثافة.",
+        "legal": "بند أعمال الصب - خاضع لمعاينة الاستشاري وإصدار محضر استلام رسمي (IR) قبل الصب، ويترتب عليه صرف المستخلص الفني للمقاول.",
+        "scientific": "التصلد الكيميائي للخرسانة - تفاعل إماهة الإسمنت الطارد للحرارة (Hydration) وتشكيل روابط السليكات التي تمنح المنشأ قوته الإنشائية المستهدفة."
+    },
+    "high voltage poles": {
+        "general": "أعمدة أو أبراج الكهرباء ذات الجهد العالي.",
+        "engineering": "أبراج الجهد العالي / أعمدة الضغط العالي - هياكل إنشائية (معدنية أو خرسانية) مصممة هندسياً لتحمل شبكات نقل الطاقة بكفاءة، مع الالتزام بمسافات الأمان والعزل الموقعي.",
+        "legal": "منشآت حيوية خاضعة للمواصفات القياسية الحكومية، وتتطلب خطوط ارتداد آمنة وحرم طريق محدد قانوناً بموجب عقود التوريد والتشغيل.",
+        "scientific": "الأبراج الحاملة للموصلات الكهربائية بجهد يتعدى 33 كيلوفولت، وتصميمها يراعي مقاومة الرياح، الأحمال الديناميكية، وظاهرة التفريغ الهالي (Corona Effect)."
+    },
+    "high-voltage poles": {
+        "general": "أعمدة أو أبراج الكهرباء ذات الجهد العالي.",
+        "engineering": "أبراج الجهد العالي / أعمدة الضغط العالي - هياكل إنشائية (معدنية أو خرسانية) مصممة هندسياً لتحمل شبكات نقل الطاقة بكفاءة، مع الالتزام بمسافات الأمان والعزل الموقعي.",
+        "legal": "منشآت حيوية خاضعة للمواصفات القياسية الحكومية، وتتطلب خطوط ارتداد آمنة وحرم طريق محدد قانوناً بموجب عقود التوريد والتشغيل.",
+        "scientific": "الأبراج الحاملة للموصلات الكهربائية بجهد يتعدى 33 كيلوفولت، وتصميمها يراعي مقاومة الرياح، الأحمال الديناميكية، وظاهرة التفريغ الهالي (Corona Effect)."
+    },
+    "shop drawings": {
+        "general": "الرسومات أو المخططات التنفيذية.",
+        "engineering": "رسومات الورشة / المخططات التنفيذية للموقع - اللوحات التفصيلية الدقيقة التي توضح أبعاد حديد التسليح، التوصيلات، ومسارات الأنابيب، وهي المرجع الأول والملزم لمهندس الموقع أثناء التنفيذ الفعلي.",
+        "legal": "المستندات الفنية الواجب تقديمها واعتمادها من المهندس المشرف (The Engineer) قبل البدء بأي بند، ويعد العمل بدونها مخالفة صريحة لشروط التعاقد.",
+        "scientific": "الترجمة الهندسية الدقيقة للرسومات التصميمية (Design Drawings) وتحويلها إلى أبعاد قابلة للتطبيق المختبري والموقعي مع مراعاة نسب التفاوت المسموحة."
+    },
+    "reinforcement": {
+        "general": "التعزيز أو التدعيم (حديد التسليح).",
+        "engineering": "حديد التسليح / تسليح العناصر الإنشائية - شبكات أسياخ الصلب (المقشوط أو الأملس) الموضوعة في مناطق الشد داخل البلاطات، القواعد، والأعمدة لتحمل الأحمال.",
+        "legal": "بند التسليح تعاقدياً - يتطلب فحص شهادات المنشأ واختبارات الشد والإنحناء بالمختبرات المعتمدة لضمان مطابقتها لمواصفات المشروع والـ FIDIC.",
+        "scientific": "دمج صلب التسليح مع الخرسانة لإنشاء 'الخرسانة المسلحة' لتعويض ضعف الخرسانة القاسي في مقاومة قوى الشد (Tensile Stress) بينما تقاوم هي قوى الضغط."
+    },
+    "slab": {
+        "general": "بلاطة أو لوح سميك.",
+        "engineering": "بلاطة خرسانية / سقف / فرش إنشائي - العنصر الإنشائي الأفقي الحامل للأحمال الحية والميتة في المبنى، ويتم تصنيفه فنياً (Solid Slab, Flat Slab, Hollow Block).",
+        "legal": "مستوى استحقاق مالي - بند استلام حديد تسليح ونجارة السقف، وتاريخ صبه يعد حدثاً رئيسياً (Milestone) في الجدول الزمني للمشروع.",
+        "scientific": "عنصر إنشائي ثنائي الأبعاد يتم تحليل الإجهادات والانحناءات (Bending Moments) فيه لتوزيع حديد التسليح في الاتجاهين الرئيسي والثانوي."
+    },
+    "lean concrete": {
+        "general": "خرسانة ضعيفة الإسمنت.",
+        "engineering": "خرسانة عادية / خرسانة نظافة / فرشية عمية - طبقة خرسانية غير مسلحة بسمك (10-15 سم) تُصب أسفل القواعد المسلحة لتوفير سطح مستوٍ ونظيف وحماية حديد التسليح من رطوبة التربة والأملاح.",
+        "legal": "أعمال التأسيس الأولية - لا تدخل في الحسابات الإنشائية للمبنى ولكنها بند تعاقدي مستقل يُحسب بالمتر المكعب أو المتر المسطح في مقايسة الأعمال.",
+        "scientific": "خليط خرساني ذو محتوى إسمنتي منخفض (حوالي 150-200 كجم/متر مكعب) ومقاومة ضغط منخفضة، وظيفته الأساسية ملء الفراغات وتوزيع الأحمال بانتظام."
     }
-    
-    # تحديد الشرح الهندسي الموقعي
-    eng_explanation = "غير متوفر سياق هندسي مباشر"
-    for key, val in engineering_db.items():
-        if key in original_lower:
-            eng_explanation = val
-            break
-            
-    # توليد الشرح العام
-    gen_explanation = f"{translated_text} (المعنى الأساسي المباشر المتداول في المعاجم اللغوية)."
-    
-    # توليد الشرح القانوني والتعاقدي
-    legal_explanation = f"البند المعتمد تعاقدياً بخصوص ({translated_text}) وفقاً لشروط الفيديك والالتزامات المتبادلة."
-    if "المقاول" in translated_text or "contractor" in original_lower:
-        legal_explanation = "يلتزم الطرف الثاني (المقاول) بتنفيذ وتأمين كافة الأعمال الموكلة إليه بموجب شروط العقد."
-        
-    # توليد الشرح العلمي والأكاديمي
-    sci_explanation = f"الدراسة المخبرية والتحليل الفيزيائي/الكيميائي لخواص ({translated_text}) في الأبحاث الأكاديمية."
-
-    return gen_explanation, eng_explanation, legal_explanation, sci_explanation
+}
 
 # ==========================================
-# 📥 واجهة المستخدم (Inputs)
+# 📥 واجهة المستخدم
 # ==========================================
-with st.form(key="custom_translator_form", clear_on_submit=False):
+with st.form(key="internal_dict_form", clear_on_submit=False):
     col_l1, col_l2 = st.columns(2)
     with col_l1:
-        source_lang = st.selectbox("ترجم من لغة:", list(languages_dict.keys()), index=1, key="src_lang")
+        source_lang = st.selectbox("ترجم من لغة:", list(languages_dict.keys()), index=1)
     with col_l2:
-        target_lang = st.selectbox("إلى لغة (اللغة المستهدفة):", list(languages_dict.keys()), index=0, key="tgt_lang")
+        target_lang = st.selectbox("إلى لغة (اللغة المستهدفة):", list(languages_dict.keys()), index=0)
     
     st.write("---")
     
     text_to_translate = st.text_area(
-        "أدخل الكلمة أو العبارة (سيقوم المحرك بفك تشفيرها وإعطائك تفاصيلها):", 
-        placeholder="اكتب هنا الكلمة الفنية (مثال: concrete casting أو shop drawings)...",
-        height=150,
+        "أدخل الكلمة الفنية أو العبارة (مثل: concrete casting أو shop drawings):", 
+        placeholder="اكتب المصطلحات الإنشائية والموقِعية هنا...",
+        height=120,
         key="input_text"
     )
     
-    btn_process = st.form_submit_button("🚀 RUN ENGINE | تشغيل المعالجة والفرز السياقي الشامل", use_container_width=True)
+    btn_process = st.form_submit_button("🧠 ANALYZE CONTEXT | فك التشفير والتشريح السياقي الفوري", use_container_width=True)
 
 st.write("---")
 
 # ==========================================
-# 📊 عرض النتائج (Outputs)
+# 📊 عرض النتائج التفصيلية
 # ==========================================
 if btn_process and text_to_translate.strip():
-    cleaned_text = text_to_translate.strip()
-    original_lower = cleaned_text.lower()
+    search_query = text_to_translate.strip().lower()
     
-    lang_from = languages_dict[source_lang]
-    lang_to = languages_dict[target_lang]
-    
-    with st.spinner("جاري معالجة النص وتوليد الشروح التفصيلية..."):
-        try:
-            # استخدام محرك مترجمين متطور يتخطى الحظر تلقائياً عبر سيرفرات موازية
-            base_translation = ts.translate_text(cleaned_text, from_language=lang_from, to_language=lang_to, translator='bing')
+    if search_query in dictionary_db:
+        data = dictionary_db[search_query]
+        
+        st.success(f"🎯 تم العثور على المصطلح وتحليله سياقياً وفنياً بدقة 100%:")
+        st.write("---")
+        
+        col_a, col_b = st.columns(2)
+        with col_a:
+            st.markdown("### 💬 صياغة عامة وشرحها اللغوي:")
+            st.warning(data["general"])
             
-            # توليد الشروح الذكية والتفصيلية لكل قالب
-            f_gen, f_eng, f_leg, f_sci = generate_detailed_explanation(base_translation, original_lower, lang_to)
+            st.markdown("### 📜 صياغة تعاقدية وقانونية (FIDIC):")
+            st.success(data["legal"])
             
-            st.success("🎯 تم التحليل والتوزيع السياقي بنجاح وبدون أي أخطاء اتصال:")
-            st.write("---")
+        with col_b:
+            st.markdown("### 👷 صياغة هندسية موقِعية تفصيلية (شرح كامل):")
+            st.info(data["engineering"])
             
-            col_a, col_b = st.columns(2)
-            with col_a:
-                st.markdown("### 💬 صياغة عامة مع الشرح")
-                st.warning(f_gen)
-                
-                st.markdown("### 📜 صياغة تعاقدية وقانونية")
-                st.success(f_leg)
+            st.markdown("### 🧬 صياغة علمية وأكاديمية دقيقة:")
+            st.code(data["scientific"], language="")
             
-            with col_b:
-                st.markdown("### 👷 صياغة هندسية موقعية تفصيلية")
-                st.info(f_eng)
-                
-                st.markdown("### 🧬 صياغة علمية وأكاديمية")
-                st.code(f_sci, language="")
-                
-        except Exception as e:
-            st.error(f"❌ حدث خطأ أثناء جلب البيانات: {e}")
+    else:
+        # حل بديل مرن إذا كتبت كلمة ليست في القاموس المركزي لكي لا يتوقف التطبيق
+        st.warning(f"⚠️ المصطلح '{text_to_translate}' غير مدرج حالياً في قاعدة البيانات المركزية.")
+        st.info("💡 لتجربة الفرز الشامل والمفصل، جرب كتابة أحد المصطلحات التالية المدمجة بكامل تفاصيلها:\n"
+                "* **`concrete casting`** (أعمال الصب)\n"
+                "* **`shop drawings`** (الرسومات التنفيذية)\n"
+                "* **`high voltage poles`** (أبراج الجهد العالي)\n"
+                "* **`reinforcement`** (حديد التسليح)\n"
+                "* **`slab`** (البلاطة الخرسانية)\n"
+                "* **`lean concrete`** (خرسانة النظافة)")
 
 elif btn_process:
-    st.warning("⚠️ من فضلك اكتب النص أولاً لتشغيل المحرك.")
+    st.warning("⚠️ من فضلك اكتب المصطلح الإنشائي أولاً ليتم تشريحه فنيّاً.")
