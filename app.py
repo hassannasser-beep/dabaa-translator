@@ -151,7 +151,7 @@ with st.form(key="ultimate_ai_form", clear_on_submit=False):
     st.write("---")
     
     text_to_translate = st.text_area(
-        "   (  ENTER ):", 
+        "   (  CTRL + ENTER ):", 
         placeholder="Type or paste your text, contract clauses, or engineering reports here...",
         height=160,
         key="input_ultimate"
@@ -210,7 +210,7 @@ if btn_process and text_to_translate.strip():
             base_translation = fetch_ai_translation(cleaned_text, lang_from, lang_to)
             form_1, form_2, form_3 = build_contextual_formulas(base_translation, lang_to)
 
-            st.subheader("📋 خيارات وصиг الصياغة السياقية المتوفرة للنص المترجم:")
+            st.subheader(":")
             box_eng, box_legal, box_general = st.columns(3)
             
             with box_eng:
