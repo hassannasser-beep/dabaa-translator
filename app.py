@@ -30,7 +30,7 @@ def fetch_ai_translation(text, from_lang, to_lang):
     except:
         return text
 
-# قاعدة بيانات معجم المصطلحات الموقعية الدارجة (Site Slang) الخاصة بالمهندس حسن ناصر
+# قاعدة بيانات معجم المصطلحات الموقعية الدارجة (Site Slang) 
 site_slang_db = {
     "slab": {"academic": "بلاطة", "slang": "سقف / فرش خرساني", "desc": "تُطلق in المواقع على الأسقف والمسطحات الخرسانية المسلحة."},
     "lean concrete": {"academic": "خرسانة عجيفة / ضعيفة", "slang": "خرسانة عادية / خرسانة نظافة", "desc": "الطبقة الخرسانية غير المسلحة التي تُصب أسفل القواعد لحماية الحديد والأساسات."},
@@ -151,7 +151,7 @@ with st.form(key="ultimate_ai_form", clear_on_submit=False):
     st.write("---")
     
     text_to_translate = st.text_area(
-        "   ( CTRL + ENTER ):", 
+        "   (  ENTER ):", 
         placeholder="Type or paste your text, contract clauses, or engineering reports here...",
         height=160,
         key="input_ultimate"
