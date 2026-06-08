@@ -1,17 +1,16 @@
 import streamlit as st
-import requests
 
-# 1. إعدادات الصفحة والعنوان الرسمي باسمك الحصري
-st.set_page_config(page_title="HASSAN NASSER", page_icon="🏗️", layout="wide")
+# 1. إعدادات الصفحة والعنوان الرسمي
+st.set_page_config(page_title="HASSAN NASSER", page_icon="🤖", layout="wide")
 
-st.title("👷 HASSAN NASSER")
-st.markdown("### SMART TRANSLATOR | المترجم الهندسي الذكي")
+st.title("🤖 HASSAN NASSER")
+st.markdown("### 🧠 LOCAL CONTEXTUAL DICTIONARY | القاموس السياقي المدمج والمستقر 100%")
 st.write("---")
 
-# اللغات الثمانية المعتمدة بالكامل في النظام
+# اللغات الثمانية كاملة ومطابقة لقاعدة البيانات
 languages_dict = {
     "العربية": "ar", 
-    "الإنجليزية (English)": "en", 
+    " can الإنجليزية (English)": "en", 
     "الروسية (Русский)": "ru", 
     "الصينية (中文)": "zh", 
     "الألمانية (Deutsch)": "de", 
@@ -20,225 +19,122 @@ languages_dict = {
     "الكورية (한국어)": "ko"
 }
 
-# دالة أساسية لجلب البيانات من محرك الذكاء الاصطناعي السياقي المستقر
-def fetch_ai_translation(text, from_lang, to_lang):
-    try:
-        url = "https://translate.googleapis.com/translate_a/single"
-        params = {"client": "gtx", "sl": from_lang, "tl": to_lang, "dt": "t", "q": text.strip()}
-        response = requests.get(url, params=params).json()
-        return "".join([part[0] for part in response[0] if part[0]])
-    except:
-        return text
-
-# قاعدة بيانات معجم المصطلحات الموقعية الدارجة (Site Slang) - تم تصحيح الكلمات العربية
-site_slang_db = {
-    "slab": {"academic": "بلاطة", "slang": "سقف / فرش خرساني", "desc": "تُطلق في المواقع على الأسقف والمسطحات الخرسانية المسلحة."},
-    "lean concrete": {"academic": "خرسانة عجيفة / ضعيفة", "slang": "خرسانة عادية / خرسانة نظافة", "desc": "الطبقة الخرسانية غير المسلحة التي تُصب أسفل القواعد لحماية الحديد والأساسات."},
-    "shop drawings": {"academic": "رسومات المتجر", "slang": "الرسومات التنفيذية للموقع", "desc": "المخططات التفصيلية المعتمدة للبدء في التنفيذ الفعلي بالموقع وليس الشراء."},
-    "as-built drawings": {"academic": "رسومات كما بنيت", "slang": "مخططات الواقع الفعلي للمشروع", "desc": "الرسومات النهائية التي تعكس ما تم تنفيذه على أرض الواقع بدقة بعد انتهاء الأعمال."},
-    "bill of quantities": {"academic": "فاتورة الكميات", "slang": "جدول الكميات والمواصفات (BOQ)", "desc": "الوثيقة التعاقدية الأساسية وحجر الزاوية لتسعير وحساب كميات خامات المشروع."},
-    "shuttering": {"academic": "إغلاق", "slang": "الشدّة الخشبية / الطوبار", "desc": "الهيكل المؤقت (سواء خشب أو حديد) الذي يُصب بداخله الخرسانة المسلحة لحين تماسكها."},
-    "scaffolding": {"academic": "أشغال السقالة", "slang": "السقالات الإنشائية", "desc": "الهياكل المعدنية الخارجية التي يقف عليها العمال لتنفيذ الواجهات والأعمال المرتفعة."},
-    "curing": {"academic": "شفاء / علاج", "slang": "رش / معالجة الخرسانة بالمياه", "desc": "العملية الحاسمة لرش الخرسانة بالماء بعد الصب للحفاظ على رطوبتها واكتساب المقاومة المطلوبة."},
-    "honeycombing": {"academic": "تعتشيق النحل", "slang": "تعشيش الخرسانة", "desc": "الفراغات الحصوية التي تظهر في الخرسانة بعد فك الخشب نتيجة عدم استخدام الهزاز الميكانيكي بشكل صحيح."},
-    "kick-off meeting": {"academic": "اجتماع ركلة البداية", "slang": "الاجتماع التحضيري التأسيسي للمشروع", "desc": "أول اجتماع رسمي يجمع المالك والاستشاري والمقاول لترتيب خطة بدء العمل مسبقاً."},
-    "variation order": {"academic": "ترتيب الاختلاف", "slang": "أمر تغيير / ملحق تعاقدي (VO)", "desc": "الأمر الرسمي الصادر لتعديل أو إضافة بند خارج نطاق التعاقد الأصلي للمشروع."}
-}
-
-# دالة حساب المسافة الإملائية (Levenshtein Distance)
-def calculate_distance(s1, s2):
-    if len(s1) < len(s2):
-        return calculate_distance(s2, s1)
-    if len(s2) == 0:
-        return len(s1)
-    previous_row = range(len(s2) + 1)
-    for i, c1 in enumerate(s1):
-        current_row = [i + 1]
-        for j, c2 in enumerate(s2):
-            insertions = previous_row[j + 1] + 1
-            deletions = current_row[j] + 1
-            substitutions = previous_row[j] + (c1 != c2)
-            current_row.append(min(insertions, deletions, substitutions))
-        previous_row = current_row
-    return previous_row[-1]
-
-# دالة فحص الكلمات وتوليد اقتراح "هل تقصد؟"
-def check_do_you_mean(text):
-    words = text.lower().replace(",", " ").replace(".", " ").replace(";", " ").split()
-    suggestions = []
-    
-    for word in words:
-        if len(word) < 3 or word in site_slang_db:
-            continue
-        for correct_term in site_slang_db.keys():
-            dist = calculate_distance(word, correct_term)
-            if dist == 1 or (len(correct_term) > 6 and dist == 2):
-                if correct_term not in suggestions:
-                    suggestions.append(correct_term)
-    return suggestions
-
-# دالة فحص النص ورصد المصطلحات الموقعية
-def detect_site_slang(text):
-    detected = []
-    text_lower = text.lower()
-    for key, data in site_slang_db.items():
-        if key in text_lower:
-            detected.append({
-                "term": key.title(),
-                "academic": data["academic"],
-                "slang": data["slang"],
-                "desc": data["desc"]
-            })
-    return detected
-
-# قاموس بناء الصيغ البديلة بناءً على نوع الصياغة المطلوبة
-def build_contextual_formulas(base_text, target_lang):
-    if target_lang != "ar":
-        f1 = "✨ [Technical Field Version]: " + base_text
-        f2 = "⚖️ [Legal/Contract Version]: It is strictly stipulated that " + base_text[0].lower() + base_text[1:] if len(base_text) > 0 else base_text
-        f3 = "💬 [Direct/Email Version]: " + base_text
-        return f1, f2, f3
-        
-    eng_replacements = {
-        "من أجل ضمان": "لضمان تحقيق الموثوقية الفنية في", "يجب أن يدفع الانتباه": "يتعين الالتزام الصارم بـ", 
-        "الخرسانة الذاتي": "الخرسانة ذاتية الدمك (SCC)", "أشغال خفية": "الأعمال المخفية والمستترة", 
-        "قوة التصميم": "المقاومة التصميمية للخرسانة", "إلى آلات المعاينة": "في محاضر المعاينة المعتمدة موقعياً", 
-        "رصد مستمر": "إجراء المراقبة والمتابعة المستمرة لـ", "تصل الخرسانة": "تأكيد وصول الخرسانة إلى", 
-        "رب العمل": "المالك (Employer)", "فسخ": "إنهاء سحب الأعمال", "طرد": "سحب الأعمال وطرد المقاول تدابيرياً",
-        "المهندس": "استشاري المشروع (The Engineer)", "برنامج مراقبة الجودة": "خطة ضبط الجودة المعتمدة"
-    }
-    
-    legal_replacements = {
-        "من أجل ضمان": "بغرض تأكيد الامتثال والوفاء بـ", "يجب أن يدفع الانتباه": "يتعين قانوناً التركيز والإيعاز بـ", 
-        "الخرسانة الذاتي": "المواصفات الفنية للخرسانة ذاتية الدمك", "أشغال خفية": "أعمال الاستلام المستترة وغير الظاهرة", 
-        "قوة التصميم": "مقاومة الخرسانة المستهدفة تعاقدياً", "إلى آلات المعاينة": "لأغراض الفحص والتدقيق المعتمد", 
-        "رصد مستمر": "الالتزام بالمراقبة الدائمة لـ", "تصل الخرسانة": "وصول المواد الموردة إلى", 
-        "رب العمل": "صاحب العمل / المالك تعاقدياً", "فسخ": "فسخ التعاقد بموجب الشروط العامة", "طرد": "إجراءات مصادرة الموقع وسحب الأعمال"
-    }
-
-    form_engineering = base_text
-    for key, val in eng_replacements.items():
-        form_engineering = form_engineering.replace(key, val)
-    if "خرسانة" in form_engineering and "ذاتي" in form_engineering:
-        form_engineering = form_engineering.replace("الخرسانة الذاتية", "الخرسانة ذاتية الدمك").replace("الخرسانة الذاتي", "الخرسانة ذاتية الدمك")
-
-    form_legal = base_text
-    for key, val in legal_replacements.items():
-        form_legal = form_legal.replace(key, val)
-    form_legal = form_legal.replace("المقاول", "يتعين على المقاول").replace("يجب أن", "يلتزم الطرف الثاني بـ أن")
-
-    form_general = base_text
-    form_general = form_general.replace("الامتثال لإخطار", "تنفيذ طلبات الجواب").replace("إخفاق", "عدم قدرة")
-    
-    # تحسين طريقة عرض التسميات التوضيحية داخل الـ Boxes
-    form_engineering = "✨ [صياغة هندسية موقعية]: " + form_engineering
-    form_legal = "⚖️ [صياغة تعاقدية قانونية/فيديك]: " + form_legal
-    form_general = "💬 [صيغة مباشرة/عامة]: " + form_general
-
-    return form_engineering, form_legal, form_general
-
-# ==========================================
-# 📥 قسم المدخلات (واجهة المستخدم)
-# ==========================================
-with st.form(key="ultimate_ai_form", clear_on_submit=False):
-    col_l1, col_l2 = st.columns(2)
-    with col_l1:
-        source_lang = st.selectbox("ترجم من لغة:", list(languages_dict.keys()), index=1, key="src_ultimate")
-    with col_l2:
-        target_lang = st.selectbox("إلى لغة (اللغة المستهدفة):", list(languages_dict.keys()), index=0, key="tgt_ultimate")
-    
-    st.write("---")
-    
-    text_to_translate = st.text_area(
-        "أدخل النص المراد ترجمته (قوانين، عقود، تقارير هندسية):", 
-        placeholder="Type or paste your text, contract clauses, or engineering reports here...",
-        height=160,
-        key="input_ultimate"
-    )
-    
-    btn_process = st.form_submit_button("TRANSLATE | تنفيذ الترجمة الذكية", use_container_width=True)
-
-st.write("---")
-
-# ==========================================
-# 📊 قسم المعالجة وعرض النتائج الاحترافية
-# ==========================================
-if btn_process and text_to_translate.strip():
-    cleaned_text = text_to_translate.strip()
-    is_single_word = len(cleaned_text.split()) == 1
-    
-    lang_from = languages_dict[source_lang]
-    lang_to = languages_dict[target_lang]
-    
-    # فحص ورصد الأخطاء الإملائية المصطلحية
-    mean_suggestions = check_do_you_mean(cleaned_text)
-    if mean_suggestions:
-        formatted_sug = ", ".join([f"**{s.title()}**" for s in mean_suggestions])
-        st.error(f"💡 **هل تقصد (Did you mean):** {formatted_sug} ؟")
-        st.write("---")
-    
-    with st.spinner("جاري تحليل النص وتوليد الصياغات السياقية..."):
-        
-        # 🟢 الحالة الأولى: كلمة واحدة (المعجم السياقي المتعدد)
-        if is_single_word:
-            st.subheader(f"🗄️ المعجم السياقي المطور للكلمة: ({cleaned_text})")
-            st.markdown("### تم تحليل الكلمة وعرض معانيها المختلفة بناءً على السياق التقني والموقعي:")
-            
-            base_meaning = fetch_ai_translation(cleaned_text, lang_from, lang_to)
-            
-            if lang_to == "ar":
-                st.markdown(f"""
-                | السياق والمجال | المعنى المعتمد والمصطلح الفني | مثال توضيحي في هذا السياق |
-                | :--- | :--- | :--- |
-                | **👷 السياق الهندسي والإنشائي** | {base_meaning.replace("مصفوفة", "قالب / مصفوفة إنشائية").replace("بلاطة", "بلاطة خرسانية")} | استخدام الخامات المطابقة للمواصفات الفنية في الموقع |
-                | **⚖️ السياق القانوني والتعاقدي** | بند ملزم / شرط تعاقدي (Clause) | يلتزم الطرفان ببنود الشروط الجزائية والمطالبات في العقد |
-                | **💼 السياق التجاري والمالي** | قيمة أصلية / استقطاع مالي مستبق | يتم تجميد أموال الاستقطاعات لحين إجراء التسوية المالية |
-                | **🌍 السياق العام والدارج** | {base_meaning} | سياق الحديث اليومي العادي والمراسلات الودية بين الأطراف |
-                """)
-            else:
-                st.markdown(f"""
-                | Context / Field | Technical Meaning & Definition | Contextual Example |
-                | :--- | :--- | :--- |
-                | **Engineering & Site** | Technical structural/construction term | The element complies with project specifications |
-                | **Legal & Contract** | Binding contractual/FIDIC term | Subject to the terms of the contract agreement |
-                | **General Use** | {base_meaning} | Standard definition used in daily conversations |
-                """)
-
-        # 🔵 الحالة الثانية: جملة أو تقرير كامل (تعدد الصيغ الثلاثية + Site Slang)
-        else:
-            base_translation = fetch_ai_translation(cleaned_text, lang_from, lang_to)
-            form_1, form_2, form_3 = build_contextual_formulas(base_translation, lang_to)
-
-            st.subheader("🤖 نتائج الترجمة الفورية متعددة القوالب:")
-            box_eng, box_legal, box_general = st.columns(3)
-            
-            with box_eng:
-                st.markdown("### 👷 الصياغة الهندسية")
-                st.info(form_1.strip())
-                
-            with box_legal:
-                st.markdown("### ⚖️ الصياغة القانونية")
-                st.success(form_2.strip())
-                
-            with box_general:
-                st.markdown("### 💬 الصيغة المباشرة")
-                st.warning(form_3.strip())
-            
-            # ميزة رصد مصطلحات الموقع (Site Slang)
-            detected_slang = detect_site_slang(cleaned_text)
-            if detected_slang:
-                st.write("---")
-                st.markdown("### 🔍 كاشف مصطلحات الموقع (Site Slang Detector)")
-                st.markdown("> **💡 ميزة حصرية لمنصتك:** النظام رصد كلمات في تقريرك تترجمها المحركات العادية حرفياً، وإليك معناها الهندسي المعتمد في ساحة العمل:")
-                
-                slang_table = """
-| المصطلح الهندسي الأصلي | الترجمة الأكاديمية (جوجل وغيره) | 👷 المصطلح الدارج في الموقع الحقيقي | 📘 الدليل الفني للمصطلح |
-| :--- | :--- | :--- | :--- |
-"""
-                for item in detected_slang:
-                    slang_table += f"| **{item['term']}** | *{item['academic']}* | **{item['slang']}** | {item['desc']} |\n"
-                
-                st.markdown(slang_table)
-
-elif btn_process:
-    st.warning("⚠️ من فضلك اكتب أو ألصق نصاً أولاً ليتمكن النظام من معالجته وتوليد الخيارات المتعددة.")
+# 🗺️ قاعدة البيانات اليدوية الشاملة (8 لغات × 7 تخصصات لكل مصطلح استراتيجي)
+dictionary_db = {
+    "concrete casting": {
+        "ar": {
+            "general": "صب الخرسانة - عملية سكب المخلوط الخرساني في القالب المخصص.",
+            "engineering": "أعمال الصب الموقعي - تشمل اختبار الهبوط (Slump Test)، وأخذ المكعبات، واستخدام الهزازات الميكانيكية لتفادي التعشيش.",
+            "legal": "بند الصب تعاقدياً - يشترط توقيع محضر استلام حديد التسليح والنجارة (IR) من الاستشاري قبل بدء الصب رسمياً.",
+            "scientific": "التفاعل الكيميائي الطارد للحرارة (Hydration) الناتجة عن إماهة جزيئات الإسمنت وتكوين روابط السليكات لرفع المقاومة.",
+            "political": "البروتوكول الحكومي المعتمد لتنفيذ البنية التحتية والمشروعات القومية السيادية.",
+            "economic": "بند مالي مدرج في مقايسة الأعمال (BOQ) يُحسب بالمتر المكعب ويشمل تكلفة المواد والمعدات والعمالة.",
+            "religious": "الأمانة المهنية في نسب خلط المواد ومطابقة المعايير الهندسية دون غش أو تلاعب."
+        },
+        "en": {
+            "general": "Concrete casting - The process of pouring concrete into molds.",
+            "engineering": "Site placement of concrete including slump testing, cube sampling, and mechanical vibration to prevent voids.",
+            "legal": "Casting item subject to structural inspection request (IR) approval prior to formal execution under FIDIC rules.",
+            "scientific": "Exothermic chemical hydration process of cement particles forming calcium silicate hydrate (C-S-H) gel.",
+            "political": "State-regulated infrastructure framework for major national development projects.",
+            "economic": "Financial item in the Bill of Quantities (BOQ) priced per cubic meter including materials and logistics.",
+            "religious": "Ethical compliance with material specification limits and standard engineering integrity."
+        },
+        "ru": {
+            "general": "Заливка бетона - процесс укладки бетонной смеси в опалубку.",
+            "engineering": "Укладка бетона на площадке, включая конус усадки, отбор проб и вибрирование для избежания каверн.",
+            "legal": "Бетонирование регулируется актом освидетельствования скрытых работ (ИР) до начала заливки.",
+            "scientific": "Экзотермический процесс гидратации цемента с образованием гидросиликата кальция для прочности.",
+            "political": "Государственный регламент реализации стратегических инфраструктурных объектов.",
+            "economic": "Финансовая позиция в ведомости объемов работ (BOQ), оцениваемая в кубических метрах.",
+            "religious": "Профессиональная честность при соблюдении пропорций смеси и проектных стандартов."
+        },
+        "zh": {
+            "general": "混凝土浇筑 - 将混凝土拌合物 Markets 浇入模具的过程。",
+            "engineering": "现场混凝土施工，包括坍落度測試、試塊留置及機械振搗以防蜂窩麻面。",
+            "legal": "根据FIDIC条款，浇筑项目在正式施工前须获得结构检验申请（IR）的批准。",
+            "scientific": "水泥颗粒发生放热化学水化反应，形成水化硅酸钙（C-S-H）凝胶以达到设计强度。",
+            "political": "国家重大基础设施与战略发展项目规范框架。",
+            "economic": "工程量清单（BOQ）中的财务条目，按立方米计价，包含材料与物流成本。",
+            "religious": "严格遵守材料配比与工程质量规范的职业道德要求。"
+        },
+        "de": {
+            "general": "Betonieren - Das Gießen von Beton in Schalungen.",
+            "engineering": "Einbau von Frischbeton vor Ort inklusive Setzmassprüfung, Würfelproben und Verdichtung mittels Rüttler.",
+            "legal": "Betonierabschnitt erfordert die vorherige Abnahme der Bewehrung und Schalung durch den Bauüberwacher.",
+            "scientific": "Exothermer Hydratationsprozess der Zementpartikel zur Bildung von Calciumsilicathydrat-Kristallen.",
+            "political": "Staatliche Infrastrukturrichtlinien für strategische Großprojekte.",
+            "economic": "Leistungsposition im Leistungsverzeichnis (LV), abgerechnet nach Kubikmeter inklusive Logistik.",
+            "religious": "Berufliche Integrität bei der Einhaltung von Mischungsverhältnissen und Baunormen."
+        },
+        "es": {
+            "general": "Vaciado de hormigón - El proceso de verter concreto en los moldes.",
+            "engineering": "Colocación de concreto en sitio, incluyendo prueba de asentamiento, toma de probetas y vibrado mecánico.",
+            "legal": "Ítem de vaciado sujeto a la aprobación de la solicitud de inspección (IR) antes de la ejecución.",
+            "scientific": "Proceso químico exotérmico de hidratación del cemento que forma cristales de silicato de calcio.",
+            "political": "Marco regulatorio estatal para el desarrollo de proyectos de infraestructura crítica.",
+            "economic": "Partida financiera en el Catálogo de Conceptos (BOQ) cotizada por metro cúbico.",
+            "religious": "Compromiso ético con el cumplimiento de las especificaciones técnicas sin fraude."
+        },
+        "pt": {
+            "general": "Betonagem - O processo de lançamento do betão/concreto nas cofragens.",
+            "engineering": "Colocação de concreto em obra, incluindo ensaio de abatimento, recolha de provetes e vibração mecânica.",
+            "legal": "Item de betonagem sujeito à aprovação do pedido de inspeção (IR) antes do início dos trabalhos.",
+            "scientific": "Processo químico exotérmico de hidratação do cimento, gerando ligações de silicato de cálcio.",
+            "political": "Diretrizes estatais para a execução de obras públicas de infraestrutura estratégica.",
+            "economic": "Item financeiro no Caderno de Encargos (BOQ) medido em metros cúbicos com insumos.",
+            "religious": "Responsabilidade moral na conformidade dos traços de concreto e segurança estrutural."
+        },
+        "ko": {
+            "general": "콘크리트 타설 - 거푸집에 콘크리트 혼합물을 붓는 과정.",
+            "engineering": "슬럼프 테스트, 공시체 채취 및 재료분리 방지를 위한 기계식 진동기 사용을 포함한 현장 타설 작업.",
+            "legal": "FIDIC 규정에 따라 실제 타설 전 감리단의 구조물 검사 요청서(IR) 승인이 필수적인 공종.",
+            "scientific": "시멘트 입자의 수화 반응에 따른 발열 화학 공정으로, 규산칼슘 수화물(C-S-H) 겔 형성.",
+            "political": "국가 주요 기간산업 및 국책 기반시설 검수 지침 법률.",
+            "economic": "물량내역서(BOQ) 상의 금융 항목으로, 자재 및 장비 비용을 포함하여 루베(CBM)당 단가 산정.",
+            "religious": "부실공사 방지 및 구조적 안전성 확보를 위한 현장 엔지니어의 직업적 양심과 청렴성."
+        }
+    },
+    "honeycombing": {
+        "ar": {
+            "general": "تعشيش الخرسانة - وجود فراغات هوائية وحصوات ظاهرة في القطاع الإنشائي.",
+            "engineering": "عيب تنفيذي ينتج عن ضعف الدمك أو كثافة التسليح، ويتطلب المعالجة بمواد إيبوكسية غير قابلة للانكماش (Grout).",
+            "legal": "مخالفة للمواصفات تستوجب إيقاف البند وإلزام المقاول بتقديم تقرير طريقة إصلاح معتمد (Method Statement).",
+            "scientific": "انفصال حبيبي (Segregation) يؤدي إلى خفض مساحة القطاع الفعالة المقاومة للإجهادات ويسرع صدأ الحديد.",
+            "political": "ملف رقابي حكومي يخص جودة وأمان المنشآت الوطنية الحيوية.",
+            "economic": "خسارة مالية للمقاول تشمل تكلفة مواد الترميم التخصصية وأجور العمالة الإضافية دون تعويض.",
+            "religious": "ضرورة اتقان العمل لمنع العيوب الخفية التي قد تهدد سلامة وأرواح مستخدمي المبنى."
+        },
+        "en": {
+            "general": "Honeycombing - Voids and empty spaces in concrete face showing coarse aggregate.",
+            "engineering": "Defect caused by poor compaction or congested rebar, requiring repair with non-shrink high-strength grout.",
+            "legal": "Non-conformance report (NCR) issued under contract terms, forcing the contractor to submit a repair method statement.",
+            "scientific": "Particle segregation reducing the effective cross-sectional area and causing early carbonation or rebar corrosion.",
+            "political": "Regulatory oversight parameter for public safety and governmental infrastructure quality assurance.",
+            "economic": "Financial loss for the contractor due to uncompensated remedial works and specialized repair material costs.",
+            "religious": "Professional accountability regarding hidden defects that might compromise human structural safety."
+        },
+        "ru": {
+            "general": "Раковины в бетоне (соты) - пустоты и обнажение крупного заполнителя на поверхности.",
+            "engineering": "Дефект из-за плохой вибрации или густой арматуры, требующий ремонта безусадочным составом.",
+            "legal": "Акт о несоответствии (NCR), обязывающий подрядчика предоставить утвержденный метод устранения дефекта.",
+            "scientific": "Сегрегация смеси, снижающая эффективное сечение элемента и ускоряющая коррозию арматуры.",
+            "political": "Критерий государственного строительного надзора за безопасностью ядерных и гражданских объектов.",
+            "economic": "Прямые убытки подрядчика на исправление брака и закупку специализированных ремонтных смесей.",
+            "religious": "Профессиональный долг по недопущению скрытых дефектов, угрожающих жизни людей."
+        },
+        "zh": {
+            "general": "混凝土蜂窝 - 混凝土表面出现砂浆少、石子多, 石子间有空隙的现象。",
+            "engineering": "因振捣不足或钢筋过密引起的缺陷，需使用无收缩高强灌浆料进行修补。",
+            "legal": "合同条款下的不合格报告（NCR），强制承包商提交书面修补施工方案（Method Statement）。",
+            "scientific": "骨料离析现象，降低了结构构件的有效截面积，加速了主筋碳化与锈蚀进程。",
+            "political": "政府对公共安全及国家战略基础设施质量监督的核心控制要点。",
+            "economic": "承包商因非补偿性返工及采购特种修补材料而承担的直接经济损失。",
+            "religious": "杜绝工程隐患、保障生命安全的职业良心与建筑质量操守。"
+        },
+        "de": {
+            "general": "Kiesnester - Hohlräume im Beton durch fehlenden Zementleim.",
+            "engineering": "Ausführungsfehler infolge mangelnder Verdichtung, Reparatur mittels quellfähigem Vergussmörtel erforderlich.",
+            "legal": "Mängelrüge (NCR) nach VOB/FIDIC, Verpflichtung des Auftragnehmers zur Sanierung auf eigene Kosten.",
+            "scientific": "Entmischung des Korns, verringert den tragenden Querschnitt und begünstigt Korrosion der Bewehrung.",
+            "political": "G
