@@ -1,17 +1,17 @@
 import streamlit as st
 from deep_translator import GoogleTranslator
 
-# 1. إعدادات الصفحة والعنوان الرسمي باسمك الحصري
+# 1. إعدادات الصفحة والعنوان
 st.set_page_config(page_title="HASSAN NASSER", page_icon="🤖", layout="wide")
 
 st.title("🤖 HASSAN NASSER")
-st.markdown("### SMART AI TRANSLATOR | المترجم الذكي متعدد السياقات")
+st.markdown("### SMART AI TRANSLATOR | المترجم الذكي المطور (متعدد المترادفات)")
 st.write("---")
 
-# اللغات الثمانية المعتمدة في النظام
+# اللغات المعتمدة
 languages_dict = {
     "العربية": "ar", 
-    "الإنجليزية (English)": "en", 
+    " can الإنجليزية (English)": "en", 
     "الروسية (Русский)": "ru", 
     "الصينية (中文)": "zh", 
     "الألمانية (Deutsch)": "de", 
@@ -20,85 +20,118 @@ languages_dict = {
     "الكورية (한국어)": "ko"
 }
 
-# دالة ذكية لتوليد الصياغات بناءً على قاموس استبدال هندسي وقواعد لغوية حقيقية
-def generate_all_styles(base_text, to_lang):
-    # القاموس الهندسي الاحترافي الخاص بك لتعديل الصياغة الهندسية فوراً إذا كانت الترجمة للعربية
-    eng_replacements = {
-        "من أجل ضمان": "لضمان تحقيق الموثوقية الفنية في", "يجب أن يدفع الانتباه": "يتعين الالتزام الصارم بـ", 
-        "الخرسانة الذاتي": "الخرسانة ذاتية الدمك (SCC)", "أشغال خفية": "الأعمال المخفية والمستترة", 
-        "قوة التصميم": "المقاومة التصميمية للخرسانة", "إلى آلات المعاينة": "في محاضر المعاينة المعتمدة موقعياً", 
-        "رصد مستمر": "إجراء المراقبة والمتابعة المستمرة لـ", "تصل الخرسانة": "تأكيد وصول الخرسانة إلى", 
-        "رب العمل": "المالك (Employer)", "فسخ": "إنهاء سحب الأعمال", "طرد": "سحب الأعمال وطرد المقاول تدابيرياً",
-        "المهندس": "استشاري المشروع (The Engineer)", "برنامج مراقبة الجودة": "خطة ضبط الجودة المعتمدة",
-        "بلاطة": "بلاطة خرسانية / سقف", "خرسانة ضعيفة": "خرسانة عادية / خرسانة نظافة",
-        "رسومات المتجر": "الرسومات التنفيذية للموقع (Shop Drawings)"
+# قاعدة بيانات موسعة للمصطلحات التخصصية التي تعطى أكثر من معنى في السياق الواحد
+multi_meaning_db = {
+    "slab": {
+        "engineering": "بلاطة خرسانية / سقف / فرش خرساني مسلح",
+        "legal": "عنصر إنشائي خاضع للمعاينة والاستلام تعاقدياً",
+        "general": "شريحة / لوح سميك"
+    },
+    "lean concrete": {
+        "engineering": "خرسانة عادية / خرسانة نظافة / فرشية عمية (ضعيفة)",
+        "legal": "طبقة التأسيس غير المسلحة أسفل القواعد المعتمدة",
+        "general": "خرسانة فقيرة الإسمنت"
+    },
+    "shop drawings": {
+        "engineering": "رسومات تنفيذية / مخططات ورشة / لوحات تشغيلية للموقع",
+        "legal": "المخططات التفصيلية الواجب اعتمادها قبل بدء التنفيذ",
+        "general": "رسومات المتجر"
+    },
+    "as-built drawings": {
+        "engineering": "مخططات الواقع الفعلي / رسومات كما نُفذ / لوحات مطابقة الطبيعة",
+        "legal": "الرسومات النهائية والمستند التعاقدي بعد إتمام الأعمال",
+        "general": "رسومات كما بنيت"
+    },
+    "shuttering": {
+        "engineering": "شدّة خشبية / طوبار / قالب صب / كوفراج",
+        "legal": "الهيكل المؤقت الحاضن للخرسانة لحين جفافها تعاقدياً",
+        "general": "إغلاق / نوافذ"
+    },
+    "curing": {
+        "engineering": "رش المياه / معالجة الخرسانة / ترطيب / إنضاج الخرسانة",
+        "legal": "فترة الحماية والترطيب الإلزامية للمنشأ الخرساني",
+        "general": "علاج / شفاء"
+    },
+    "honeycombing": {
+        "engineering": "تعشيش الخرسانة / فراغات حصوية / تزهير وتجويف الخرسانة",
+        "legal": "عيوب مصنعية ناتجة عن سوء الدمك تستوجب الإصلاح الفني",
+        "general": "تعتشيق النحل"
+    },
+    "bill of quantities": {
+        "engineering": "جدول الكميات والمواصفات (BOQ) / مقايسة الأعمال",
+        "legal": "وثيقة التسعير الأساسية وحجر الزاوية في التعاقد",
+        "general": "فاتورة الكميات"
+    }
+}
+
+# دالة ذكية لتوليد الصياغات مع إعطاء مرونة وخيارات متعددة داخل السياق
+def generate_all_styles(base_text, text_lower, to_lang):
+    
+    # قاموس دقيق جداً لاستبدال العبارات الركيكة بعبارات احترافية تحتوي على بدائل
+    eng_phrases = {
+        "من أجل ضمان": "لضمان [تحقيق / تأكيد] الموثوقية الفنية في", 
+        "يجب أن يدفع الانتباه": "يتعين [الالتزام الصارم بـ / مراعاة] ضوابط", 
+        "الخرسانة الذاتي": "الخرسانة ذاتية الدمك (SCC)", 
+        "أشغال خفية": "الأعمال [المخفية / المستترة / غير الظاهرة]", 
+        "قوة التصميم": "المقاومة التصميمية [المستهدفة] للخرسانة", 
+        "إلى آلات المعاينة": "في محاضر الفحص والمعاينة المعتمدة موقعياً", 
+        "رصد مستمر": "إجراء [المراقبة الدائمة / المتابعة المستمرة] لـ", 
+        "تصل الخرسانة": "تأكيد وصول وتوريد الخرسانة إلى", 
+        "رب العمل": "المالك / صاحب العمل (Employer)", 
+        "فسخ": "إجراءات [إنهاء التعاقد / سحب الأعمال]", 
+        "طرد": "سحب الأعمال وطرد المقاول تدابيرياً",
+        "المهندس": "استشاري المشروع / المهندس المشرف (The Engineer)", 
+        "برنامج مراقبة الجودة": "خطة ضبط وتأكيد الجودة المعتمدة"
     }
     
-    # قاموس الصياغة القانونية الصارمة (FIDIC)
-    legal_replacements = {
-        "من أجل ضمان": "بغرض تأكيد الامتثال والوفاء بـ", "يجب أن يدفع الانتباه": "يتعين قانوناً التركيز والإيعاز بـ", 
-        "قوة التصميم": "مقاومة الخرسانة المستهدفة تعاقدياً", "رب العمل": "صاحب العمل / المالك تعاقدياً", 
-        "فسخ": "فسخ التعاقد بموجب الشروط العامة", "طرد": "إجراءات مصادرة الموقع وسحب الأعمال"
+    legal_phrases = {
+        "من أجل ضمان": "بغرض تأكيد الامتثال والوفاء بـ", 
+        "يجب أن يدفع الانتباه": "يتعين قانوناً ولائحياً التركيز والإيعاز بـ", 
+        "قوة التصميم": "مقاومة الخرسانة المستهدفة تعاقدياً", 
+        "رب العمل": "صاحب العمل تعاقدياً / المالك", 
+        "فسخ": "فسخ التعاقد بموجب أحكام الشروط العامة (FIDIC)"
     }
 
-    # 1. الصياغة العامة (الأصلية)
+    # تحقق أولاً إذا كانت الكلمة موجودة في قاموس تعدد المعاني المخصص
+    word_key = text_lower.strip()
+    if word_key in multi_meaning_db:
+        db_entry = multi_meaning_db[word_key]
+        if to_lang == "ar":
+            return base_text, db_entry["engineering"], db_entry["legal"], f"🔬 [مترادفات أكاديمية]: {db_entry['engineering']}", None, None, None
+
+    # الصياغة العامة
     form_general = base_text
 
-    # 2. الصياغة الهندسية الموقعية
+    # الصياغة الهندسية (تطبيق الفلتر الذكي لإعطاء المترادفات بين أقواس)
     form_engineering = base_text
     if to_lang == "ar":
-        for key, val in eng_replacements.items():
+        for key, val in eng_phrases.items():
             form_engineering = form_engineering.replace(key, val)
     else:
-        form_engineering = f"[Technical/Engineering]: {base_text}"
+        form_engineering = f"[Technical/Field Options]: {base_text}"
 
-    # 3. الصياغة القانونية
+    # الصياغة القانونية
     form_legal = base_text
     if to_lang == "ar":
-        for key, val in legal_replacements.items():
+        for key, val in legal_phrases.items():
             form_legal = form_legal.replace(key, val)
         if "المقاول" in form_legal:
-            form_legal = form_legal.replace("المقاول", "يتعين على المقاول")
+            form_legal = form_legal.replace("المقاول", "يلتزم الطرف الثاني (المقاول) بـ")
     else:
-        form_legal = f"[Contractual/Legal]: Subject to the terms, {base_text[0].lower() + base_text[1:] if len(base_text)>1 else base_text}"
+        form_legal = f"[Contractual/Statutory]: {base_text}"
 
-    # الكلمات المفتاحية الذكية لفحص بقية السياقات منعاً للكلام العشوائي (الذي ليس له أساس)
-    text_lower = base_text.lower()
-    
-    # 4. الصياغة العلمية الأكاديمية
-    scientific_keywords = ["ذرة", "خرسانة", "تفاعل", "مادة", "تحليل", "طب", "خلية", "concrete", "atom", "cell", "acid", "chemical", "test", "analysis", "system"]
-    if any(word in text_lower for word in scientific_keywords):
-        form_scientific = f"🔬 [أكاديمي/مختبري]: {base_text}" if to_lang == "ar" else f"🔬 [Academic/Scientific]: {base_text}"
-    else:
-        form_scientific = None
-
-    # 5. الصياغة السياسية
-    political_keywords = ["دولة", "رئيس", "حكومة", "وزير", "سفارة", "اتفاقية", "سياسة", "president", "minister", "government", "state", "policy", "treaty", "official"]
-    if any(word in text_lower for word in political_keywords):
-        form_political = f"🏛️ [دبلوماسي/رسمي]: {base_text}" if to_lang == "ar" else f"🏛️ [Diplomatic/Political]: {base_text}"
-    else:
-        form_political = None
-
-    # 6. الصياغة الاقتصادية
-    economic_keywords = ["مال", "بنوك", "دولار", "سعر", "أسهم", "شراء", "فاتورة", "تمويل", "money", "price", "bank", "stock", "invoice", "finance", "market", "boq", "quantities"]
-    if any(word in text_lower for word in economic_keywords):
-        form_economic = f"📊 [مالي/تجاري]: {base_text}" if to_lang == "ar" else f"📊 [Financial/Economic]: {base_text}"
-    else:
-        form_economic = None
-
-    # 7. الصياغة الدينية
-    religious_keywords = ["الله", "رب", "صلاة", "مقدس", "كنيسة", "مسجد", "آية", "قرآن", "god", "lord", "pray", "holy", "church", "mosque", "scripture", "bless"]
-    if any(word in text_lower for word in religious_keywords):
-        form_religious = f"🌙 [سياق روحي/عقائدي]: {base_text}" if to_lang == "ar" else f"🌙 [Spiritual/Religious]: {base_text}"
-    else:
-        form_religious = None
+    # فحص بقية السياقات بالكلمات المفتاحية
+    form_scientific = f"🔬 [أكاديمي/مختبري]: {base_text}" if any(w in text_lower for w in ["ذرة", "خرسانة", "تفاعل", "concrete", "atom", "chemical", "test"]) else None
+    form_political = f"🏛️ [دبلوماسي/رسمي]: {base_text}" if any(w in text_lower for w in ["دولة", "رئيس", "وزير", "president", "minister", "government"]) else None
+    form_economic = f"📊 [مالي/تجاري]: {base_text}" if any(w in text_lower for w in ["مال", "بنوك", "دولار", "سعر", "money", "price", "bank", "boq"]) else None
+    form_religious = f"🌙 [سياق روحي]: {base_text}" if any(w in text_lower for w in ["الله", "رب", "صلاة", "god", "lord", "pray"]) else None
 
     return form_general, form_engineering, form_legal, form_scientific, form_political, form_economic, form_religious
 
 # ==========================================
-# 📥 واجهة المستخدم (Inputs)
+# 📥 واجهة المستخدم
 # ==========================================
-with st.form(key="smart_translator_form", clear_on_submit=False):
+with st.form(key="advanced_translator_form", clear_on_submit=False):
     col_l1, col_l2 = st.columns(2)
     with col_l1:
         source_lang = st.selectbox("ترجم من لغة:", list(languages_dict.keys()), index=1, key="src_lang")
@@ -108,75 +141,36 @@ with st.form(key="smart_translator_form", clear_on_submit=False):
     st.write("---")
     
     text_to_translate = st.text_area(
-        "أدخل النص أو الكلمة (سيقوم النظام بفرز الصياغات الحقيقية فقط):", 
+        "أدخل النص أو الكلمة (ستظهر البدائل والمترادفات لحمايتك من الخطأ):", 
         placeholder="Type or paste your text here...",
         height=150,
         key="input_text"
     )
     
-    btn_process = st.form_submit_button("🚀 TRANSLATE | تشغيل الترجمة السياقية الفورية", use_container_width=True)
+    btn_process = st.form_submit_button("🚀 TRANSLATE | تشغيل الترجمة فائقة الدقة", use_container_width=True)
 
 st.write("---")
 
 # ==========================================
-# 📊 عرض النتائج (Outputs)
+# 📊 عرض النتائج
 # ==========================================
 if btn_process and text_to_translate.strip():
     cleaned_text = text_to_translate.strip()
+    text_lower = cleaned_text.lower()
     
     lang_from = languages_dict[source_lang]
     lang_to = languages_dict[target_lang]
     
-    with st.spinner("جاري الترجمة والفرز السياقي الذكي..."):
+    with st.spinner("جاري الترجمة واستخراج البدائل اللغوية..."):
         try:
-            # استخدام محرك ترجمة مستقر جداً ومجاني وبدون حظر
             base_translation = GoogleTranslator(source=lang_from, target=lang_to).translate(cleaned_text)
             
-            # توليد الصياغات السبعة المحدثة
-            f_general, f_engineering, f_legal, f_scientific, f_political, f_economic, f_religious = generate_all_styles(base_translation, lang_to)
+            f_general, f_engineering, f_legal, f_scientific, f_political, f_economic, f_religious = generate_all_styles(base_translation, text_lower, lang_to)
             
-            st.success("🔍 تم تحليل النص وتوليد الصياغات المطابقة بنجاح:")
+            st.success("🎯 تم توليد معاني متعددة وبدائل سياقية لتقليل نسبة الخطأ إلى 0%:")
             st.write("---")
             
-            # عرض الصياغات الأساسية الثلاثة (تظهر دائماً لأنها تناسب أي نص)
-            st.subheader("🛠️ الصياغات الأساسية الدائمة:")
+            st.subheader("🛠️ الصياغات المفتوحة على خيارات متعددة:")
             col_a, col_b, col_c = st.columns(3)
             with col_a:
-                st.markdown("### 💬 صياغة عامة")
-                st.warning(f_general)
-            with col_b:
-                st.markdown("### 👷 صياغة هندسية موقعية")
-                st.info(f_engineering)
-            with col_c:
-                st.markdown("### 📜 صياغة تعاقدية قانونية")
-                st.success(f_legal)
-                
-            st.write("---")
-            
-            # عرض الصياغات التخصصية (تظهر فقط إذا كان لها أساس في النص الأصلي)
-            st.subheader("🎯 الصياغات التخصصية المستهدفة (إن وجدت):")
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.markdown("### 🧬 الصياغة العلمية")
-                if f_scientific: st.info(f_scientific)
-                else: st.caption("_لا توجد أبعاد علمية أو أكاديمية لهذا النص_")
-                    
-                st.markdown("### 📊 الصياغة الاقتصادية")
-                if f_economic: st.warning(f_economic)
-                else: st.caption("_لا توجد أبعاد مالية أو تجارية لهذا النص_")
-
-            with col2:
-                st.markdown("### 🏛️ الصياغة السياسية")
-                if f_political: st.code(f_political, language="")
-                else: st.caption("_لا توجد أبعاد سياسية أو دبلوماسية لهذا النص_")
-                    
-                st.markdown("### 🌙 الصياغة الدينية")
-                if f_religious: st.markdown(f"> **{f_religious}**")
-                else: st.caption("_لا توجد أبعاد دينية أو روحية لهذا النص_")
-
-        except Exception as e:
-            st.error(f"❌ عذراً، حدث خطأ أثناء المعالجة: {e}")
-
-elif btn_process:
-    st.warning("⚠️ من فضلك اكتب أو ألصق نصاً أولاً ليتمكن النظام من معالجته.")
+                st.markdown("### 💬 صياغة عامة مب
