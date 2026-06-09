@@ -4,8 +4,6 @@ import requests
 
 import re
 
-
-
 # 1. Page Configuration
 
 st.set_page_config(page_title="HASSAN NASSER", page_icon="🏗️", layout="wide")
