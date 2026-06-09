@@ -3,355 +3,209 @@ import requests
 
 st.set_page_config(page_title="HASSAN NASSER", page_icon="🏗️", layout="wide")
 
-# ========== CSS مخصص للتصميم الجديد ==========
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-
-html, body, [class*="css"] {
-    font-family: 'Inter', sans-serif;
-}
-
-/* إخفاء عناصر Streamlit الافتراضية */
+html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 #MainMenu, footer, header { visibility: hidden; }
-.block-container { padding-top: 2rem; padding-bottom: 2rem; max-width: 1000px; }
+.block-container { padding-top: 1.5rem; padding-bottom: 2rem; max-width: 1000px; }
 
-/* الهيدر */
-.hn-header {
-    border-bottom: 0.5px solid #e5e7eb;
-    padding-bottom: 1.2rem;
+.hero {
+    background: #1a1a2e;
+    border-radius: 14px;
+    padding: 2rem 2rem 1.5rem;
     margin-bottom: 1.5rem;
 }
-.hn-badge {
-    display: inline-block;
-    background: #E1F5EE;
-    color: #0F6E56;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 3px 12px;
-    border-radius: 20px;
-    letter-spacing: 0.06em;
-    margin-bottom: 0.5rem;
-}
-.hn-title {
-    font-size: 26px;
-    font-weight: 600;
-    color: #111827;
-    margin: 0;
-}
-.hn-sub {
-    font-size: 14px;
-    color: #6b7280;
-    margin-top: 4px;
-}
+.hero-name { font-size: 30px; font-weight: 600; color: #ffffff; letter-spacing: -0.5px; }
+.hero-name span { color: #5DCAA5; }
+.hero-sub { font-size: 13px; color: rgba(255,255,255,0.45); margin-top: 6px; letter-spacing: 0.04em; }
+.hero-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.pill { display: inline-block; border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 500; letter-spacing: 0.04em; }
+.pill-active { background: #5DCAA5; color: #04342C; }
+.pill-muted { background: rgba(255,255,255,0.07); border: 0.5px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.5); }
+.lang-bar { display: flex; gap: 6px; margin-top: 14px; align-items: center; }
+.ldot { width: 8px; height: 8px; border-radius: 50%; background: #5DCAA5; display: inline-block; }
+.ldot-off { background: rgba(255,255,255,0.18); }
+.lang-bar-txt { font-size: 11px; color: rgba(255,255,255,0.35); margin-left: 4px; }
 
-/* بطاقات النتائج */
-.result-card {
-    background: #ffffff;
-    border: 0.5px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 1.1rem 1.3rem;
-    height: 100%;
-}
-.result-card.eng  { border-top: 3px solid #1D9E75; }
-.result-card.legal { border-top: 3px solid #534AB7; }
-.result-card.direct { border-top: 3px solid #BA7517; }
+.rcard { border-radius: 12px; padding: 1.1rem 1.3rem; border: 0.5px solid #e5e7eb; background: #fff; }
+.rcard-eng { border-top: 3px solid #1D9E75; }
+.rcard-leg { border-top: 3px solid #534AB7; }
+.rcard-dir { border-top: 3px solid #D85A30; }
+.rlabel { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 8px; }
+.rlabel-e { color: #085041; }
+.rlabel-l { color: #3C3489; }
+.rlabel-g { color: #712B13; }
+.rtext { font-size: 14px; line-height: 1.75; color: #1f2937; direction: auto; }
 
-.result-label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    margin-bottom: 0.6rem;
-}
-.result-label.e { color: #0F6E56; }
-.result-label.l { color: #534AB7; }
-.result-label.g { color: #BA7517; }
+.slang-wrap { border-radius: 12px; overflow: hidden; border: 0.5px solid #9FE1CB; margin-top: 1rem; }
+.slang-head { background: #085041; padding: 12px 16px; }
+.slang-head-txt { font-size: 11px; font-weight: 600; color: #9FE1CB; letter-spacing: 0.06em; }
+.slang-table { width: 100%; border-collapse: collapse; background: #fff; }
+.slang-table th { font-size: 10px; font-weight: 600; color: #6b7280; letter-spacing: 0.06em; padding: 8px 14px; border-bottom: 0.5px solid #e5e7eb; text-align: left; }
+.slang-table td { font-size: 13px; padding: 10px 14px; border-bottom: 0.5px solid #f3f4f6; vertical-align: top; }
+.slang-table tr:last-child td { border-bottom: none; }
+.term-cell { font-weight: 600; color: #085041; }
+.site-cell { font-weight: 500; color: #3C3489; }
 
-.result-text {
-    font-size: 14px;
-    line-height: 1.75;
-    color: #1f2937;
-    direction: auto;
-}
+.dym-box { background: #FAEEDA; border-left: 3px solid #BA7517; border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 13px; color: #412402; margin-bottom: 1rem; }
 
-/* بطاقة Site Slang */
-.slang-wrap {
-    background: #E1F5EE;
-    border: 0.5px solid #9FE1CB;
-    border-radius: 12px;
-    padding: 1rem 1.25rem;
-    margin-top: 1rem;
-}
-.slang-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: #0F6E56;
-    margin-bottom: 0.75rem;
-}
-.slang-item {
-    background: #fff;
-    border: 0.5px solid #9FE1CB;
-    border-radius: 8px;
-    padding: 10px 14px;
-    margin-bottom: 8px;
-}
-.slang-term { font-size: 13px; font-weight: 600; color: #111827; }
-.slang-grid { display: flex; gap: 20px; margin-top: 6px; flex-wrap: wrap; }
-.slang-col span { font-size: 11px; color: #6b7280; display: block; }
-.slang-val { font-size: 12px; color: #111827; font-weight: 500; }
-.slang-desc { font-size: 12px; color: #6b7280; margin-top: 6px; line-height: 1.5; }
-
-/* تنبيه هل تقصد */
-.dym-box {
-    background: #FAEEDA;
-    border: 0.5px solid #FAC775;
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 13px;
-    color: #633806;
-    margin-bottom: 1rem;
-}
-
-/* زر الترجمة */
 div.stButton > button {
-    background: #0F6E56 !important;
-    color: white !important;
-    border: none !important;
-    border-radius: 8px !important;
-    font-weight: 500 !important;
-    font-size: 15px !important;
-    padding: 0.6rem 2rem !important;
-    width: 100% !important;
-    transition: background 0.15s !important;
+    background: #1a1a2e !important; color: white !important; border: none !important;
+    border-radius: 8px !important; font-weight: 500 !important;
+    font-size: 15px !important; padding: 0.65rem 2rem !important; width: 100% !important;
 }
-div.stButton > button:hover {
-    background: #085041 !important;
-}
-
-/* حقل النص */
-textarea {
-    border-radius: 8px !important;
-    border: 0.5px solid #d1d5db !important;
-    font-size: 14px !important;
-}
+div.stButton > button:hover { background: #0f0f1e !important; }
+textarea { border-radius: 8px !important; border: 0.5px solid #d1d5db !important; font-size: 14px !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# ========== الهيدر ==========
 st.markdown("""
-<div class="hn-header">
-    <div class="hn-badge">SMART TRANSLATOR</div>
-    <h1 class="hn-title">HASSAN NASSER</h1>
-    <p class="hn-sub">Engineering · Legal · Contractual Translations — 8 Languages</p>
+<div class="hero">
+    <div class="hero-name">HASSAN <span>NASSER</span></div>
+    <div class="hero-sub">ENGINEERING · LEGAL · CONTRACTUAL TRANSLATIONS</div>
+    <div class="hero-pills">
+        <span class="pill pill-active">Smart Translator</span>
+        <span class="pill pill-muted">Site Slang Detector</span>
+        <span class="pill pill-muted">3 Formulations</span>
+    </div>
+    <div class="lang-bar">
+        <span class="ldot"></span><span class="ldot"></span><span class="ldot"></span>
+        <span class="ldot"></span><span class="ldot"></span><span class="ldot"></span>
+        <span class="ldot"></span><span class="ldot"></span>
+        <span class="lang-bar-txt">8 languages</span>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
-# ========== البيانات ==========
 languages_dict = {
-    "العربية": "ar",
-    "English": "en",
-    "Русский": "ru",
-    "中文": "zh",
-    "Deutsch": "de",
-    "Español": "es",
-    "Português": "pt",
-    "한국어": "ko"
+    "العربية": "ar", "English": "en", "Русский": "ru", "中文": "zh",
+    "Deutsch": "de", "Español": "es", "Português": "pt", "한국어": "ko"
 }
 
 site_slang_db = {
-    "slab": {"academic": "بلاطة", "slang": "سقف / فرش خرساني", "desc": "تُطلق في المواقع على الأسقف والمسطحات الخرسانية المسلحة."},
-    "lean concrete": {"academic": "خرسانة عجيفة / ضعيفة", "slang": "خرسانة عادية / خرسانة نظافة", "desc": "الطبقة الخرسانية غير المسلحة التي تُصب أسفل القواعد."},
-    "shop drawings": {"academic": "رسومات المتجر", "slang": "الرسومات التنفيذية للموقع", "desc": "المخططات التفصيلية المعتمدة للبدء في التنفيذ الفعلي."},
-    "as-built drawings": {"academic": "رسومات كما بنيت", "slang": "مخططات الواقع الفعلي للمشروع", "desc": "الرسومات النهائية التي تعكس ما تم تنفيذه على أرض الواقع."},
-    "bill of quantities": {"academic": "فاتورة الكميات", "slang": "جدول الكميات والمواصفات (BOQ)", "desc": "الوثيقة التعاقدية الأساسية لتسعير وحساب كميات خامات المشروع."},
-    "shuttering": {"academic": "إغلاق", "slang": "الشدّة الخشبية / الطوبار", "desc": "الهيكل المؤقت الذي يُصب بداخله الخرسانة لحين تماسكها."},
-    "scaffolding": {"academic": "أشغال السقالة", "slang": "السقالات الإنشائية", "desc": "الهياكل المعدنية الخارجية التي يقف عليها العمال."},
-    "curing": {"academic": "شفاء / علاج", "slang": "رش / معالجة الخرسانة بالمياه", "desc": "عملية رش الخرسانة بالماء بعد الصب للحفاظ على رطوبتها."},
-    "honeycombing": {"academic": "تعتشيق النحل", "slang": "تعشيش الخرسانة", "desc": "الفراغات الحصوية التي تظهر في الخرسانة بعد فك الخشب."},
-    "kick-off meeting": {"academic": "اجتماع ركلة البداية", "slang": "الاجتماع التحضيري التأسيسي للمشروع", "desc": "أول اجتماع رسمي يجمع المالك والاستشاري والمقاول."},
-    "variation order": {"academic": "ترتيب الاختلاف", "slang": "أمر تغيير / ملحق تعاقدي (VO)", "desc": "الأمر الرسمي الصادر لتعديل أو إضافة بند خارج نطاق التعاقد."}
+    "slab": {"academic": "بلاطة", "slang": "سقف / فرش خرساني", "desc": "الأسقف والمسطحات الخرسانية المسلحة في الموقع."},
+    "lean concrete": {"academic": "خرسانة عجيفة / ضعيفة", "slang": "خرسانة نظافة", "desc": "طبقة خرسانية غير مسلحة أسفل القواعد."},
+    "shop drawings": {"academic": "رسومات المتجر", "slang": "الرسومات التنفيذية للموقع", "desc": "المخططات التفصيلية للتنفيذ الفعلي."},
+    "as-built drawings": {"academic": "رسومات كما بنيت", "slang": "مخططات الواقع الفعلي", "desc": "الرسومات النهائية التي تعكس ما نُفِّذ على أرض الواقع."},
+    "bill of quantities": {"academic": "فاتورة الكميات", "slang": "جدول الكميات BOQ", "desc": "الوثيقة التعاقدية الأساسية لتسعير خامات المشروع."},
+    "shuttering": {"academic": "إغلاق", "slang": "الشدّة الخشبية / الطوبار", "desc": "الهيكل المؤقت لصب الخرسانة."},
+    "scaffolding": {"academic": "أشغال السقالة", "slang": "السقالات الإنشائية", "desc": "الهياكل المعدنية للعمل على الارتفاعات."},
+    "curing": {"academic": "شفاء / علاج", "slang": "معالجة الخرسانة بالمياه", "desc": "رش الخرسانة بعد الصب لاكتساب المقاومة."},
+    "honeycombing": {"academic": "تعتشيق النحل", "slang": "تعشيش الخرسانة", "desc": "فراغات حصوية تظهر بعد فك الخشب."},
+    "kick-off meeting": {"academic": "اجتماع ركلة البداية", "slang": "الاجتماع التحضيري للمشروع", "desc": "أول اجتماع رسمي للمالك والاستشاري والمقاول."},
+    "variation order": {"academic": "ترتيب الاختلاف", "slang": "أمر تغيير / ملحق تعاقدي (VO)", "desc": "أمر رسمي لتعديل بند خارج نطاق التعاقد."}
 }
 
-# ========== الدوال ==========
 def fetch_ai_translation(text, from_lang, to_lang):
     try:
         url = "https://translate.googleapis.com/translate_a/single"
         params = {"client": "gtx", "sl": from_lang, "tl": to_lang, "dt": "t", "q": text.strip()}
-        response = requests.get(url, params=params).json()
-        return "".join([part[0] for part in response[0] if part[0]])
+        r = requests.get(url, params=params).json()
+        return "".join([p[0] for p in r[0] if p[0]])
     except:
         return text
 
 def calculate_distance(s1, s2):
-    if len(s1) < len(s2):
-        return calculate_distance(s2, s1)
-    if len(s2) == 0:
-        return len(s1)
-    previous_row = range(len(s2) + 1)
+    if len(s1) < len(s2): return calculate_distance(s2, s1)
+    if len(s2) == 0: return len(s1)
+    prev = range(len(s2) + 1)
     for i, c1 in enumerate(s1):
-        current_row = [i + 1]
+        cur = [i + 1]
         for j, c2 in enumerate(s2):
-            insertions = previous_row[j + 1] + 1
-            deletions = current_row[j] + 1
-            substitutions = previous_row[j] + (c1 != c2)
-            current_row.append(min(insertions, deletions, substitutions))
-        previous_row = current_row
-    return previous_row[-1]
+            cur.append(min(prev[j+1]+1, cur[j]+1, prev[j]+(c1!=c2)))
+        prev = cur
+    return prev[-1]
 
 def check_do_you_mean(text):
-    words = text.lower().replace(",", " ").replace(".", " ").replace(";", " ").split()
-    suggestions = []
-    for word in words:
-        if len(word) < 3 or word in site_slang_db:
-            continue
-        for correct_term in site_slang_db.keys():
-            dist = calculate_distance(word, correct_term)
-            if dist == 1 or (len(correct_term) > 6 and dist == 2):
-                if correct_term not in suggestions:
-                    suggestions.append(correct_term)
-    return suggestions
+    words = text.lower().replace(",", " ").replace(".", " ").split()
+    sug = []
+    for w in words:
+        if len(w) < 3 or w in site_slang_db: continue
+        for k in site_slang_db:
+            d = calculate_distance(w, k)
+            if d == 1 or (len(k) > 6 and d == 2):
+                if k not in sug: sug.append(k)
+    return sug
 
 def detect_site_slang(text):
-    detected = []
-    text_lower = text.lower()
-    for key, data in site_slang_db.items():
-        if key in text_lower:
-            detected.append({
-                "term": key.title(),
-                "academic": data["academic"],
-                "slang": data["slang"],
-                "desc": data["desc"]
-            })
-    return detected
+    tl = text.lower()
+    return [{"term": k.title(), "academic": v["academic"], "slang": v["slang"], "desc": v["desc"]}
+            for k, v in site_slang_db.items() if k in tl]
 
-def build_contextual_formulas(base_text, target_lang):
-    if target_lang != "ar":
-        f1 = "[Engineering]: " + base_text
-        f2 = "[Legal/Contractual]: It is strictly stipulated that " + base_text[0].lower() + base_text[1:]
-        f3 = base_text
-        return f1, f2, f3
+def build_formulas(base, to_lang):
+    if to_lang != "ar":
+        return "[Engineering] " + base, "[Legal] It is strictly stipulated that " + base[0].lower() + base[1:], base
+    e = {"من أجل ضمان": "لضمان الموثوقية الفنية في", "رب العمل": "المالك (Employer)", "المهندس": "استشاري المشروع"}
+    l = {"يجب": "يلتزم الطرف الثاني بـ", "المقاول": "يتعين على المقاول", "رب العمل": "صاحب العمل تعاقدياً"}
+    f1, f2 = base, base
+    for k, v in e.items(): f1 = f1.replace(k, v)
+    for k, v in l.items(): f2 = f2.replace(k, v)
+    return f1, f2, base
 
-    eng_replacements = {
-        "من أجل ضمان": "لضمان تحقيق الموثوقية الفنية في",
-        "يجب أن يدفع الانتباه": "يتعين الالتزام الصارم بـ",
-        "رب العمل": "المالك (Employer)",
-        "المهندس": "استشاري المشروع (The Engineer)",
-    }
-    legal_replacements = {
-        "من أجل ضمان": "بغرض تأكيد الامتثال والوفاء بـ",
-        "يجب": "يلتزم الطرف الثاني بـ",
-        "المقاول": "يتعين على المقاول",
-        "رب العمل": "صاحب العمل / المالك تعاقدياً",
-    }
+col1, col2 = st.columns(2)
+with col1:
+    src = st.selectbox("FROM", list(languages_dict.keys()), index=1)
+with col2:
+    tgt = st.selectbox("INTO", list(languages_dict.keys()), index=0)
 
-    f1 = base_text
-    for k, v in eng_replacements.items():
-        f1 = f1.replace(k, v)
-
-    f2 = base_text
-    for k, v in legal_replacements.items():
-        f2 = f2.replace(k, v)
-
-    f3 = base_text
-    return f1, f2, f3
-
-# ========== الواجهة ==========
-col_l1, col_l2 = st.columns(2)
-with col_l1:
-    source_lang = st.selectbox("من لغة:", list(languages_dict.keys()), index=1)
-with col_l2:
-    target_lang = st.selectbox("إلى لغة:", list(languages_dict.keys()), index=0)
-
-text_to_translate = st.text_area(
-    "النص المراد ترجمته:",
-    placeholder="اكتب أو الصق نصك هنا — تقارير هندسية، بنود تعاقدية، مراسلات...",
-    height=150
-)
-
-btn_process = st.button("🌐 ترجم الآن", use_container_width=True)
+text_input = st.text_area("", placeholder="اكتب أو الصق النص هنا — تقارير هندسية، بنود تعاقدية، مراسلات رسمية...", height=140)
+btn = st.button("🌐  Translate", use_container_width=True)
 
 st.divider()
 
-# ========== المعالجة ==========
-if btn_process and text_to_translate.strip():
-    cleaned_text = text_to_translate.strip()
-    lang_from = languages_dict[source_lang]
-    lang_to = languages_dict[target_lang]
+if btn and text_input.strip():
+    text = text_input.strip()
+    fl = languages_dict[src]
+    tl = languages_dict[tgt]
 
-    # هل تقصد؟
-    suggestions = check_do_you_mean(cleaned_text)
-    if suggestions:
-        formatted = ", ".join([f"<strong>{s.title()}</strong>" for s in suggestions])
-        st.markdown(f'<div class="dym-box">💡 <b>هل تقصد (Did you mean):</b> {formatted} ؟</div>', unsafe_allow_html=True)
+    sug = check_do_you_mean(text)
+    if sug:
+        fmt = ", ".join([f"<strong>{s.title()}</strong>" for s in sug])
+        st.markdown(f'<div class="dym-box">💡 <b>Did you mean:</b> {fmt}?</div>', unsafe_allow_html=True)
 
-    with st.spinner("جارٍ الترجمة..."):
-        is_single = len(cleaned_text.split()) == 1
+    with st.spinner("Translating..."):
+        is_single = len(text.split()) == 1
 
         if is_single:
-            base = fetch_ai_translation(cleaned_text, lang_from, lang_to)
-            st.markdown(f"### 🗄️ المعجم السياقي للكلمة: `{cleaned_text}`")
-            if lang_to == "ar":
-                st.markdown(f"""
-| السياق | المعنى المعتمد | مثال |
-|:---|:---|:---|
-| 👷 هندسي وإنشائي | {base} | مواصفات فنية في الموقع |
-| ⚖️ قانوني وتعاقدي | بند ملزم / شرط تعاقدي (Clause) | الشروط الجزائية في العقد |
-| 💼 تجاري ومالي | قيمة أصلية / استقطاع مالي | التسوية المالية النهائية |
-| 🌍 عام ودارج | {base} | الحديث اليومي والمراسلات |
-""")
-            else:
-                st.markdown(f"""
-| Context | Meaning | Example |
-|:---|:---|:---|
-| Engineering | Technical/structural term | On-site specifications |
-| Legal | Contractual/FIDIC clause | Penalty conditions |
-| General | {base} | Daily correspondence |
+            base = fetch_ai_translation(text, fl, tl)
+            st.markdown(f"### 🗄️ Contextual Lexicon: `{text}`")
+            st.markdown(f"""
+| Context | Meaning |
+|:---|:---|
+| 👷 Engineering | {base} |
+| ⚖️ Legal / FIDIC | Binding contractual clause |
+| 💬 General | {base} |
 """)
         else:
-            base = fetch_ai_translation(cleaned_text, lang_from, lang_to)
-            f1, f2, f3 = build_contextual_formulas(base, lang_to)
+            base = fetch_ai_translation(text, fl, tl)
+            f1, f2, f3 = build_formulas(base, tl)
 
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.markdown(f"""
-<div class="result-card eng">
-    <div class="result-label e">🏗️ الصياغة الهندسية</div>
-    <div class="result-text">{f1}</div>
-</div>""", unsafe_allow_html=True)
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                st.markdown(f'<div class="rcard rcard-eng"><div class="rlabel rlabel-e">🏗 ENGINEERING</div><div class="rtext">{f1}</div></div>', unsafe_allow_html=True)
+            with c2:
+                st.markdown(f'<div class="rcard rcard-leg"><div class="rlabel rlabel-l">⚖ LEGAL</div><div class="rtext">{f2}</div></div>', unsafe_allow_html=True)
+            with c3:
+                st.markdown(f'<div class="rcard rcard-dir"><div class="rlabel rlabel-g">💬 DIRECT</div><div class="rtext">{f3}</div></div>', unsafe_allow_html=True)
 
-            with col2:
-                st.markdown(f"""
-<div class="result-card legal">
-    <div class="result-label l">⚖️ الصياغة القانونية</div>
-    <div class="result-text">{f2}</div>
-</div>""", unsafe_allow_html=True)
-
-            with col3:
-                st.markdown(f"""
-<div class="result-card direct">
-    <div class="result-label g">💬 الصيغة المباشرة</div>
-    <div class="result-text">{f3}</div>
-</div>""", unsafe_allow_html=True)
-
-            # Site Slang
-            detected = detect_site_slang(cleaned_text)
+            detected = detect_site_slang(text)
             if detected:
-                items_html = ""
-                for item in detected:
-                    items_html += f"""
-<div class="slang-item">
-    <div class="slang-term">{item['term']}</div>
-    <div class="slang-grid">
-        <div class="slang-col"><span>الترجمة الأكاديمية</span><span class="slang-val">{item['academic']}</span></div>
-        <div class="slang-col"><span>المصطلح الموقعي</span><span class="slang-val">{item['slang']}</span></div>
-    </div>
-    <div class="slang-desc">{item['desc']}</div>
-</div>"""
+                rows = "".join([f"""
+                <tr>
+                  <td class="term-cell">{d['term']}</td>
+                  <td>{d['academic']}</td>
+                  <td class="site-cell">{d['slang']}</td>
+                  <td style="font-size:12px;color:#6b7280">{d['desc']}</td>
+                </tr>""" for d in detected])
                 st.markdown(f"""
 <div class="slang-wrap">
-    <div class="slang-title">🔍 Site Slang Detector — تم رصد {len(detected)} مصطلح</div>
-    {items_html}
+  <div class="slang-head"><span class="slang-head-txt">🔍 SITE SLANG DETECTOR — {len(detected)} TERM(S) FOUND</span></div>
+  <table class="slang-table">
+    <thead><tr><th>TERM</th><th>STANDARD</th><th>ON-SITE</th><th>NOTE</th></tr></thead>
+    <tbody>{rows}</tbody>
+  </table>
 </div>""", unsafe_allow_html=True)
 
-elif btn_process:
-    st.warning("⚠️ من فضلك اكتب نصاً أولاً.")
+elif btn:
+    st.warning("⚠️ Please enter some text first.")
