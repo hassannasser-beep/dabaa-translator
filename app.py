@@ -1,4 +1,4 @@
-import HASSAN as st
+import Streamlit as st
 import requests
 import re
 
