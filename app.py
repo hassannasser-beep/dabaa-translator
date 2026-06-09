@@ -99,7 +99,14 @@ def build_contextual_formulas(base_text, target_lang):
         f3 = "💬 [Direct Version]: " + base_text
         return f1, f2, f3
         
-    
+    eng_replacements = {
+        "من أجل ضمان": "لضمان تحقيق الموثوقية الفنية في", "يجب أن يدفع الانتباه": "يتعين الالتزام الصارم بـ", 
+        "الخرسانة الذاتي": "الخرسانة ذاتية الدمك (SCC)", "أشغال خفية": "الأعمال المخفية والمستترة", 
+        "قوة التصميم": "المقاومة التصميمية للخرسانة", "إلى آلات المعاينة": "في محاضر المعاينة المعتمدة موقعياً", 
+        "رصد مستمر": "إجراء المراقبة والمتابعة المستمرة لـ", "تصل الخرسانة": "تأكيد وصول الخرسانة إلى", 
+        "رب العمل": "المالك (Employer)", "فسخ": "إنهاء سحب الأعمال", "طرد": "سحب الأعمال وطرد المقاول تدابيرياً",
+        "المهندس": "استشاري المشروع (The Engineer)", "برنامج مراقبة الجودة": "خطة ضبط الجودة المعتمدة"
+    }
     
     legal_replacements = {
         "من أجل ضمان": "بغرض تأكيد الامتثال والوفاء بـ", "يجب أن يدفع الانتباه": "يتعين قانوناً التركيز والإيعاز بـ", 
@@ -193,15 +200,16 @@ if btn_process and text_to_translate.strip():
                 st.markdown(f"""
                 | Context / Field | Technical Meaning & Definition | Contextual Example |
                 | :--- | :--- | :--- |
-                | **Engineering & Site** | Technical structural/construction term | The element complies with project specifications |
-                | **Legal & Contract** | Binding contractual/FIDIC term | Subject to the terms of the contract agreement |
-                | **General Use** | {base_meaning} | Standard definition used in daily conversations |
+                | **Engineering & Site** | Technical structural/construction term |  |
+                | **Legal & Contract** | Binding contractual/FIDIC term |  |
+                | **General Use** | {base_meaning} |  |
                 """)
 
         # 🔵 الحالة الثانية: جملة أو تقرير كامل (تعدد الصيغ الثلاثية + تشغيل معجم الـ Site Slang)
         else:
             base_translation = fetch_ai_translation(cleaned_text, lang_from, lang_to)
-            form_1, form_2, form_3 = (base_translation, lang_to)
+            form_1, form_2, form_3 = build_contextual_formulas(base_translation, lang_to)
+
             st.subheader("")
             box_eng, box_legal, box_general = st.columns(3)
             
