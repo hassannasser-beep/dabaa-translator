@@ -2,4 +2,3 @@ streamlit
 anthropic
 python-dotenv
 requests
-ANTHROPIC_API_KEY=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
