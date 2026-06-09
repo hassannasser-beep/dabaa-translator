@@ -1,4 +1,2 @@
 streamlit
-anthropic
-python-dotenv
-requests
+request
