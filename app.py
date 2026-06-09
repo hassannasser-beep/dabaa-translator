@@ -256,8 +256,6 @@ if btn and text_input.strip():
 
 elif btn:
     st.warning("⚠️ Please enter some text first.")
-
-On Tue, 9 Jun 2026, 11:08 am Hassan Nasser, <hassan.nasser@doosanenerbility.com> wrote:
 import streamlit as st
 import requests
  
