@@ -1,11 +1,8 @@
 import streamlit as st
 import requests
-import re
 
-# 1. Page Configuration
 st.set_page_config(page_title="HASSAN NASSER", page_icon="🏗️", layout="wide")
 
-# 2. Adaptive CSS (Supports Light & Dark Themes)
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
@@ -13,7 +10,6 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 #MainMenu, footer, header { visibility: hidden; }
 .block-container { padding-top: 1.5rem; padding-bottom: 2rem; max-width: 1000px; }
 
-/* Hero Banner */
 .hero {
     background: #1a1a2e;
     border-radius: 14px;
@@ -29,40 +25,31 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 .pill-muted { background: rgba(255,255,255,0.07); border: 0.5px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.5); }
 .lang-bar { display: flex; gap: 6px; margin-top: 14px; align-items: center; }
 .ldot { width: 8px; height: 8px; border-radius: 50%; background: #5DCAA5; display: inline-block; }
+.ldot-off { background: rgba(255,255,255,0.18); }
 .lang-bar-txt { font-size: 11px; color: rgba(255,255,255,0.35); margin-left: 4px; }
 
-/* Dynamic Context Card */
-.rcard { 
-    border-radius: 12px; 
-    padding: 1.5rem; 
-    border: 0.5px solid rgba(128, 128, 128, 0.2); 
-    background: var(--background-color, #fff);
-    margin-top: 1rem;
-}
-.rcard-eng { border-top: 4px solid #1D9E75; }
-.rcard-leg { border-top: 4px solid #534AB7; }
-.rcard-dir { border-top: 4px solid #D85A30; }
-.rlabel { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 10px; }
-.rlabel-e { color: #1D9E75; }
-.rlabel-l { color: #534AB7; }
-.rlabel-g { color: #D85A30; }
-.rtext { font-size: 16px; line-height: 1.8; color: var(--text-color, #1f2937); direction: auto; }
+.rcard { border-radius: 12px; padding: 1.1rem 1.3rem; border: 0.5px solid #e5e7eb; background: #fff; }
+.rcard-eng { border-top: 3px solid #1D9E75; }
+.rcard-leg { border-top: 3px solid #534AB7; }
+.rcard-dir { border-top: 3px solid #D85A30; }
+.rlabel { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 8px; }
+.rlabel-e { color: #085041; }
+.rlabel-l { color: #3C3489; }
+.rlabel-g { color: #712B13; }
+.rtext { font-size: 14px; line-height: 1.75; color: #1f2937; direction: auto; }
 
-/* Slang Detector Table */
-.slang-wrap { border-radius: 12px; overflow: hidden; border: 0.5px solid #9FE1CB; margin-top: 1.5rem; }
+.slang-wrap { border-radius: 12px; overflow: hidden; border: 0.5px solid #9FE1CB; margin-top: 1rem; }
 .slang-head { background: #085041; padding: 12px 16px; }
 .slang-head-txt { font-size: 11px; font-weight: 600; color: #9FE1CB; letter-spacing: 0.06em; }
-.slang-table { width: 100%; border-collapse: collapse; background: var(--background-color, #fff); }
-.slang-table th { font-size: 10px; font-weight: 600; color: #6b7280; letter-spacing: 0.06em; padding: 8px 14px; border-bottom: 0.5px solid rgba(128, 128, 128, 0.2); text-align: left; }
-.slang-table td { font-size: 13px; padding: 10px 14px; border-bottom: 0.5px solid rgba(128, 128, 128, 0.1); vertical-align: top; color: var(--text-color, #1f2937); }
+.slang-table { width: 100%; border-collapse: collapse; background: #fff; }
+.slang-table th { font-size: 10px; font-weight: 600; color: #6b7280; letter-spacing: 0.06em; padding: 8px 14px; border-bottom: 0.5px solid #e5e7eb; text-align: left; }
+.slang-table td { font-size: 13px; padding: 10px 14px; border-bottom: 0.5px solid #f3f4f6; vertical-align: top; }
 .slang-table tr:last-child td { border-bottom: none; }
-.term-cell { font-weight: 600; color: #1D9E75; }
-.site-cell { font-weight: 500; color: #534AB7; }
+.term-cell { font-weight: 600; color: #085041; }
+.site-cell { font-weight: 500; color: #3C3489; }
 
-/* Spellcheck Alert Box */
 .dym-box { background: #FAEEDA; border-left: 3px solid #BA7517; border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 13px; color: #412402; margin-bottom: 1rem; }
 
-/* Input Adjustments */
 div.stButton > button {
     background: #1a1a2e !important; color: white !important; border: none !important;
     border-radius: 8px !important; font-weight: 500 !important;
@@ -73,15 +60,14 @@ textarea { border-radius: 8px !important; border: 0.5px solid #d1d5db !important
 </style>
 """, unsafe_allow_html=True)
 
-# 3. Hero Layout
 st.markdown("""
 <div class="hero">
     <div class="hero-name">HASSAN <span>NASSER</span></div>
     <div class="hero-sub">ENGINEERING · LEGAL · CONTRACTUAL TRANSLATIONS</div>
     <div class="hero-pills">
-        <span class="pill pill-active">Context Classifier</span>
-        <span class="pill pill-muted">Smart Translator</span>
+        <span class="pill pill-active">Smart Translator</span>
         <span class="pill pill-muted">Site Slang Detector</span>
+        <span class="pill pill-muted">3 Formulations</span>
     </div>
     <div class="lang-bar">
         <span class="ldot"></span><span class="ldot"></span><span class="ldot"></span>
@@ -92,7 +78,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 4. Databases and Mappings
 languages_dict = {
     "العربية": "ar", "English": "en", "Русский": "ru", "中文": "zh",
     "Deutsch": "de", "Español": "es", "Português": "pt", "한국어": "ko"
@@ -112,14 +97,13 @@ site_slang_db = {
     "variation order": {"academic": "ترتيب الاختلاف", "slang": "أمر تغيير / ملحق تعاقدي (VO)", "desc": "أمر رسمي لتعديل بند خارج نطاق التعاقد."}
 }
 
-# 5. Core Utility Functions
 def fetch_ai_translation(text, from_lang, to_lang):
     try:
         url = "https://translate.googleapis.com/translate_a/single"
         params = {"client": "gtx", "sl": from_lang, "tl": to_lang, "dt": "t", "q": text.strip()}
         r = requests.get(url, params=params).json()
         return "".join([p[0] for p in r[0] if p[0]])
-    except Exception:
+    except:
         return text
 
 def calculate_distance(s1, s2):
@@ -134,11 +118,10 @@ def calculate_distance(s1, s2):
     return prev[-1]
 
 def check_do_you_mean(text):
-    clean_text = re.sub(r'[^a-zA-Z\s]', ' ', text)
-    words = clean_text.lower().split()
+    words = text.lower().replace(",", " ").replace(".", " ").split()
     sug = []
     for w in words:
-        if len(w) < 3 or w.isupper() or w in site_slang_db: continue
+        if len(w) < 3 or w in site_slang_db: continue
         for k in site_slang_db:
             d = calculate_distance(w, k)
             if d == 1 or (len(k) > 6 and d == 2):
@@ -150,35 +133,16 @@ def detect_site_slang(text):
     return [{"term": k.title(), "academic": v["academic"], "slang": v["slang"], "desc": v["desc"]}
             for k, v in site_slang_db.items() if k in tl]
 
-def classify_and_build_formula(base, text, to_lang):
-    tl_text = text.lower()
-    
-    legal_keywords = ['shall', 'contract', 'employer', 'contractor', 'agreement', 'clause', 'liability', 'المقاول', 'صاحب العمل', 'العقد', 'شروط', 'يلتزم']
-    eng_keywords = ['concrete', 'slab', 'drawing', 'beam', 'specification', 'site', 'foundation', 'خرسانة', 'الموقع', 'رسومات', 'تسليح', 'مخططات', 'بند']
-
-    is_legal = any(w in tl_text for w in legal_keywords)
-    is_eng = any(w in tl_text for w in eng_keywords)
-
+def build_formulas(base, to_lang):
     if to_lang != "ar":
-        if is_legal:
-            return "legal", "[Legal Formulation]\nIt is strictly stipulated that " + base[0].lower() + base[1:]
-        elif is_eng:
-            return "engineering", "[Technical Engineering Formulation]\n" + base
-        else:
-            return "direct", base
+        return "[Engineering] " + base, "[Legal] It is strictly stipulated that " + base[0].lower() + base[1:], base
+    e = {"من أجل ضمان": "لضمان الموثوقية الفنية في", "رب العمل": "المالك (Employer)", "المهندس": "استشاري المشروع"}
+    l = {"يجب": "يلتزم الطرف الثاني بـ", "المقاول": "يتعين على المقاول", "رب العمل": "صاحب العمل تعاقدياً"}
+    f1, f2 = base, base
+    for k, v in e.items(): f1 = f1.replace(k, v)
+    for k, v in l.items(): f2 = f2.replace(k, v)
+    return f1, f2, base
 
-    if is_legal:
-        l_replacements = {"يجب": "يلتزم الطرف الثاني بـ", "المقاول": "يتعين على المقاول", "رب العمل": "صاحب العمل تعاقدياً"}
-        for k, v in l_replacements.items(): base = base.replace(k, v)
-        return "legal", base
-    elif is_eng:
-        e_replacements = {"من أجل ضمان": "لضمان الموثوقية الفنية في", "رب العمل": "المالك (Employer)", "المهندس": "استشاري المشروع"}
-        for k, v in e_replacements.items(): base = base.replace(k, v)
-        return "engineering", base
-    else:
-        return "direct", base
-
-# 6. Interactive Interface
 col1, col2 = st.columns(2)
 with col1:
     src = st.selectbox("FROM", list(languages_dict.keys()), index=1)
@@ -190,7 +154,6 @@ btn = st.button("🌐  Translate", use_container_width=True)
 
 st.divider()
 
-# 7. Processing Engine
 if btn and text_input.strip():
     text = text_input.strip()
     fl = languages_dict[src]
@@ -201,7 +164,7 @@ if btn and text_input.strip():
         fmt = ", ".join([f"<strong>{s.title()}</strong>" for s in sug])
         st.markdown(f'<div class="dym-box">💡 <b>Did you mean:</b> {fmt}?</div>', unsafe_allow_html=True)
 
-    with st.spinner("Translating and Classifying..."):
+    with st.spinner("Translating..."):
         is_single = len(text.split()) == 1
 
         if is_single:
@@ -216,14 +179,15 @@ if btn and text_input.strip():
 """)
         else:
             base = fetch_ai_translation(text, fl, tl)
-            context_type, formulated_text = classify_and_build_formula(base, text, tl)
+            f1, f2, f3 = build_formulas(base, tl)
 
-            if context_type == "engineering":
-                st.markdown(f'<div class="rcard rcard-eng"><div class="rlabel rlabel-e">🏗️ DETECTED CONTEXT: ENGINEERING / TECHNICAL</div><div class="rtext">{formulated_text}</div></div>', unsafe_allow_html=True)
-            elif context_type == "legal":
-                st.markdown(f'<div class="rcard rcard-leg"><div class="rlabel rlabel-l">⚖️ DETECTED CONTEXT: LEGAL / CONTRACTUAL</div><div class="rtext">{formulated_text}</div></div>', unsafe_allow_html=True)
-            else:
-                st.markdown(f'<div class="rcard rcard-dir"><div class="rlabel rlabel-g">💬 DETECTED CONTEXT: DIRECT / GENERAL</div><div class="rtext">{formulated_text}</div></div>', unsafe_allow_html=True)
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                st.markdown(f'<div class="rcard rcard-eng"><div class="rlabel rlabel-e">🏗 ENGINEERING</div><div class="rtext">{f1}</div></div>', unsafe_allow_html=True)
+            with c2:
+                st.markdown(f'<div class="rcard rcard-leg"><div class="rlabel rlabel-l">⚖ LEGAL</div><div class="rtext">{f2}</div></div>', unsafe_allow_html=True)
+            with c3:
+                st.markdown(f'<div class="rcard rcard-dir"><div class="rlabel rlabel-g">💬 DIRECT</div><div class="rtext">{f3}</div></div>', unsafe_allow_html=True)
 
             detected = detect_site_slang(text)
             if detected:
