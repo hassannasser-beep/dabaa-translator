@@ -63,7 +63,7 @@ def calculate_distance(s1, s2):
     return previous_row[-1]
 
 # دالة فحص الكلمات وتوليد اقتراح "هل تقصد؟" in حال وجود خطأ إملائي 
-def check_do_you_mean(Option):
+def check_do_you_mean(text):
     words = text.lower().replace(",", " ").replace(".", " ").replace(";", " ").split()
     suggestions = []
     
@@ -132,8 +132,8 @@ def build_contextual_formulas(base_text, target_lang):
     
     if form_engineering == base_text:
         form_engineering = "✨ [صياغة هندسية ]: " + base_text
-    if form_legal == "، " + base_text:
-        form_legal = "⚖️ [صياغة تعاقدية قانونية]:  " + base_text
+    if form_legal == " " + base_text:
+        form_legal = "⚖️ [صياغة قانونية]:  " + base_text
 
     return form_engineering, form_legal, form_general
 
