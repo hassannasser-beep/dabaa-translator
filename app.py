@@ -248,7 +248,6 @@ with col_tgt:
 
 st.session_state.src_idx = LANG_NAMES.index(src_sel)
 st.session_state.tgt_idx = LANG_NAMES.index(tgt_sel)
-    )
 
 with col_swap:
     st.markdown("<br>", unsafe_allow_html=True)
