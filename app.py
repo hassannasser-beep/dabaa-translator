@@ -128,7 +128,7 @@ def build_contextual_formulas(base_text, target_lang):
     form_legal = form_legal.replace("المقاول", "يتعين على المقاول").replace("يجب", "يلتزم الطرف الثاني بـ")
 
     form_general = base_text
-    form_general = form_general.replace("الامتثال لإخطار", "تنفيذ طلبات الجواب").replace("إخفاق", "عدم قدرة")
+    form_general = form_general.replace("", "").replace("", "")
     
     if form_engineering == base_text:
         form_engineering = "✨ [صياغة هندسية ]: " + base_text
