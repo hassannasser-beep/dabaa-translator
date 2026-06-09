@@ -133,11 +133,13 @@ def calculate_distance(s1, s2):
         prev = cur
     return prev[-1]
 
+# المعدلة لتخطي الأرقام والاختصارات والانتصارات والرموز تماماً
 def check_do_you_mean(text):
     clean_text = re.sub(r'[^a-zA-Z\s]', ' ', text)
     words = clean_text.lower().split()
     sug = []
     for w in words:
+        # إذا كانت الكلمة كلها حروف كبيرة (اختصار مثل BOQ أو VO) أو قصيرة جداً يتم تجاهلها
         if len(w) < 3 or w.isupper() or w in site_slang_db: continue
         for k in site_slang_db:
             d = calculate_distance(w, k)
@@ -150,10 +152,13 @@ def detect_site_slang(text):
     return [{"term": k.title(), "academic": v["academic"], "slang": v["slang"], "desc": v["desc"]}
             for k, v in site_slang_db.items() if k in tl]
 
+# دالة ذكية لتحديد نوع النص تلقائياً وعياغته بناءً عليه
 def classify_and_build_formula(base, text, to_lang):
     tl_text = text.lower()
     
+    # الكلمات الدلالية للتعاقدات والقوانين
     legal_keywords = ['shall', 'contract', 'employer', 'contractor', 'agreement', 'clause', 'liability', 'المقاول', 'صاحب العمل', 'العقد', 'شروط', 'يلتزم']
+    # الكلمات الدلالية للهندسة والموقع
     eng_keywords = ['concrete', 'slab', 'drawing', 'beam', 'specification', 'site', 'foundation', 'خرسانة', 'الموقع', 'رسومات', 'تسليح', 'مخططات', 'بند']
 
     is_legal = any(w in tl_text for w in legal_keywords)
@@ -167,6 +172,7 @@ def classify_and_build_formula(base, text, to_lang):
         else:
             return "direct", base
 
+    # صياغات مخصصة للغة العربية
     if is_legal:
         l_replacements = {"يجب": "يلتزم الطرف الثاني بـ", "المقاول": "يتعين على المقاول", "رب العمل": "صاحب العمل تعاقدياً"}
         for k, v in l_replacements.items(): base = base.replace(k, v)
@@ -186,7 +192,7 @@ with col2:
     tgt = st.selectbox("INTO", list(languages_dict.keys()), index=0)
 
 text_input = st.text_area("", placeholder="اكتب أو الصق النص هنا — تقارير هندسية، بنود تعاقدية، مراسلات رسمية...", height=140)
-btn = st.button("🌐  Translate", use_container_width=True)
+btn = st.button("🌐 Translate", use_container_width=True)
 
 st.divider()
 
@@ -196,6 +202,7 @@ if btn and text_input.strip():
     fl = languages_dict[src]
     tl = languages_dict[tgt]
 
+    # تشغيل التدقيق الذكي بعد تصفية الأرقام والاختصارات
     sug = check_do_you_mean(text)
     if sug:
         fmt = ", ".join([f"<strong>{s.title()}</strong>" for s in sug])
@@ -216,8 +223,11 @@ if btn and text_input.strip():
 """)
         else:
             base = fetch_ai_translation(text, fl, tl)
+            
+            # تحديد نوع النص تلقائياً وجلب الصياغة الفردية
             context_type, formulated_text = classify_and_build_formula(base, text, tl)
 
+            # عرض بطاقة واحدة فقط بناءً على نوع النص المكتشف
             if context_type == "engineering":
                 st.markdown(f'<div class="rcard rcard-eng"><div class="rlabel rlabel-e">🏗️ DETECTED CONTEXT: ENGINEERING / TECHNICAL</div><div class="rtext">{formulated_text}</div></div>', unsafe_allow_html=True)
             elif context_type == "legal":
@@ -225,6 +235,7 @@ if btn and text_input.strip():
             else:
                 st.markdown(f'<div class="rcard rcard-dir"><div class="rlabel rlabel-g">💬 DETECTED CONTEXT: DIRECT / GENERAL</div><div class="rtext">{formulated_text}</div></div>', unsafe_allow_html=True)
 
+            # كاشف المصطلحات الدارجة في الموقع
             detected = detect_site_slang(text)
             if detected:
                 rows = "".join([f"""
@@ -245,3 +256,219 @@ if btn and text_input.strip():
 
 elif btn:
     st.warning("⚠️ Please enter some text first.")
+
+On Tue, 9 Jun 2026, 11:08 am Hassan Nasser, <hassan.nasser@doosanenerbility.com> wrote:
+import streamlit as st
+import requests
+ 
+st.set_page_config(page_title="HASSAN NASSER", page_icon="🏗️", layout="wide")
+ 
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
+#MainMenu, footer, header { visibility: hidden; }
+.block-container { padding-top: 1.5rem; padding-bottom: 2rem; max-width: 1000px; }
+ 
+.hero {
+    background: #1a1a2e;
+    border-radius: 14px;
+    padding: 2rem 2rem 1.5rem;
+    margin-bottom: 1.5rem;
+}
+.hero-name { font-size: 30px; font-weight: 600; color: #ffffff; letter-spacing: -0.5px; }
+.hero-name span { color: #5DCAA5; }
+.hero-sub { font-size: 13px; color: rgba(255,255,255,0.45); margin-top: 6px; letter-spacing: 0.04em; }
+.hero-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.pill { display: inline-block; border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 500; letter-spacing: 0.04em; }
+.pill-active { background: #5DCAA5; color: #04342C; }
+.pill-muted { background: rgba(255,255,255,0.07); border: 0.5px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.5); }
+.lang-bar { display: flex; gap: 6px; margin-top: 14px; align-items: center; }
+.ldot { width: 8px; height: 8px; border-radius: 50%; background: #5DCAA5; display: inline-block; }
+.ldot-off { background: rgba(255,255,255,0.18); }
+.lang-bar-txt { font-size: 11px; color: rgba(255,255,255,0.35); margin-left: 4px; }
+ 
+.rcard { border-radius: 12px; padding: 1.1rem 1.3rem; border: 0.5px solid #e5e7eb; background: #fff; }
+.rcard-eng { border-top: 3px solid #1D9E75; }
+.rcard-leg { border-top: 3px solid #534AB7; }
+.rcard-dir { border-top: 3px solid #D85A30; }
+.rlabel { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 8px; }
+.rlabel-e { color: #085041; }
+.rlabel-l { color: #3C3489; }
+.rlabel-g { color: #712B13; }
+.rtext { font-size: 14px; line-height: 1.75; color: #1f2937; direction: auto; }
+ 
+.slang-wrap { border-radius: 12px; overflow: hidden; border: 0.5px solid #9FE1CB; margin-top: 1rem; }
+.slang-head { background: #085041; padding: 12px 16px; }
+.slang-head-txt { font-size: 11px; font-weight: 600; color: #9FE1CB; letter-spacing: 0.06em; }
+.slang-table { width: 100%; border-collapse: collapse; background: #fff; }
+.slang-table th { font-size: 10px; font-weight: 600; color: #6b7280; letter-spacing: 0.06em; padding: 8px 14px; border-bottom: 0.5px solid #e5e7eb; text-align: left; }
+.slang-table td { font-size: 13px; padding: 10px 14px; border-bottom: 0.5px solid #f3f4f6; vertical-align: top; }
+.slang-table tr:last-child td { border-bottom: none; }
+.term-cell { font-weight: 600; color: #085041; }
+.site-cell { font-weight: 500; color: #3C3489; }
+ 
+.dym-box { background: #FAEEDA; border-left: 3px solid #BA7517; border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 13px; color: #412402; margin-bottom: 1rem; }
+ 
+div.stButton > button {
+    background: #1a1a2e !important; color: white !important; border: none !important;
+    border-radius: 8px !important; font-weight: 500 !important;
+    font-size: 15px !important; padding: 0.65rem 2rem !important; width: 100% !important;
+}
+div.stButton > button:hover { background: #0f0f1e !important; }
+textarea { border-radius: 8px !important; border: 0.5px solid #d1d5db !important; font-size: 14px !important; }
+</style>
+""", unsafe_allow_html=True)
+ 
+st.markdown("""
+<div class="hero">
+    <div class="hero-name">HASSAN <span>NASSER</span></div>
+    <div class="hero-sub">ENGINEERING · LEGAL · CONTRACTUAL TRANSLATIONS</div>
+    <div class="hero-pills">
+        <span class="pill pill-active">Smart Translator</span>
+        <span class="pill pill-muted">Site Slang Detector</span>
+        <span class="pill pill-muted">3 Formulations</span>
+    </div>
+    <div class="lang-bar">
+        <span class="ldot"></span><span class="ldot"></span><span class="ldot"></span>
+        <span class="ldot"></span><span class="ldot"></span><span class="ldot"></span>
+        <span class="ldot"></span><span class="ldot"></span>
+        <span class="lang-bar-txt">8 languages</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+ 
+languages_dict = {
+    "العربية": "ar", "English": "en", "Русский": "ru", "中文": "zh",
+    "Deutsch": "de", "Español": "es", "Português": "pt", "한국어": "ko"
+}
+ 
+site_slang_db = {
+    "slab": {"academic": "بلاطة", "slang": "سقف / فرش خرساني", "desc": "الأسقف والمسطحات الخرسانية المسلحة في الموقع."},
+    "lean concrete": {"academic": "خرسانة عجيفة / ضعيفة", "slang": "خرسانة نظافة", "desc": "طبقة خرسانية غير مسلحة أسفل القواعد."},
+    "shop drawings": {"academic": "رسومات المتجر", "slang": "الرسومات التنفيذية للموقع", "desc": "المخططات التفصيلية للتنفيذ الفعلي."},
+    "as-built drawings": {"academic": "رسومات كما بنيت", "slang": "مخططات الواقع الفعلي", "desc": "الرسومات النهائية التي تعكس ما نُفِّذ على أرض الواقع."},
+    "bill of quantities": {"academic": "فاتورة الكميات", "slang": "جدول الكميات BOQ", "desc": "الوثيقة التعاقدية الأساسية لتسعير خامات المشروع."},
+    "shuttering": {"academic": "إغلاق", "slang": "الشدّة الخشبية / الطوبار", "desc": "الهيكل المؤقت لصب الخرسانة."},
+    "scaffolding": {"academic": "أشغال السقالة", "slang": "السقالات الإنشائية", "desc": "الهياكل المعدنية للعمل على الارتفاعات."},
+    "curing": {"academic": "شفاء / علاج", "slang": "معالجة الخرسانة بالمياه", "desc": "رش الخرسانة بعد الصب لاكتساب المقاومة."},
+    "honeycombing": {"academic": "تعتشيق النحل", "slang": "تعشيش الخرسانة", "desc": "فراغات حصوية تظهر بعد فك الخشب."},
+    "kick-off meeting": {"academic": "اجتماع ركلة البداية", "slang": "الاجتماع التحضيري للمشروع", "desc": "أول اجتماع رسمي للمالك والاستشاري والمقاول."},
+    "variation order": {"academic": "ترتيب الاختلاف", "slang": "أمر تغيير / ملحق تعاقدي (VO)", "desc": "أمر رسمي لتعديل بند خارج نطاق التعاقد."}
+}
+ 
+def fetch_ai_translation(text, from_lang, to_lang):
+    try:
+        url = https://translate.googleapis.com/translate_a/single
+        params = {"client": "gtx", "sl": from_lang, "tl": to_lang, "dt": "t", "q": text.strip()}
+        r = requests.get(url, params=params).json()
+        return "".join([p[0] for p in r[0] if p[0]])
+    except:
+        return text
+ 
+def calculate_distance(s1, s2):
+    if len(s1) < len(s2): return calculate_distance(s2, s1)
+    if len(s2) == 0: return len(s1)
+    prev = range(len(s2) + 1)
+    for i, c1 in enumerate(s1):
+        cur = [i + 1]
+        for j, c2 in enumerate(s2):
+            cur.append(min(prev[j+1]+1, cur[j]+1, prev[j]+(c1!=c2)))
+        prev = cur
+    return prev[-1]
+ 
+def check_do_you_mean(text):
+    words = text.lower().replace(",", " ").replace(".", " ").split()
+    sug = []
+    for w in words:
+        if len(w) < 3 or w in site_slang_db: continue
+        for k in site_slang_db:
+            d = calculate_distance(w, k)
+            if d == 1 or (len(k) > 6 and d == 2):
+                if k not in sug: sug.append(k)
+    return sug
+ 
+def detect_site_slang(text):
+    tl = text.lower()
+    return [{"term": k.title(), "academic": v["academic"], "slang": v["slang"], "desc": v["desc"]}
+            for k, v in site_slang_db.items() if k in tl]
+ 
+def build_formulas(base, to_lang):
+    if to_lang != "ar":
+        return "[Engineering] " + base, "[Legal] It is strictly stipulated that " + base[0].lower() + base[1:], base
+    e = {"من أجل ضمان": "لضمان الموثوقية الفنية في", "رب العمل": "المالك (Employer)", "المهندس": "استشاري المشروع"}
+    l = {"يجب": "يلتزم الطرف الثاني بـ", "المقاول": "يتعين على المقاول", "رب العمل": "صاحب العمل تعاقدياً"}
+    f1, f2 = base, base
+    for k, v in e.items(): f1 = f1.replace(k, v)
+    for k, v in l.items(): f2 = f2.replace(k, v)
+    return f1, f2, base
+ 
+col1, col2 = st.columns(2)
+with col1:
+    src = st.selectbox("FROM", list(languages_dict.keys()), index=1)
+with col2:
+    tgt = st.selectbox("INTO", list(languages_dict.keys()), index=0)
+ 
+text_input = st.text_area("", placeholder="اكتب أو الصق النص هنا — تقارير هندسية، بنود تعاقدية، مراسلات رسمية...", height=140)
+btn = st.button("🌐  Translate", use_container_width=True)
+ 
+st.divider()
+ 
+if btn and text_input.strip():
+    text = text_input.strip()
+    fl = languages_dict[src]
+    tl = languages_dict[tgt]
+ 
+    sug = check_do_you_mean(text)
+    if sug:
+        fmt = ", ".join([f"<strong>{s.title()}</strong>" for s in sug])
+        st.markdown(f'<div class="dym-box">💡 <b>Did you mean:</b> {fmt}?</div>', unsafe_allow_html=True)
+ 
+    with st.spinner("Translating..."):
+        is_single = len(text.split()) == 1
+ 
+        if is_single:
+            base = fetch_ai_translation(text, fl, tl)
+            st.markdown(f"### 🗄️ Contextual Lexicon: `{text}`")
+            st.markdown(f"""
+| Context | Meaning |
+|:---|:---|
+| 👷 Engineering | {base} |
+| ⚖️ Legal / FIDIC | Binding contractual clause |
+| 💬 General | {base} |
+""")
+        else:
+            base = fetch_ai_translation(text, fl, tl)
+            f1, f2, f3 = build_formulas(base, tl)
+ 
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                st.markdown(f'<div class="rcard rcard-eng"><div class="rlabel rlabel-e">🏗 ENGINEERING</div><div class="rtext">{f1}</div></div>', unsafe_allow_html=True)
+            with c2:
+                st.markdown(f'<div class="rcard rcard-leg"><div class="rlabel rlabel-l">⚖ LEGAL</div><div class="rtext">{f2}</div></div>', unsafe_allow_html=True)
+            with c3:
+                st.markdown(f'<div class="rcard rcard-dir"><div class="rlabel rlabel-g">💬 DIRECT</div><div class="rtext">{f3}</div></div>', unsafe_allow_html=True)
+ 
+            detected = detect_site_slang(text)
+            if detected:
+                rows = "".join([f"""
+                <tr>
+                  <td class="term-cell">{d['term']}</td>
+                  <td>{d['academic']}</td>
+                  <td class="site-cell">{d['slang']}</td>
+                  <td style="font-size:12px;color:#6b7280">{d['desc']}</td>
+                </tr>""" for d in detected])
+                st.markdown(f"""
+<div class="slang-wrap">
+  <div class="slang-head"><span class="slang-head-txt">🔍 SITE SLANG DETECTOR — {len(detected)} TERM(S) FOUND</span></div>
+  <table class="slang-table">
+    <thead><tr><th>TERM</th><th>STANDARD</th><th>ON-SITE</th><th>NOTE</th></tr></thead>
+    <tbody>{rows}</tbody>
+  </table>
+</div>""", unsafe_allow_html=True)
+ 
+elif btn:
+    st.warning("⚠️ Please enter some text first.")
+
+
+This message and any documents herein may contain confidential or privileged information and is for the exclusive use of the intended recipient(s) named above. If you are not the intended recipient(s), you should not disseminate, distribute, retain, copy or otherwise use any information contained herein. If you have received this message in error, please notify the sender immediately by replying to this message and delete this e-mail and associated documents. Doosan Group Co., Ltd. does not guarantee this message is secure or free from viruses.
