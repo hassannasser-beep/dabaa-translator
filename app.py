@@ -201,7 +201,7 @@ if btn_process and text_to_translate.strip():
         # 🔵 الحالة الثانية: جملة أو تقرير كامل (تعدد الصيغ الثلاثية + تشغيل معجم الـ Site Slang)
         else:
             base_translation = fetch_ai_translation(cleaned_text, lang_from, lang_to)
-form_1, form_2, form_3 = (base_translation, lang_to)
+            form_1, form_2, form_3 = (base_translation, lang_to)
             st.subheader("")
             box_eng, box_legal, box_general = st.columns(3)
             
