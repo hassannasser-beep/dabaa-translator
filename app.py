@@ -222,15 +222,32 @@ Do NOT include markdown, backticks, or any text outside the JSON."""
     raw = re.sub(r'\n?```$', '', raw)
     return json.loads(raw)
 
-# ── 6. Language selector with swap ───────────────────────────────────────────
+# ── Language selector with swap ──────────────────────────────────────────────
+if "src_idx" not in st.session_state: st.session_state.src_idx = 1
+if "tgt_idx" not in st.session_state: st.session_state.tgt_idx = 0
+
+def swap_langs():
+    st.session_state.src_idx, st.session_state.tgt_idx = \
+        st.session_state.tgt_idx, st.session_state.src_idx
+
 col_src, col_swap, col_tgt = st.columns([5, 1, 5])
 
 with col_src:
-    src_sel = st.selectbox(
-        "FROM",
-        LANG_NAMES,
-        index=st.session_state.src_idx,
-        key="src_select"
+    src_sel = st.selectbox("FROM", LANG_NAMES,
+                           index=st.session_state.src_idx, key="src_select")
+
+with col_swap:
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.button("⇄", on_click=swap_langs, key="swap_btn")
+
+with col_tgt:
+    tgt_options = [l for l in LANG_NAMES if l != src_sel]
+    tgt_sel = st.selectbox("INTO", tgt_options,
+                           index=min(st.session_state.tgt_idx, len(tgt_options)-1),
+                           key="tgt_select")
+
+st.session_state.src_idx = LANG_NAMES.index(src_sel)
+st.session_state.tgt_idx = LANG_NAMES.index(tgt_sel)
     )
 
 with col_swap:
