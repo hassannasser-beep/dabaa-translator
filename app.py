@@ -2,10 +2,10 @@ import streamlit as st
 import requests
 
 # 1. إعدادات الصفحة والعنوان الرسمي باسمك الحصري
-st.set_page_config(page_title="HASSAN NASSER", page_icon="🤖", layout="wide")
+st.set_page_config(page_title="HASSAN NASSER", page_icon="", layout="wide")
 
-st.title("🤖 HASSAN NASSER")
-st.markdown("### 🧠 SMART CONTEXTUAL TRANSLATOR | المترجم الذكي")
+st.title(" HASSAN NASSER")
+st.markdown("### SMART TRANSLATOR ")
 st.write("---")
 
 # اللغات الثمانية المعتمدة بالكامل في النظام
@@ -32,15 +32,15 @@ def fetch_ai_translation(text, from_lang, to_lang):
 
 # قاعدة بيانات معجم المصطلحات الموقعية الدارجة (Site Slang) 
 site_slang_db = {
-    "slab": {"academic": "بلاطة", "slang": "سقف / فرش خرساني", "desc": "تُطلق في المواقع على الأسقف والمسطحات الخرسانية المسلحة."},
+    "slab": {"academic": "بلاطة", "slang": "سقف / فرش خرساني", "desc": "تُطلق in المواقع على الأسقف والمسطحات الخرسانية المسلحة."},
     "lean concrete": {"academic": "خرسانة عجيفة / ضعيفة", "slang": "خرسانة عادية / خرسانة نظافة", "desc": "الطبقة الخرسانية غير المسلحة التي تُصب أسفل القواعد لحماية الحديد والأساسات."},
-    "shop drawings": {"academic": "رسومات المتجر", "slang": "الرسومات التنفيذية للموقع", "desc": "المخططات التفصيلية المعتمدة للبدء في التنفيذ الفعلي بالموقع وليس الشراء."},
+    "shop drawings": {"academic": "رسومات المتجر", "slang": "الرسومات التنفيذية للموقع", "desc": "المخططات التفصيلية المعتمدة للبدء in التنفيذ الفعلي بالموقع وليس الشراء."},
     "as-built drawings": {"academic": "رسومات كما بنيت", "slang": "مخططات الواقع الفعلي للمشروع", "desc": "الرسومات النهائية التي تعكس ما تم تنفيذه على أرض الواقع بدقة بعد انتهاء الأعمال."},
     "bill of quantities": {"academic": "فاتورة الكميات", "slang": "جدول الكميات والمواصفات (BOQ)", "desc": "الوثيقة التعاقدية الأساسية وحجر الزاوية لتسعير وحساب كميات خامات المشروع."},
-    "shuttering": {"academic": "إغلاق", "slang": "الشدّة الخشبية / الطوبار", "desc": "الهيكل المؤقت (سواء خشب أو حديد) الذي يُصب بداخله الخرسانة المسلحة لحين تماسكها."},
+    "shuttering": {"academic": "إغلاق", "slang": "الشدّة الخشبية / الطوبار", "desc": "الهيكل المؤقت (سواء خشب أو حديد) الذي يُصب بداخله الخرسانة المسلحة لحين تмаسكها."},
     "scaffolding": {"academic": "أشغال السقالة", "slang": "السقالات الإنشائية", "desc": "الهياكل المعدنية الخارجية التي يقف عليها العمال لتنفيذ الواجهات والأعمال المرتفعة."},
     "curing": {"academic": "شفاء / علاج", "slang": "رش / معالجة الخرسانة بالمياه", "desc": "العملية الحاسمة لرش الخرسانة بالماء بعد الصب للحفاظ على رطوبتها واكتساب المقاومة المطلوبة."},
-    "honeycombing": {"academic": "تعتشيق النحل", "slang": "تعشيش الخرسانة", "desc": "الفراغات الحصوية التي تظهر في الخرسانة بعد فك الخشب نتيجة عدم استخدام الهزاز الميكانيكي بشكل صحيح."},
+    "honeycombing": {"academic": "تعتشيق النحل", "slang": "تعشيش الخرسانة", "desc": "الفраغات الحصوية التي تظهر in الخرسانة بعد فك الخشب نتيجة عدم استخدام الهزاز الميكانيكي بشكل صحيح."},
     "kick-off meeting": {"academic": "اجتماع ركلة البداية", "slang": "الاجتماع التحضيري التأسيسي للمشروع", "desc": "أول اجتماع رسمي يجمع المالك والاستشاري والمقاول لترتيب خطة بدء العمل مسبقاً."},
     "variation order": {"academic": "ترتيب الاختلاف", "slang": "أمر تغيير / ملحق تعاقدي (VO)", "desc": "الأمر الرسمي الصادر لتعديل أو إضافة بند خارج نطاق التعاقد الأصلي للمشروع."}
 }
@@ -62,7 +62,7 @@ def calculate_distance(s1, s2):
         previous_row = current_row
     return previous_row[-1]
 
-# دالة فحص الكلمات وتوليد اقتراح "هل تقصد؟" في حال وجود خطأ إملائي هندسي
+# دالة فحص الكلمات وتوليد اقتراح "هل تقصد؟" in حال وجود خطأ إملائي هندسي
 def check_do_you_mean(text):
     words = text.lower().replace(",", " ").replace(".", " ").replace(";", " ").split()
     suggestions = []
@@ -95,7 +95,7 @@ def detect_site_slang(text):
 def build_contextual_formulas(base_text, target_lang):
     if target_lang != "ar":
         f1 = "✨ [Technical Field Version]: " + base_text
-        f2 = "⚖️ [Legal/Contractual Version]: It is strictly stipulated that " + base_text[0].lower() + base_text[1:] if base_text else base_text
+        f2 = "⚖️ [Contractual Formal Clause]: It is strictly stipulated that " + base_text[0].lower() + base_text[1:]
         f3 = "💬 [Direct/Email Version]: " + base_text
         return f1, f2, f3
         
@@ -131,9 +131,9 @@ def build_contextual_formulas(base_text, target_lang):
     form_general = form_general.replace("الامتثال لإخطار", "تنفيذ طلبات الجواب").replace("إخفاق", "عدم قدرة")
     
     if form_engineering == base_text:
-        form_engineering = "✨ [صياغة هندسية موجهة]: " + base_text
-    if form_legal == " " + base_text or form_legal == "، " + base_text:
-        form_legal = "⚖️ [صياغة تعاقدية قانونية]: " + base_text
+        form_engineering = "✨ [صياغة هندسية ]: " + base_text
+    if form_legal == "، " + base_text:
+        form_legal = "⚖️ [صياغة تعاقدية قانونية]:  " + base_text
 
     return form_engineering, form_legal, form_general
 
@@ -151,13 +151,13 @@ with st.form(key="ultimate_ai_form", clear_on_submit=False):
     st.write("---")
     
     text_to_translate = st.text_area(
-        "أدخل النص واضغط على الزر (أو CTRL + ENTER):", 
+        "   (  CTRL + ENTER ):", 
         placeholder="Type or paste your text, contract clauses, or engineering reports here...",
         height=160,
         key="input_ultimate"
     )
     
-    btn_process = st.form_submit_button("🚀 TRANSLATE (Ctrl+Enter)", use_container_width=True)
+    btn_process = st.form_submit_button(" TRANSLATE ( Ctrl+Enter)", use_container_width=True)
 
 st.write("---")
 
@@ -214,31 +214,31 @@ if btn_process and text_to_translate.strip():
             box_eng, box_legal, box_general = st.columns(3)
             
             with box_eng:
-                st.markdown("### الصيغة 1: الصياغة الهندسية")
-                st.caption("صياغة موجهة لموقع العمل")
+                st.markdown("###  الصيغة 1: الصياغة الهندسية")
+                st.caption("")
                 st.info(form_1.strip())
                 
             with box_legal:
-                st.markdown("### الصيغة 2: الصياغة القانونية")
-                st.caption("صياغة متوافقة مع شروط التعاقد")
+                st.markdown("###  الصيغة 2: الصياغة القانونية")
+                st.caption(" ")
                 st.success(form_2.strip())
                 
             with box_general:
-                st.markdown("### الصيغة 3: الصيغة المباشرة")
-                st.caption("صياغة المراسلات العامة")
+                st.markdown("### الصيغة 3: الصيغة المباشرة ")
+                st.caption("")
                 st.warning(form_3.strip())
             
             # ميزة التميز الحصرية: كرت رصد وتصحيح مصطلحات الموقع (Site Slang)
             detected_slang = detect_site_slang(cleaned_text)
             if detected_slang:
                 st.write("---")
-                st.markdown("### 🎯 (Site Slang Detector)")
+                st.markdown("###  (Site Slang Detector)")
                 st.markdown("> **💡 ميزة حصرية لمنصتك:** النظام رصد كلمات في تقريرك تترجمها المواقع العادية خطأً، وإليك معناها الهندسي الحقيقي المعتمد في ساحة العمل:")
                 
                 slang_table = """
-| المصطلح الهندسي الأصلي | الترجمة الأكاديمية (جوجل وغيره) | 👷 المصطلح الدارج والمستعمل في الموقع الحقيقي | 📘 الدليل الفني للمصطلح |
-| :--- | :--- | :--- | :--- |
-"""
+                | المصطلح الهندسي الاصلي | الترجمة الأكاديمية (جوجل وغيره) | 👷 المصطلح الدارج والمستعمل في الموقع الحقيقي | 📘 الدليل الفني للمصطلح |
+                | :--- | :--- | :--- | :--- |
+                """
                 for item in detected_slang:
                     slang_table += f"| **{item['term']}** | *{item['academic']}* | **{item['slang']}** | {item['desc']} |\n"
                 
