@@ -8,7 +8,7 @@ st.set_page_config(page_title="HASSAN NASSER", page_icon="🏗️", layout="wide
 # 2. Adaptive CSS (Supports Light & Dark Themes)
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600&display=swap');
 html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 #MainMenu, footer, header { visibility: hidden; }
 .block-container { padding-top: 1.5rem; padding-bottom: 2rem; max-width: 1000px; }
@@ -31,7 +31,7 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 .ldot { width: 8px; height: 8px; border-radius: 50%; background: #5DCAA5; display: inline-block; }
 .lang-bar-txt { font-size: 11px; color: rgba(255,255,255,0.35); margin-left: 4px; }
 
-/* Dynamic Context Card */
+/* Dynamic Context Cards */
 .rcard { 
     border-radius: 12px; 
     padding: 1.5rem; 
@@ -41,10 +41,19 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 }
 .rcard-eng { border-top: 4px solid #1D9E75; }
 .rcard-leg { border-top: 4px solid #534AB7; }
+.rcard-med { border-top: 4px solid #00B4D8; }
+.rcard-lit { border-top: 4px solid #E63946; }
+.rcard-sci { border-top: 4px solid #FFB703; }
+.rcard-pol { border-top: 4px solid #6C757D; }
 .rcard-dir { border-top: 4px solid #D85A30; }
+
 .rlabel { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 10px; }
 .rlabel-e { color: #1D9E75; }
 .rlabel-l { color: #534AB7; }
+.rlabel-m { color: #00B4D8; }
+.rlabel-lit { color: #E63946; }
+.rlabel-s { color: #FFB703; }
+.rlabel-p { color: #6C757D; }
 .rlabel-g { color: #D85A30; }
 .rtext { font-size: 16px; line-height: 1.8; color: var(--text-color, #1f2937); direction: auto; }
 
@@ -73,7 +82,7 @@ textarea { border-radius: 8px !important; border: 0.5px solid #d1d5db !important
 </style>
 """, unsafe_allow_html=True)
 
-# 3. Hero Layout
+# 3. Hero Layout (تم إرجاع العناوين الأصلية كما طلبت)
 st.markdown("""
 <div class="hero">
     <div class="hero-name">HASSAN <span>NASSER</span></div>
@@ -96,6 +105,29 @@ st.markdown("""
 languages_dict = {
     "العربية": "ar", "English": "en", "Русский": "ru", "中文": "zh",
     "Deutsch": "de", "Español": "es", "Português": "pt", "한국어": "ko"
+}
+
+# قاموس داخلي موسع للكلمات الفردية متعددة المعاني (مثل charge وغيرها) لضمان إظهار كافة المعاني الممكنة حسب السياق
+ADVANCED_LEXICON = {
+    "charge": [
+        {"context": "⚡ Electrical Engineering", "meaning": "شحنة كهربائية / يشحن بطارية"},
+        {"context": "⚖️ Legal & Contractual", "meaning": "تهمة رسمية / ادعاء جنائي / رهن تعاقدي لضمان مالي"},
+        {"context": "💰 Financial & Accounts", "meaning": "رسوم مالية / تكلفة / مصاريف إضافية"},
+        {"context": "👔 Management & Site", "meaning": "في عهدة / تحت مسؤولية وإشراف (In charge of)"},
+        {"context": "🩺 Medical & Clinical", "meaning": "جرعة علاجية مكثفة مفاجئة"},
+        {"context": "🏛️ Political & Official", "meaning": "تكليف بمهام دبلوماسية أو منصب رسمي مؤقت"}
+    ],
+    "tender": [
+        {"context": "🏗️ Engineering & Procurement", "meaning": "عطاء / مناقصة مشروع / مستندات التسعير والمزايدة"},
+        {"context": "⚖️ Legal & FIDIC", "meaning": "عرض رسمي للوفاء بالتزام تعاقدي"},
+        {"context": "💰 Financial", "meaning": "عملة قانونية سائلة للمدفوعات"},
+        {"context": "💬 General / Literary", "meaning": "رقيق / حنون / حساس"}
+    ],
+    "plant": [
+        {"context": "🏗️ Heavy Engineering", "meaning": "معدات وآليات الموقع الثقيلة (آلات الصب، الحفارات)"},
+        {"context": "🏭 Technical / Industrial", "meaning": "محطة توليد أو معالجة / مصنع إنتاجي ضخم"},
+        {"context": "🔬 Scientific / Biology", "meaning": "نبات / كائن حي نباتي"}
+    ]
 }
 
 site_slang_db = {
@@ -121,6 +153,32 @@ def fetch_ai_translation(text, from_lang, to_lang):
         return "".join([p[0] for p in r[0] if p[0]])
     except Exception:
         return text
+
+def fetch_all_dictionary_meanings(word):
+    """دالة ذكية تبحث عن كافة المعاني المحتملة للكلمة من مصادر متعددة"""
+    w_clean = word.strip().lower()
+    if w_clean in ADVANCED_LEXICON:
+        return ADVANCED_LEXICON[w_clean]
+    
+    # محاولة جلب معاني إضافية من API عام خارجي في حالة توفره للكلمات الأخرى
+    try:
+        res = requests.get(f"https://api.dictionaryapi.dev/api/v2/entries/en/{w_clean}", timeout=3)
+        if res.status_code == 200:
+            data = res.json()
+            meanings_list = []
+            for meaning in data[0].get('meanings', []):
+                part = meaning.get('partOfSpeech', 'general')
+                defs = [d.get('definition', '') for d in meaning.get('definitions', [])[:2]]
+                meanings_list.append({
+                    "context": f"💬 Context as {part.title()}",
+                    "meaning": "; ".join(defs)
+                })
+            if meanings_list:
+                return meanings_list
+    except Exception:
+        pass
+        
+    return None
 
 def calculate_distance(s1, s2):
     if len(s1) < len(s2): return calculate_distance(s2, s1)
@@ -153,30 +211,53 @@ def detect_site_slang(text):
 def classify_and_build_formula(base, text, to_lang):
     tl_text = text.lower()
     
-    legal_keywords = ['shall', 'contract', 'employer', 'contractor', 'agreement', 'clause', 'liability', 'المقاول', 'صاحب العمل', 'العقد', 'شروط', 'يلتزم']
-    eng_keywords = ['concrete', 'slab', 'drawing', 'beam', 'specification', 'site', 'foundation', 'خرسانة', 'الموقع', 'رسومات', 'تسليح', 'مخططات', 'بند']
+    keywords = {
+        "legal": ['shall', 'contract', 'employer', 'contractor', 'agreement', 'clause', 'liability', 'المقاول', 'صاحب العمل', 'العقد', 'شروط', 'يلتزم', 'المحكمة'],
+        "engineering": ['concrete', 'slab', 'drawing', 'beam', 'specification', 'site', 'foundation', 'خرسانة', 'الموقع', 'رسومات', 'تسليح', 'مخططات', 'بند', 'عمود'],
+        "medical": ['patient', 'clinical', 'diagnosis', 'treatment', 'symptoms', 'disease', 'doctor', 'hospital', 'المريض', 'تشخيص', 'أعراض', 'علاج', 'سريري', 'جرعة'],
+        "literary": ['metaphor', 'poem', 'novel', 'soul', 'heart', 'beauty', 'shadow', 'whisper', 'شعر', 'رواية', 'بلاغة', 'روح', 'قصيدة', 'نثر', 'وجدان'],
+        "scientific": ['laboratory', 'experiment', 'hypothesis', 'molecule', 'quantum', 'chemical', 'data', 'مختبر', 'جزيء', 'معادلة', 'فرضية', 'تحليل', 'فيزياء'],
+        "political": ['government', 'election', 'minister', 'diplomatic', 'treaty', 'parliament', 'policy', 'الحكومة', 'انتخابات', 'وزير', 'دبلوماسي', 'معاهدة', 'سياسة']
+    }
 
-    is_legal = any(w in tl_text for w in legal_keywords)
-    is_eng = any(w in tl_text for w in eng_keywords)
+    scores = {k: sum(1 for word in v if word in tl_text) for k, v in keywords.items()}
+    max_context = max(scores, key=scores.get)
+    
+    if scores[max_context] == 0:
+        max_context = "direct"
 
     if to_lang != "ar":
-        if is_legal:
-            return "legal", "[Legal Formulation]\nIt is strictly stipulated that " + base[0].lower() + base[1:]
-        elif is_eng:
-            return "engineering", "[Technical Engineering Formulation]\n" + base
-        else:
-            return "direct", base
+        prefix_mapping = {
+            "legal": "[Legal & Contractual Formulation]\nIt is strictly stipulated that " + base[0].lower() + base[1:],
+            "engineering": "[Technical Engineering Formulation]\n" + base,
+            "medical": "[Clinical Medical Formulation]\n" + base,
+            "literary": "[Literary & Aesthetic Formulation]\n" + base,
+            "scientific": "[Academic Scientific Formulation]\n" + base,
+            "political": "[Official Political & Diplomatic Formulation]\n" + base,
+            "direct": base
+        }
+        return max_context, prefix_mapping[max_context]
 
-    if is_legal:
-        l_replacements = {"يجب": "يلتزم الطرف الثاني بـ", "المقاول": "يتعين على المقاول", "رب العمل": "صاحب العمل تعاقدياً"}
-        for k, v in l_replacements.items(): base = base.replace(k, v)
-        return "legal", base
-    elif is_eng:
-        e_replacements = {"من أجل ضمان": "لضمان الموثوقية الفنية في", "رب العمل": "المالك (Employer)", "المهندس": "استشاري المشروع"}
-        for k, v in e_replacements.items(): base = base.replace(k, v)
-        return "engineering", base
-    else:
-        return "direct", base
+    if max_context == "legal":
+        replacements = {"يجب": "يلتزم الطرف الثاني بـ", "المقاول": "يتعين على المقاول", "رب العمل": "صاحب العمل تعاقدياً"}
+        for k, v in replacements.items(): base = base.replace(k, v)
+    elif max_context == "engineering":
+        replacements = {"من أجل ضمان": "لضمان الموثوقية الفنية في", "رب العمل": "المالك (Employer)", "المهندس": "استشاري المشروع"}
+        for k, v in replacements.items(): base = base.replace(k, v)
+    elif max_context == "medical":
+        replacements = {"مرض": "اعتلال صحي", "موت": "وفاة سريرية", "دواء": "العقار العلاجي قيد الوصف"}
+        for k, v in replacements.items(): base = base.replace(k, v)
+    elif max_context == "literary":
+        replacements = {"جميل": "آسرٌ يخلب الألباب", "حزين": "مثقلٌ بأعباء الشجن", "قال": "أردفَ قائلاً بنبرةٍ وجدانية"}
+        for k, v in replacements.items(): base = base.replace(k, v)
+    elif max_context == "scientific":
+        replacements = {"نتيجة": "المخرجات التجريبية الرصدية", "تغيير": "تحول تفاعلي ديناميكي"}
+        for k, v in replacements.items(): base = base.replace(k, v)
+    elif max_context == "political":
+        replacements = {"اتفاق": "معاهدة دبلوماسية رفيعة المستوى", "رفض": "أعربت الجهات السيادية عن تحفظها على"}
+        for k, v in replacements.items(): base = base.replace(k, v)
+
+    return max_context, base
 
 # 6. Interactive Interface
 col1, col2 = st.columns(2)
@@ -185,8 +266,8 @@ with col1:
 with col2:
     tgt = st.selectbox("INTO", list(languages_dict.keys()), index=0)
 
-text_input = st.text_area("", placeholder="اكتب أو الصق النص هنا — تقارير هندسية، بنود تعاقدية، مراسلات رسمية...", height=140)
-btn = st.button("🌐  Translate", use_container_width=True)
+text_input = st.text_area("", placeholder="اكتب أو الصق النص هنا — تقارير هندسية، بنود تعاقدية، تقارير طبية، نصوص أدبية وسياسية...", height=140)
+btn = st.button("🌐  Translate & Refine", use_container_width=True)
 
 st.divider()
 
@@ -201,30 +282,50 @@ if btn and text_input.strip():
         fmt = ", ".join([f"<strong>{s.title()}</strong>" for s in sug])
         st.markdown(f'<div class="dym-box">💡 <b>Did you mean:</b> {fmt}?</div>', unsafe_allow_html=True)
 
-    with st.spinner("Translating and Classifying..."):
+    with st.spinner("Analyzing context and translating..."):
+        # التحقق مما إذا كان المدخل كلمة واحدة فقط لإظهار القاموس الشامل لكافة المعاني الممكنة
         is_single = len(text.split()) == 1
 
         if is_single:
             base = fetch_ai_translation(text, fl, tl)
-            st.markdown(f"### 🗄️ Contextual Lexicon: `{text}`")
-            st.markdown(f"""
-| Context | Meaning |
+            all_meanings = fetch_all_dictionary_meanings(text)
+            
+            st.markdown(f"### 🗄️ Comprehensive Contextual Lexicon for: `{text}`")
+            
+            if all_meanings:
+                # إنشاء جدول ديناميكي يحتوي على كافة المعاني المتاحة دون الاقتصار على ثلاثة فقط
+                markdown_table = "| Field / Context | All Possible Meanings & Variations |\n|:---|:---|\n"
+                for m in all_meanings:
+                    markdown_table += f"| {m['context']} | {m['meaning']} |\n"
+                st.markdown(markdown_table)
+            else:
+                # في حال لم تكن الكلمة مسجلة في القاموس المتعدد، نعرض الترجمة الافتراضية المباشرة
+                st.markdown(f"""
+| Field / Context | Meaning |
 |:---|:---|
-| 👷 Engineering | {base} |
-| ⚖️ Legal / FIDIC | Binding contractual clause |
-| 💬 General | {base} |
+| 💬 General Translation | {base} |
 """)
         else:
+            # إذا كان النص جملة كاملة، يتم تفعيل كاشف السياق التلقائي وعرض بطاقة واحدة ذكية ومناسبة للمجال
             base = fetch_ai_translation(text, fl, tl)
             context_type, formulated_text = classify_and_build_formula(base, text, tl)
 
             if context_type == "engineering":
-                st.markdown(f'<div class="rcard rcard-eng"><div class="rlabel rlabel-e">🏗️ DETECTED CONTEXT: ENGINEERING / TECHNICAL</div><div class="rtext">{formulated_text}</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="rcard rcard-eng"><div class="rlabel rlabel-e">🏗️ DETECTED CONTEXT: ENGINEERING & TECHNICAL</div><div class="rtext">{formulated_text}</div></div>', unsafe_allow_html=True)
             elif context_type == "legal":
-                st.markdown(f'<div class="rcard rcard-leg"><div class="rlabel rlabel-l">⚖️ DETECTED CONTEXT: LEGAL / CONTRACTUAL</div><div class="rtext">{formulated_text}</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="rcard rcard-leg"><div class="rlabel rlabel-l">⚖️ DETECTED CONTEXT: LEGAL & CONTRACTUAL</div><div class="rtext">{formulated_text}</div></div>', unsafe_allow_html=True)
+            elif context_type == "medical":
+                st.markdown(f'<div class="rcard rcard-med"><div class="rlabel rlabel-m">🩺 DETECTED CONTEXT: MEDICAL & CLINICAL</div><div class="rtext">{formulated_text}</div></div>', unsafe_allow_html=True)
+            elif context_type == "literary":
+                st.markdown(f'<div class="rcard rcard-lit"><div class="rlabel rlabel-lit">✍️ DETECTED CONTEXT: LITERARY & AESTHETIC</div><div class="rtext">{formulated_text}</div></div>', unsafe_allow_html=True)
+            elif context_type == "scientific":
+                st.markdown(f'<div class="rcard rcard-sci"><div class="rlabel rlabel-s">🔬 DETECTED CONTEXT: SCIENTIFIC & ACADEMIC</div><div class="rtext">{formulated_text}</div></div>', unsafe_allow_html=True)
+            elif context_type == "political":
+                st.markdown(f'<div class="rcard rcard-pol"><div class="rlabel rlabel-p">🏛️ DETECTED CONTEXT: POLITICAL & DIPLOMATIC</div><div class="rtext">{formulated_text}</div></div>', unsafe_allow_html=True)
             else:
-                st.markdown(f'<div class="rcard rcard-dir"><div class="rlabel rlabel-g">💬 DETECTED CONTEXT: DIRECT / GENERAL</div><div class="rtext">{formulated_text}</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="rcard rcard-dir"><div class="rlabel rlabel-g">💬 DETECTED CONTEXT: DIRECT & GENERAL</div><div class="rtext">{formulated_text}</div></div>', unsafe_allow_html=True)
 
+            # كاشف المصطلحات الدارجة في الموقع
             detected = detect_site_slang(text)
             if detected:
                 rows = "".join([f"""
