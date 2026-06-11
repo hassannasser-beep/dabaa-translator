@@ -1,3 +1,4 @@
-streamlit>=1.30.0
-requests>=2.31.0
+git add .
+git commit -m "Updated to v2 with 6 formulations and DeepL"
+git push origin main
 
