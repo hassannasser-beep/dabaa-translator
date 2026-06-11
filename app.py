@@ -764,21 +764,49 @@ def detect_site_slang(text):
 
 
 def detect_abbreviations(text):
-    """Detect abbreviations in text and return their full meanings."""
+    """Detect abbreviations in text and return their full meanings.
+    Also detects acronyms formed by first letters of words."""
     found = []
     text_upper = text.upper()
     text_words = text.split()
 
+    # Direct abbreviation match
     for abbr, data in abbreviations_db.items():
-        # Check if abbreviation appears as whole word or in text
         if abbr.upper() in text_upper or abbr in text_words:
             found.append({
                 "abbr": abbr,
                 "full_en": data["full_en"],
                 "full_ru": data["full_ru"],
                 "ar": data["ar"],
-                "desc": data["desc"]
+                "desc": data["desc"],
+                "match_type": "direct"
             })
+
+    # Reverse acronym detection: check if words form acronym
+    words_clean = [w.strip(".,;:!?()[]{}"'").upper() for w in text_words if len(w.strip(".,;:!?()[]{}"'")) > 1]
+    for abbr, data in abbreviations_db.items():
+        if len(abbr) >= 2:
+            abbr_chars = list(abbr.upper())
+            # Look for sequence of words starting with these letters
+            for i in range(len(words_clean) - len(abbr) + 1):
+                match = True
+                for j, char in enumerate(abbr_chars):
+                    if not words_clean[i + j].startswith(char):
+                        match = False
+                        break
+                if match:
+                    # Check if not already found
+                    if not any(f["abbr"] == abbr for f in found):
+                        found.append({
+                            "abbr": abbr,
+                            "full_en": data["full_en"],
+                            "full_ru": data["full_ru"],
+                            "ar": data["ar"],
+                            "desc": data["desc"],
+                            "match_type": "acronym"
+                        })
+                    break
+
     return found
 
 
@@ -954,24 +982,21 @@ if should_translate:
     # Detect abbreviations
     detected_abbrevs = detect_abbreviations(text)
     if detected_abbrevs:
-        abbrev_rows = ""
         for a in detected_abbrevs:
-            abbrev_rows += f"""
-            <tr>
-              <td class="term-cell">{a['abbr']}</td>
-              <td>{a['full_en']}</td>
-              <td>{a['full_ru']}</td>
-              <td>{a['ar']}</td>
-              <td style="font-size:12px;color:#6b7280">{a['desc']}</td>
-            </tr>"""
-        st.markdown(f"""
-<div class="slang-wrap" style="border-color:#1565C0;">
-  <div class="slang-head" style="background:#0D47A1;"><span class="slang-head-txt" style="color:#BBDEFB;">📋 ABBREVIATIONS DETECTOR — {len(detected_abbrevs)} FOUND</span></div>
-  <table class="slang-table">
-    <thead><tr><th>ABBR</th><th>ENGLISH</th><th>RUSSIAN</th><th>ARABIC</th><th>NOTE</th></tr></thead>
-    <tbody>{abbrev_rows}</tbody>
-  </table>
-</div>""", unsafe_allow_html=True)
+            match_label = "🔤 Direct" if a['match_type'] == "direct" else "🔠 Acronym detected"
+            st.markdown(f"""
+<div class="abbrev-box">
+    <div style="font-size:11px;font-weight:600;color:#1565C0;margin-bottom:4px;">{match_label}</div>
+    <div style="font-size:16px;font-weight:700;color:#0D47A1;margin-bottom:6px;">
+        {a['abbr']} = <span style="color:#1565C0;">{a['ar']}</span>
+    </div>
+    <div style="font-size:13px;color:#374151;line-height:1.6;">
+        🇬🇧 <b>English:</b> {a['full_en']}<br>
+        🇷🇺 <b>Russian:</b> {a['full_ru']}<br>
+        📝 <b>Note:</b> {a['desc']}
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
     # Did you mean
     sug = check_do_you_mean(text)
