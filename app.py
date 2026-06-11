@@ -449,12 +449,10 @@ if should_translate:
     # Detect domains
     detected_domains = detect_domains(text)
 
-    # Show detected domains banner
-    if detected_domains and detected_domains != ["general"]:
+    # Show detected domains banner (only if actually detected)
+    if detected_domains:
         badges = ""
         for d in detected_domains:
-            if d == "general":
-                continue
             info = DOMAIN_KEYWORDS[d]
             badges += f'<span class="domain-badge db-{d}">{info["emoji"]} {info["name_ar"]}</span>'
         st.markdown(f'<div class="detected-box">🔍 <b>تم التعرف تلقائياً على المجال:</b> {badges}</div>', unsafe_allow_html=True)
@@ -484,16 +482,19 @@ if should_translate:
 {rows}
 """)
         else:
-            # Show cards for ALL detected domains (multi-column layout)
-            domains_to_show = detected_domains if detected_domains else ["general"]
+            # Show ONLY detected domains (no general if domains found)
+            if detected_domains:
+                domains_to_show = detected_domains
+            else:
+                domains_to_show = ["general"]
 
-            # Build cards in batches of 3
+            # Build cards
             cards = []
             for d in domains_to_show:
                 info = DOMAIN_KEYWORDS[d]
                 formulated = build_formula(base, d, tl)
-                is_detected = d != "general" and d in detected_domains and detected_domains[0] != "general"
-                highlight_class = " rcard-detected" if is_detected and d == detected_domains[0] else ""
+                # highlight the top detected domain
+                highlight_class = " rcard-detected" if (detected_domains and d == detected_domains[0]) else ""
                 cards.append((d, info, formulated, highlight_class))
 
             # Render in rows of 3
