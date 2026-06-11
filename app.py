@@ -1,10 +1,13 @@
 import streamlit as st
 import requests
 import os
+import re
 
 st.set_page_config(page_title="HASSAN NASSER", page_icon="🏗️", layout="wide")
 
-# ── CSS ──────────────────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════
+#  CSS
+# ═══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -30,13 +33,15 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 .ldot-off { background: rgba(255,255,255,0.18); }
 .lang-bar-txt { font-size: 11px; color: rgba(255,255,255,0.35); margin-left: 4px; }
 
-.rcard { border-radius: 12px; padding: 1.1rem 1.3rem; border: 0.5px solid #e5e7eb; background: #fff; }
+.rcard { border-radius: 12px; padding: 1.1rem 1.3rem; border: 0.5px solid #e5e7eb; background: #fff; transition: all 0.2s; }
 .rcard-pol { border-top: 3px solid #E63946; }
 .rcard-leg { border-top: 3px solid #534AB7; }
 .rcard-eco { border-top: 3px solid #F4A261; }
 .rcard-med { border-top: 3px solid #2A9D8F; }
 .rcard-sci { border-top: 3px solid #264653; }
 .rcard-gen { border-top: 3px solid #6B7280; }
+.rcard-eng { border-top: 3px solid #1D9E75; }
+.rcard-detected { box-shadow: 0 0 0 2px rgba(93,202,165,0.4); background: #f6fffd; }
 
 .rlabel { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 8px; }
 .rlabel-pol { color: #9B2226; }
@@ -45,6 +50,7 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 .rlabel-med { color: #1B6B5E; }
 .rlabel-sci { color: #1D3A4C; }
 .rlabel-gen { color: #4B5563; }
+.rlabel-eng { color: #085041; }
 .rtext { font-size: 14px; line-height: 1.75; color: #1f2937; direction: auto; }
 
 .slang-wrap { border-radius: 12px; overflow: hidden; border: 0.5px solid #9FE1CB; margin-top: 1rem; }
@@ -58,16 +64,12 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 .site-cell { font-weight: 500; color: #3C3489; }
 
 .dym-box { background: #FAEEDA; border-left: 3px solid #BA7517; border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 13px; color: #412402; margin-bottom: 1rem; }
+.detected-box { background: #E6F4F1; border-left: 3px solid #5DCAA5; border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 13px; color: #04342C; margin-bottom: 1rem; }
 
 .swap-btn {
-    background: #f3f4f6 !important;
-    color: #374151 !important;
-    border: 1px solid #d1d5db !important;
-    border-radius: 8px !important;
-    font-weight: 600 !important;
-    font-size: 16px !important;
-    padding: 0.4rem 0.8rem !important;
-    width: auto !important;
+    background: #f3f4f6 !important; color: #374151 !important; border: 1px solid #d1d5db !important;
+    border-radius: 8px !important; font-weight: 600 !important; font-size: 16px !important;
+    padding: 0.4rem 0.8rem !important; width: auto !important;
 }
 .swap-btn:hover { background: #e5e7eb !important; }
 
@@ -80,15 +82,23 @@ div.stButton > button[kind="primary"]:hover { background: #0f0f1e !important; }
 textarea { border-radius: 8px !important; border: 0.5px solid #d1d5db !important; font-size: 14px !important; }
 
 .api-badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.04em; margin-right: 4px;
 }
 .api-deepl { background: #0F2B46; color: #8ECAE6; }
 .api-google { background: #F4A261; color: #5C3D1E; }
+
+.domain-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.04em; margin-right: 6px; margin-bottom: 4px;
+}
+.db-pol { background: #E63946; color: white; }
+.db-leg { background: #534AB7; color: white; }
+.db-eco { background: #F4A261; color: #3E2723; }
+.db-med { background: #2A9D8F; color: white; }
+.db-sci { background: #264653; color: white; }
+.db-eng { background: #1D9E75; color: white; }
+.db-gen { background: #6B7280; color: white; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -97,10 +107,10 @@ st.markdown("""
     <div class="hero-name">HASSAN <span>NASSER</span></div>
     <div class="hero-sub">ENGINEERING · LEGAL · CONTRACTUAL · POLITICAL · ECONOMIC · MEDICAL · SCIENTIFIC TRANSLATIONS</div>
     <div class="hero-pills">
-        <span class="pill pill-active">DeepL Precision</span>
-        <span class="pill pill-muted">6 Formulations</span>
-        <span class="pill pill-muted">Site Slang Detector</span>
+        <span class="pill pill-active">Auto-Domain Detect</span>
+        <span class="pill pill-muted">DeepL Precision</span>
         <span class="pill pill-muted">Smart Swap</span>
+        <span class="pill pill-muted">Site Slang</span>
     </div>
     <div class="lang-bar">
         <span class="ldot"></span><span class="ldot"></span><span class="ldot"></span>
@@ -111,13 +121,123 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ── Languages ────────────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Languages
+# ═══════════════════════════════════════════════════════════════════════════════
 languages_dict = {
     "العربية": "ar", "English": "en", "Русский": "ru", "中文": "zh",
     "Deutsch": "de", "Español": "es", "Português": "pt", "한국어": "ko"
 }
 
-# ── Site Slang DB ───────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Domain Detection Engine
+# ═══════════════════════════════════════════════════════════════════════════════
+DOMAIN_KEYWORDS = {
+    "political": {
+        "ar": [
+            "وزير", "حكومة", "مجلس", "وزارة", "برلمان", "سياسة", "دبلوماسي", "سفير", "معاهدة",
+            "اتفاقية دولية", "حزب", "انتخابات", "تصويت", "أمن قومي", "استراتيجية وطنية",
+            "بيان", "تصريح", "قمة", "مؤتمر", "جلسة", "تشريع", "دستور", "حقوق", "مواطن",
+            "political", "government", "minister", "parliament", "diplomatic", "treaty",
+            "election", "vote", "policy", "embassy", "summit", "legislation", "constitution",
+            "foreign affairs", "national security", "coalition", "sanctions", "bilateral"
+        ],
+        "emoji": "🏛️", "name_ar": "سياسي", "name_en": "Political", "color": "#E63946"
+    },
+    "legal": {
+        "ar": [
+            "عقد", "اتفاقية", "بند", "ملحق", "تعاقد", "قانون", "مرسوم", "لائحة", "نظام",
+            "شرط", "جزاء", "تعويض", "مسؤولية", "ضمان", "FIDIC", "تحكيم", "دعوى", "محكمة",
+            "قاضي", "حكم", "قرار", "تنظيمي", "ترخيص", "ترخيص", "التزام", "حق", "ملكية",
+            "contract", "agreement", "clause", "appendix", "legal", "stipulation", "liable",
+            "penalty", "compensation", "arbitration", "court", "judgment", "license", "obligation",
+            "terms and conditions", "binding", "jurisdiction", "warranty", "indemnity", "breach"
+        ],
+        "emoji": "⚖️", "name_ar": "قانوني", "name_en": "Legal", "color": "#534AB7"
+    },
+    "economic": {
+        "ar": [
+            "اقتصاد", "مالية", "استثمار", "تكلفة", "سعر", "ميزانية", "عائد", "ربح", "خسارة",
+            "تمويل", "قرض", "بنك", "سوق", "تجارة", "استيراد", "تصدير", "عمولة", "ضريبة",
+            "رسوم", "تسعير", "عطاء", "مناقصة", "صرف", "عملة", "تضخم", "نمو",
+            "economic", "financial", "investment", "cost", "budget", "revenue", "profit", "loss",
+            "loan", "bank", "market", "trade", "import", "export", "tax", "fee", "pricing",
+            "tender", "bid", "currency", "inflation", "growth", "GDP", "fiscal", "monetary"
+        ],
+        "emoji": "📈", "name_ar": "اقتصادي", "name_en": "Economic", "color": "#F4A261"
+    },
+    "medical": {
+        "ar": [
+            "طبيب", "مستشفى", "علاج", "دواء", "جرعة", "مرض", "أعراض", "تشخيص", "فحص",
+            "تحليل", "مختبر", "سريري", "جراحة", "عملية", "مريض", "صحة", "وباء", "تطعيم",
+            "أشعة", "بكتيريا", "فيروس", "مناعة", "أنسجة", "أعضاء", "قلب", "كبد", "كلى",
+            "doctor", "hospital", "treatment", "medication", "dose", "disease", "symptoms",
+            "diagnosis", "laboratory", "clinical", "surgery", "patient", "health", "epidemic",
+            "vaccine", "radiology", "bacteria", "virus", "immunity", "tissue", "cardiac", "renal"
+        ],
+        "emoji": "🏥", "name_ar": "طبي", "name_en": "Medical", "color": "#2A9D8F"
+    },
+    "scientific": {
+        "ar": [
+            "بحث", "دراسة", "مختبر", "تجربة", "فرضية", "نظرية", "علمي", "اكتشاف", "ابتكار",
+            "تقنية", "تكنولوجيا", "تحليل", "بيانات", "إحصائية", "نموذج", "محاكاة", "خوارزمية",
+            "ذكاء اصطناعي", "تعلم آلي", "طاقة", "فيزياء", "كيمياء", "بيولوجيا", "فلك",
+            "research", "study", "experiment", "hypothesis", "theory", "scientific", "discovery",
+            "innovation", "technology", "analysis", "data", "statistical", "model", "simulation",
+            "algorithm", "AI", "machine learning", "physics", "chemistry", "biology", "astronomy"
+        ],
+        "emoji": "🔬", "name_ar": "علمي", "name_en": "Scientific", "color": "#264653"
+    },
+    "engineering": {
+        "ar": [
+            "هندسة", "إنشائي", "مدني", "معماري", "كهرباء", "ميكانيك", "صرف", "مياه", "طرق",
+            "جسور", "أنفاق", "خرسانة", "حديد", "تسليح", "صب", "ردم", "حفر", "أساسات",
+            "تصميم", "مخططات", "مواصفات", "بناء", "تشييد", "إشراف", "جودة", "اختبار",
+            "engineering", "structural", "civil", "architectural", "electrical", "mechanical",
+            "concrete", "rebar", "foundation", "excavation", "backfill", "pouring", "drawings",
+            "specifications", "construction", "supervision", "quality", "inspection", "survey"
+        ],
+        "emoji": "🏗️", "name_ar": "هندسي", "name_en": "Engineering", "color": "#1D9E75"
+    },
+    "general": {
+        "ar": [],
+        "emoji": "💬", "name_ar": "عام", "name_en": "General", "color": "#6B7280"
+    }
+}
+
+
+def detect_domains(text):
+    """Returns list of detected domain keys sorted by relevance (score)."""
+    text_lower = text.lower()
+    scores = {}
+    for domain, data in DOMAIN_KEYWORDS.items():
+        if domain == "general":
+            continue
+        score = 0
+        for keyword in data["ar"]:
+            # count occurrences
+            count = text_lower.count(keyword.lower())
+            if count > 0:
+                # longer keywords = more specific = higher weight
+                weight = 1 + (len(keyword) / 50)
+                score += count * weight
+        if score > 0:
+            scores[domain] = score
+
+    if not scores:
+        return ["general"]
+
+    # sort by score descending
+    sorted_domains = sorted(scores, key=scores.get, reverse=True)
+    # always include general as last option
+    if "general" not in sorted_domains:
+        sorted_domains.append("general")
+    return sorted_domains
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Site Slang DB
+# ═══════════════════════════════════════════════════════════════════════════════
 site_slang_db = {
     "slab": {"academic": "بلاطة", "slang": "سقف / فرش خرساني", "desc": "الأسقف والمسطحات الخرسانية المسلحة في الموقع."},
     "lean concrete": {"academic": "خرسانة عجيفة / ضعيفة", "slang": "خرسانة نظافة", "desc": "طبقة خرسانية غير مسلحة أسفل القواعد."},
@@ -132,11 +252,13 @@ site_slang_db = {
     "variation order": {"academic": "ترتيب الاختلاف", "slang": "أمر تغيير / ملحق تعاقدي (VO)", "desc": "أمر رسمي لتعديل بند خارج نطاق التعاقد."}
 }
 
-# ── Translation Engines ──────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Translation Engines
+# ═══════════════════════════════════════════════════════════════════════════════
 DEEPL_API_KEY = os.environ.get("DEEPL_API_KEY", "")
 
+
 def fetch_deepl_translation(text, from_lang, to_lang):
-    """DeepL API — أفضل دقة للترجمة التخصصية."""
     if not DEEPL_API_KEY:
         return None
     try:
@@ -150,8 +272,8 @@ def fetch_deepl_translation(text, from_lang, to_lang):
         pass
     return None
 
+
 def fetch_google_translation(text, from_lang, to_lang):
-    """Google Translate (gtx) — fallback مجاني."""
     try:
         url = "https://translate.googleapis.com/translate_a/single"
         params = {"client": "gtx", "sl": from_lang, "tl": to_lang, "dt": "t", "q": text.strip()}
@@ -160,95 +282,103 @@ def fetch_google_translation(text, from_lang, to_lang):
     except Exception:
         return text
 
+
 def fetch_ai_translation(text, from_lang, to_lang):
-    """يحاول DeepL أولاً، ثم يعود لـ Google."""
     result = fetch_deepl_translation(text, from_lang, to_lang)
     if result:
         return result, "DeepL"
     return fetch_google_translation(text, from_lang, to_lang), "Google"
 
-# ── Helpers ─────────────────────────────────────────────────────────────────
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Helpers
+# ═══════════════════════════════════════════════════════════════════════════════
 def calculate_distance(s1, s2):
-    if len(s1) < len(s2): return calculate_distance(s2, s1)
-    if len(s2) == 0: return len(s1)
+    if len(s1) < len(s2):
+        return calculate_distance(s2, s1)
+    if len(s2) == 0:
+        return len(s1)
     prev = range(len(s2) + 1)
     for i, c1 in enumerate(s1):
         cur = [i + 1]
         for j, c2 in enumerate(s2):
-            cur.append(min(prev[j+1]+1, cur[j]+1, prev[j]+(c1!=c2)))
+            cur.append(min(prev[j + 1] + 1, cur[j] + 1, prev[j] + (c1 != c2)))
         prev = cur
     return prev[-1]
+
 
 def check_do_you_mean(text):
     words = text.lower().replace(",", " ").replace(".", " ").split()
     sug = []
     for w in words:
-        if len(w) < 3 or w in site_slang_db: continue
+        if len(w) < 3 or w in site_slang_db:
+            continue
         for k in site_slang_db:
             d = calculate_distance(w, k)
             if d == 1 or (len(k) > 6 and d == 2):
-                if k not in sug: sug.append(k)
+                if k not in sug:
+                    sug.append(k)
     return sug
+
 
 def detect_site_slang(text):
     tl = text.lower()
     return [{"term": k.title(), "academic": v["academic"], "slang": v["slang"], "desc": v["desc"]}
             for k, v in site_slang_db.items() if k in tl]
 
-# ── 6 Formulations Engine ────────────────────────────────────────────────────
-def build_formulas(base, to_lang):
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Formulation Engine (per domain)
+# ═══════════════════════════════════════════════════════════════════════════════
+FORMULA_TEMPLATES = {
+    "political": {
+        "ar": {"يجب": "تؤكد السياسة الرسمية على", "المقاول": "الجهة المنفذة", "رب العمل": "الجهة المالكة", "من أجل": "في إطار السياسة العامة لـ"},
+        "en_prefix": "In the political context, "
+    },
+    "legal": {
+        "ar": {"يجب": "يلتزم الطرف الثاني بـ", "المقاول": "يتعين على المقاول", "رب العمل": "صاحب العمل تعاقدياً", "من أجل": "بموجب الالتزامات التعاقدية"},
+        "en_prefix": "It is strictly stipulated that "
+    },
+    "economic": {
+        "ar": {"يجب": "يقتضي التحليل الاقتصادي", "المقاول": "الجهة الاقتصادية المنفذة", "رب العمل": "الجهة المستثمرة", "من أجل": "بهدف تحقيق الجدوى الاقتصادية لـ"},
+        "en_prefix": "From an economic perspective, "
+    },
+    "medical": {
+        "ar": {"يجب": "يُنصح سريرياً بـ", "المقاول": "الفريق الطبي المنفذ", "رب العمل": "المؤسسة الصحية المالكة", "من أجل": "للحفاظ على السلامة الصحية في"},
+        "en_prefix": "Clinically, "
+    },
+    "scientific": {
+        "ar": {"يجب": "تُظهر الدراسة العلمية ضرورة", "المقاول": "الجهة البحثية المنفذة", "رب العمل": "الجهة الراعية للبحث", "من أجل": "من منطلق المنهجية العلمية لـ"},
+        "en_prefix": "Scientifically, "
+    },
+    "engineering": {
+        "ar": {"يجب": "يتطلب التصميم الهندسي", "المقاول": "المقاول المنفذ", "رب العمل": "المالك (Employer)", "من أجل": "لضمان الموثوقية الفنية في"},
+        "en_prefix": "From an engineering standpoint, "
+    },
+    "general": {
+        "ar": {},
+        "en_prefix": ""
+    }
+}
+
+
+def build_formula(base, domain, to_lang):
+    tmpl = FORMULA_TEMPLATES.get(domain, FORMULA_TEMPLATES["general"])
     if to_lang != "ar":
-        return (
-            "[Political] In the political context, " + base[0].lower() + base[1:],
-            "[Legal] It is strictly stipulated that " + base[0].lower() + base[1:],
-            "[Economic] From an economic perspective, " + base[0].lower() + base[1:],
-            "[Medical] Clinically, " + base[0].lower() + base[1:],
-            "[Scientific] Scientifically, " + base[0].lower() + base[1:],
-            base
-        )
+        prefix = tmpl.get("en_prefix", "")
+        if prefix and base:
+            return prefix + base[0].lower() + base[1:]
+        return base
+    # Arabic
+    result = base
+    for k, v in tmpl.get("ar", {}).items():
+        result = result.replace(k, v)
+    return result
 
-    # Arabic formulations
-    political = {
-        "يجب": "تؤكد السياسة الرسمية على",
-        "المقاول": "الجهة المنفذة",
-        "رب العمل": "الجهة المالكة",
-        "من أجل": "في إطار السياسة العامة لـ"
-    }
-    legal = {
-        "يجب": "يلتزم الطرف الثاني بـ",
-        "المقاول": "يتعين على المقاول",
-        "رب العمل": "صاحب العمل تعاقدياً",
-        "من أجل": "بموجب الالتزامات التعاقدية"
-    }
-    economic = {
-        "يجب": "يقتضي التحليل الاقتصادي",
-        "المقاول": "الجهة الاقتصادية المنفذة",
-        "رب العمل": "الجهة المستثمرة",
-        "من أجل": "بهدف تحقيق الجدوى الاقتصادية لـ"
-    }
-    medical = {
-        "يجب": "يُنصح سريرياً بـ",
-        "المقاول": "الفريق الطبي المنفذ",
-        "رب العمل": "المؤسسة الصحية المالكة",
-        "من أجل": "للحفاظ على السلامة الصحية في"
-    }
-    scientific = {
-        "يجب": "تُظهر الدراسة العلمية ضرورة",
-        "المقاول": "الجهة البحثية المنفذة",
-        "رب العمل": "الجهة الراعية للبحث",
-        "من أجل": "من منطلق المنهجية العلمية لـ"
-    }
 
-    f_pol, f_leg, f_eco, f_med, f_sci = base, base, base, base, base
-    for k, v in political.items(): f_pol = f_pol.replace(k, v)
-    for k, v in legal.items(): f_leg = f_leg.replace(k, v)
-    for k, v in economic.items(): f_eco = f_eco.replace(k, v)
-    for k, v in medical.items(): f_med = f_med.replace(k, v)
-    for k, v in scientific.items(): f_sci = f_sci.replace(k, v)
-
-    return f_pol, f_leg, f_eco, f_med, f_sci, base
-
-# ── Session State for Swap ───────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Session State
+# ═══════════════════════════════════════════════════════════════════════════════
 if "src_lang" not in st.session_state:
     st.session_state.src_lang = "English"
 if "tgt_lang" not in st.session_state:
@@ -258,14 +388,18 @@ if "trigger_translate" not in st.session_state:
 if "last_text" not in st.session_state:
     st.session_state.last_text = ""
 
+
 def swap_languages():
     st.session_state.src_lang, st.session_state.tgt_lang = st.session_state.tgt_lang, st.session_state.src_lang
 
+
 def on_text_change():
-    """Callback when user presses Enter in text_area."""
     st.session_state.trigger_translate = True
 
-# ── UI: Language Selectors + Swap ───────────────────────────────────────────
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  UI: Language Selectors + Swap
+# ═══════════════════════════════════════════════════════════════════════════════
 lang_list = list(languages_dict.keys())
 
 col1, col2, col3 = st.columns([4, 1, 4])
@@ -280,7 +414,9 @@ with col3:
 fl = languages_dict[src]
 tl = languages_dict[tgt]
 
-# ── Text Input ──────────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Text Input
+# ═══════════════════════════════════════════════════════════════════════════════
 text_input = st.text_area(
     "",
     placeholder="اكتب أو الصق النص هنا — تقارير هندسية، بنود تعاقدية، مراسلات رسمية، نصوص سياسية، تقارير طبية...",
@@ -293,7 +429,9 @@ btn = st.button("🌐  Translate", use_container_width=True, type="primary", key
 
 st.divider()
 
-# ── Translation Logic ─────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Translation Logic
+# ═══════════════════════════════════════════════════════════════════════════════
 should_translate = (btn or st.session_state.trigger_translate) and text_input.strip()
 
 if should_translate:
@@ -306,8 +444,22 @@ if should_translate:
         st.markdown('<span class="api-badge api-deepl">⚡ DeepL API Active</span>', unsafe_allow_html=True)
     else:
         st.markdown('<span class="api-badge api-google">● Google Translate (Free)</span>', unsafe_allow_html=True)
-        st.info("💡 **Tip:** أضف مفتاح DeepL API في `secrets.toml` (DEEPL_API_KEY) لدقة أعلى. احصل على مفتاح مجاني من [deepl.com/pro-api](https://www.deepl.com/pro-api)")
+        st.info("💡 **Tip:** أضف مفتاح DeepL API في `secrets.toml` (DEEPL_API_KEY) لدقة أعلى. احصل على مفتاح مجاني من deepl.com/pro-api")
 
+    # Detect domains
+    detected_domains = detect_domains(text)
+
+    # Show detected domains banner
+    if detected_domains and detected_domains != ["general"]:
+        badges = ""
+        for d in detected_domains:
+            if d == "general":
+                continue
+            info = DOMAIN_KEYWORDS[d]
+            badges += f'<span class="domain-badge db-{d}">{info["emoji"]} {info["name_ar"]}</span>'
+        st.markdown(f'<div class="detected-box">🔍 <b>تم التعرف تلقائياً على المجال:</b> {badges}</div>', unsafe_allow_html=True)
+
+    # Did you mean
     sug = check_do_you_mean(text)
     if sug:
         fmt = ", ".join([f"<strong>{s.title()}</strong>" for s in sug])
@@ -315,40 +467,50 @@ if should_translate:
 
     with st.spinner("Translating with best available engine..."):
         is_single = len(text.split()) == 1
-
         base, engine_used = fetch_ai_translation(text, fl, tl)
 
         if is_single:
             st.markdown(f"### 🗄️ Contextual Lexicon: `{text}`")
+            # Show all domain meanings for single word
+            rows = ""
+            for d in detected_domains:
+                info = DOMAIN_KEYWORDS[d]
+                formulated = build_formula(base, d, tl)
+                rows += f"| {info['emoji']} {info['name_ar']} | {formulated} |
+"
             st.markdown(f"""
-| Context | Meaning |
+| المجال | المعنى |
 |:---|:---|
-| 🏛️ Political | {base} |
-| ⚖️ Legal / FIDIC | Binding contractual clause |
-| 📈 Economic | Financial / market context |
-| 🏥 Medical | Clinical / health context |
-| 🔬 Scientific | Research / academic context |
-| 💬 General | {base} |
+{rows}
 """)
         else:
-            f_pol, f_leg, f_eco, f_med, f_sci, f_gen = build_formulas(base, tl)
+            # Show cards for ALL detected domains (multi-column layout)
+            domains_to_show = detected_domains if detected_domains else ["general"]
 
-            c1, c2, c3 = st.columns(3)
-            with c1:
-                st.markdown(f'<div class="rcard rcard-pol"><div class="rlabel rlabel-pol">🏛 POLITICAL</div><div class="rtext">{f_pol}</div></div>', unsafe_allow_html=True)
-            with c2:
-                st.markdown(f'<div class="rcard rcard-leg"><div class="rlabel rlabel-leg">⚖ LEGAL</div><div class="rtext">{f_leg}</div></div>', unsafe_allow_html=True)
-            with c3:
-                st.markdown(f'<div class="rcard rcard-eco"><div class="rlabel rlabel-eco">📈 ECONOMIC</div><div class="rtext">{f_eco}</div></div>', unsafe_allow_html=True)
+            # Build cards in batches of 3
+            cards = []
+            for d in domains_to_show:
+                info = DOMAIN_KEYWORDS[d]
+                formulated = build_formula(base, d, tl)
+                is_detected = d != "general" and d in detected_domains and detected_domains[0] != "general"
+                highlight_class = " rcard-detected" if is_detected and d == detected_domains[0] else ""
+                cards.append((d, info, formulated, highlight_class))
 
-            c4, c5, c6 = st.columns(3)
-            with c4:
-                st.markdown(f'<div class="rcard rcard-med"><div class="rlabel rlabel-med">🏥 MEDICAL</div><div class="rtext">{f_med}</div></div>', unsafe_allow_html=True)
-            with c5:
-                st.markdown(f'<div class="rcard rcard-sci"><div class="rlabel rlabel-sci">🔬 SCIENTIFIC</div><div class="rtext">{f_sci}</div></div>', unsafe_allow_html=True)
-            with c6:
-                st.markdown(f'<div class="rcard rcard-gen"><div class="rlabel rlabel-gen">💬 GENERAL</div><div class="rtext">{f_gen}</div></div>', unsafe_allow_html=True)
+            # Render in rows of 3
+            for i in range(0, len(cards), 3):
+                batch = cards[i:i + 3]
+                cols = st.columns(len(batch))
+                for col, (d, info, formulated, highlight) in zip(cols, batch):
+                    with col:
+                        st.markdown(
+                            f'<div class="rcard rcard-{d}{highlight}">'
+                            f'<div class="rlabel rlabel-{d}">{info["emoji"]} {info["name_en"].upper()}</div>'
+                            f'<div class="rtext">{formulated}</div>'
+                            f'</div>',
+                            unsafe_allow_html=True
+                        )
 
+            # Site slang detector
             detected = detect_site_slang(text)
             if detected:
                 rows = "".join([f"""
