@@ -1,14 +1,16 @@
 import streamlit as st
 import requests
+import os
 
 st.set_page_config(page_title="HASSAN NASSER", page_icon="🏗️", layout="wide")
 
+# ── CSS ──────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 #MainMenu, footer, header { visibility: hidden; }
-.block-container { padding-top: 1.5rem; padding-bottom: 2rem; max-width: 1000px; }
+.block-container { padding-top: 1.5rem; padding-bottom: 2rem; max-width: 1100px; }
 
 .hero {
     background: #1a1a2e;
@@ -29,13 +31,20 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 .lang-bar-txt { font-size: 11px; color: rgba(255,255,255,0.35); margin-left: 4px; }
 
 .rcard { border-radius: 12px; padding: 1.1rem 1.3rem; border: 0.5px solid #e5e7eb; background: #fff; }
-.rcard-eng { border-top: 3px solid #1D9E75; }
+.rcard-pol { border-top: 3px solid #E63946; }
 .rcard-leg { border-top: 3px solid #534AB7; }
-.rcard-dir { border-top: 3px solid #D85A30; }
+.rcard-eco { border-top: 3px solid #F4A261; }
+.rcard-med { border-top: 3px solid #2A9D8F; }
+.rcard-sci { border-top: 3px solid #264653; }
+.rcard-gen { border-top: 3px solid #6B7280; }
+
 .rlabel { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 8px; }
-.rlabel-e { color: #085041; }
-.rlabel-l { color: #3C3489; }
-.rlabel-g { color: #712B13; }
+.rlabel-pol { color: #9B2226; }
+.rlabel-leg { color: #3C3489; }
+.rlabel-eco { color: #9C6644; }
+.rlabel-med { color: #1B6B5E; }
+.rlabel-sci { color: #1D3A4C; }
+.rlabel-gen { color: #4B5563; }
 .rtext { font-size: 14px; line-height: 1.75; color: #1f2937; direction: auto; }
 
 .slang-wrap { border-radius: 12px; overflow: hidden; border: 0.5px solid #9FE1CB; margin-top: 1rem; }
@@ -50,24 +59,48 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 
 .dym-box { background: #FAEEDA; border-left: 3px solid #BA7517; border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 13px; color: #412402; margin-bottom: 1rem; }
 
-div.stButton > button {
+.swap-btn {
+    background: #f3f4f6 !important;
+    color: #374151 !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 16px !important;
+    padding: 0.4rem 0.8rem !important;
+    width: auto !important;
+}
+.swap-btn:hover { background: #e5e7eb !important; }
+
+div.stButton > button[kind="primary"] {
     background: #1a1a2e !important; color: white !important; border: none !important;
     border-radius: 8px !important; font-weight: 500 !important;
     font-size: 15px !important; padding: 0.65rem 2rem !important; width: 100% !important;
 }
-div.stButton > button:hover { background: #0f0f1e !important; }
+div.stButton > button[kind="primary"]:hover { background: #0f0f1e !important; }
 textarea { border-radius: 8px !important; border: 0.5px solid #d1d5db !important; font-size: 14px !important; }
+
+.api-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+.api-deepl { background: #0F2B46; color: #8ECAE6; }
+.api-google { background: #F4A261; color: #5C3D1E; }
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown("""
 <div class="hero">
     <div class="hero-name">HASSAN <span>NASSER</span></div>
-    <div class="hero-sub">ENGINEERING · LEGAL · CONTRACTUAL TRANSLATIONS</div>
+    <div class="hero-sub">ENGINEERING · LEGAL · CONTRACTUAL · POLITICAL · ECONOMIC · MEDICAL · SCIENTIFIC TRANSLATIONS</div>
     <div class="hero-pills">
-        <span class="pill pill-active">Smart Translator</span>
+        <span class="pill pill-active">DeepL Precision</span>
+        <span class="pill pill-muted">6 Formulations</span>
         <span class="pill pill-muted">Site Slang Detector</span>
-        <span class="pill pill-muted">3 Formulations</span>
+        <span class="pill pill-muted">Smart Swap</span>
     </div>
     <div class="lang-bar">
         <span class="ldot"></span><span class="ldot"></span><span class="ldot"></span>
@@ -78,11 +111,13 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# ── Languages ────────────────────────────────────────────────────────────────
 languages_dict = {
     "العربية": "ar", "English": "en", "Русский": "ru", "中文": "zh",
     "Deutsch": "de", "Español": "es", "Português": "pt", "한국어": "ko"
 }
 
+# ── Site Slang DB ───────────────────────────────────────────────────────────
 site_slang_db = {
     "slab": {"academic": "بلاطة", "slang": "سقف / فرش خرساني", "desc": "الأسقف والمسطحات الخرسانية المسلحة في الموقع."},
     "lean concrete": {"academic": "خرسانة عجيفة / ضعيفة", "slang": "خرسانة نظافة", "desc": "طبقة خرسانية غير مسلحة أسفل القواعد."},
@@ -97,15 +132,42 @@ site_slang_db = {
     "variation order": {"academic": "ترتيب الاختلاف", "slang": "أمر تغيير / ملحق تعاقدي (VO)", "desc": "أمر رسمي لتعديل بند خارج نطاق التعاقد."}
 }
 
-def fetch_ai_translation(text, from_lang, to_lang):
+# ── Translation Engines ──────────────────────────────────────────────────────
+DEEPL_API_KEY = os.environ.get("DEEPL_API_KEY", "")
+
+def fetch_deepl_translation(text, from_lang, to_lang):
+    """DeepL API — أفضل دقة للترجمة التخصصية."""
+    if not DEEPL_API_KEY:
+        return None
+    try:
+        url = "https://api-free.deepl.com/v2/translate"
+        headers = {"Authorization": f"DeepL-Auth-Key {DEEPL_API_KEY}", "Content-Type": "application/x-www-form-urlencoded"}
+        payload = {"text": text.strip(), "source_lang": from_lang.upper(), "target_lang": to_lang.upper()}
+        r = requests.post(url, data=payload, headers=headers, timeout=15)
+        if r.status_code == 200:
+            return r.json()["translations"][0]["text"]
+    except Exception:
+        pass
+    return None
+
+def fetch_google_translation(text, from_lang, to_lang):
+    """Google Translate (gtx) — fallback مجاني."""
     try:
         url = "https://translate.googleapis.com/translate_a/single"
         params = {"client": "gtx", "sl": from_lang, "tl": to_lang, "dt": "t", "q": text.strip()}
-        r = requests.get(url, params=params).json()
+        r = requests.get(url, params=params, timeout=10).json()
         return "".join([p[0] for p in r[0] if p[0]])
-    except:
+    except Exception:
         return text
 
+def fetch_ai_translation(text, from_lang, to_lang):
+    """يحاول DeepL أولاً، ثم يعود لـ Google."""
+    result = fetch_deepl_translation(text, from_lang, to_lang)
+    if result:
+        return result, "DeepL"
+    return fetch_google_translation(text, from_lang, to_lang), "Google"
+
+# ── Helpers ─────────────────────────────────────────────────────────────────
 def calculate_distance(s1, s2):
     if len(s1) < len(s2): return calculate_distance(s2, s1)
     if len(s2) == 0: return len(s1)
@@ -133,61 +195,159 @@ def detect_site_slang(text):
     return [{"term": k.title(), "academic": v["academic"], "slang": v["slang"], "desc": v["desc"]}
             for k, v in site_slang_db.items() if k in tl]
 
+# ── 6 Formulations Engine ────────────────────────────────────────────────────
 def build_formulas(base, to_lang):
     if to_lang != "ar":
-        return "[Engineering] " + base, "[Legal] It is strictly stipulated that " + base[0].lower() + base[1:], base
-    e = {"من أجل ضمان": "لضمان الموثوقية الفنية في", "رب العمل": "المالك (Employer)", "المهندس": "استشاري المشروع"}
-    l = {"يجب": "يلتزم الطرف الثاني بـ", "المقاول": "يتعين على المقاول", "رب العمل": "صاحب العمل تعاقدياً"}
-    f1, f2 = base, base
-    for k, v in e.items(): f1 = f1.replace(k, v)
-    for k, v in l.items(): f2 = f2.replace(k, v)
-    return f1, f2, base
+        return (
+            "[Political] In the political context, " + base[0].lower() + base[1:],
+            "[Legal] It is strictly stipulated that " + base[0].lower() + base[1:],
+            "[Economic] From an economic perspective, " + base[0].lower() + base[1:],
+            "[Medical] Clinically, " + base[0].lower() + base[1:],
+            "[Scientific] Scientifically, " + base[0].lower() + base[1:],
+            base
+        )
 
-col1, col2 = st.columns(2)
+    # Arabic formulations
+    political = {
+        "يجب": "تؤكد السياسة الرسمية على",
+        "المقاول": "الجهة المنفذة",
+        "رب العمل": "الجهة المالكة",
+        "من أجل": "في إطار السياسة العامة لـ"
+    }
+    legal = {
+        "يجب": "يلتزم الطرف الثاني بـ",
+        "المقاول": "يتعين على المقاول",
+        "رب العمل": "صاحب العمل تعاقدياً",
+        "من أجل": "بموجب الالتزامات التعاقدية"
+    }
+    economic = {
+        "يجب": "يقتضي التحليل الاقتصادي",
+        "المقاول": "الجهة الاقتصادية المنفذة",
+        "رب العمل": "الجهة المستثمرة",
+        "من أجل": "بهدف تحقيق الجدوى الاقتصادية لـ"
+    }
+    medical = {
+        "يجب": "يُنصح سريرياً بـ",
+        "المقاول": "الفريق الطبي المنفذ",
+        "رب العمل": "المؤسسة الصحية المالكة",
+        "من أجل": "للحفاظ على السلامة الصحية في"
+    }
+    scientific = {
+        "يجب": "تُظهر الدراسة العلمية ضرورة",
+        "المقاول": "الجهة البحثية المنفذة",
+        "رب العمل": "الجهة الراعية للبحث",
+        "من أجل": "من منطلق المنهجية العلمية لـ"
+    }
+
+    f_pol, f_leg, f_eco, f_med, f_sci = base, base, base, base, base
+    for k, v in political.items(): f_pol = f_pol.replace(k, v)
+    for k, v in legal.items(): f_leg = f_leg.replace(k, v)
+    for k, v in economic.items(): f_eco = f_eco.replace(k, v)
+    for k, v in medical.items(): f_med = f_med.replace(k, v)
+    for k, v in scientific.items(): f_sci = f_sci.replace(k, v)
+
+    return f_pol, f_leg, f_eco, f_med, f_sci, base
+
+# ── Session State for Swap ───────────────────────────────────────────────────
+if "src_lang" not in st.session_state:
+    st.session_state.src_lang = "English"
+if "tgt_lang" not in st.session_state:
+    st.session_state.tgt_lang = "العربية"
+if "trigger_translate" not in st.session_state:
+    st.session_state.trigger_translate = False
+if "last_text" not in st.session_state:
+    st.session_state.last_text = ""
+
+def swap_languages():
+    st.session_state.src_lang, st.session_state.tgt_lang = st.session_state.tgt_lang, st.session_state.src_lang
+
+def on_text_change():
+    """Callback when user presses Enter in text_area."""
+    st.session_state.trigger_translate = True
+
+# ── UI: Language Selectors + Swap ───────────────────────────────────────────
+lang_list = list(languages_dict.keys())
+
+col1, col2, col3 = st.columns([4, 1, 4])
 with col1:
-    src = st.selectbox("FROM", list(languages_dict.keys()), index=1)
+    src = st.selectbox("FROM", lang_list, index=lang_list.index(st.session_state.src_lang), key="src_lang")
 with col2:
-    tgt = st.selectbox("INTO", list(languages_dict.keys()), index=0)
+    st.markdown("<div style='height:28px'></div>", unsafe_allow_html=True)
+    st.button("⇄", on_click=swap_languages, help="تبديل اللغات", key="swap_btn")
+with col3:
+    tgt = st.selectbox("INTO", lang_list, index=lang_list.index(st.session_state.tgt_lang), key="tgt_lang")
 
-text_input = st.text_area("", placeholder="اكتب أو الصق النص هنا — تقارير هندسية، بنود تعاقدية، مراسلات رسمية...", height=140)
-btn = st.button("🌐  Translate", use_container_width=True)
+fl = languages_dict[src]
+tl = languages_dict[tgt]
+
+# ── Text Input ──────────────────────────────────────────────────────────────
+text_input = st.text_area(
+    "",
+    placeholder="اكتب أو الصق النص هنا — تقارير هندسية، بنود تعاقدية، مراسلات رسمية، نصوص سياسية، تقارير طبية...",
+    height=160,
+    key="text_input",
+    on_change=on_text_change
+)
+
+btn = st.button("🌐  Translate", use_container_width=True, type="primary", key="translate_btn")
 
 st.divider()
 
-if btn and text_input.strip():
+# ── Translation Logic ─────────────────────────────────────────────────────────
+should_translate = (btn or st.session_state.trigger_translate) and text_input.strip()
+
+if should_translate:
+    st.session_state.trigger_translate = False
     text = text_input.strip()
-    fl = languages_dict[src]
-    tl = languages_dict[tgt]
+    st.session_state.last_text = text
+
+    # API status badge
+    if DEEPL_API_KEY:
+        st.markdown('<span class="api-badge api-deepl">⚡ DeepL API Active</span>', unsafe_allow_html=True)
+    else:
+        st.markdown('<span class="api-badge api-google">● Google Translate (Free)</span>', unsafe_allow_html=True)
+        st.info("💡 **Tip:** أضف مفتاح DeepL API في `secrets.toml` (DEEPL_API_KEY) لدقة أعلى. احصل على مفتاح مجاني من [deepl.com/pro-api](https://www.deepl.com/pro-api)")
 
     sug = check_do_you_mean(text)
     if sug:
         fmt = ", ".join([f"<strong>{s.title()}</strong>" for s in sug])
         st.markdown(f'<div class="dym-box">💡 <b>Did you mean:</b> {fmt}?</div>', unsafe_allow_html=True)
 
-    with st.spinner("Translating..."):
+    with st.spinner("Translating with best available engine..."):
         is_single = len(text.split()) == 1
 
+        base, engine_used = fetch_ai_translation(text, fl, tl)
+
         if is_single:
-            base = fetch_ai_translation(text, fl, tl)
             st.markdown(f"### 🗄️ Contextual Lexicon: `{text}`")
             st.markdown(f"""
 | Context | Meaning |
 |:---|:---|
-| 👷 Engineering | {base} |
+| 🏛️ Political | {base} |
 | ⚖️ Legal / FIDIC | Binding contractual clause |
+| 📈 Economic | Financial / market context |
+| 🏥 Medical | Clinical / health context |
+| 🔬 Scientific | Research / academic context |
 | 💬 General | {base} |
 """)
         else:
-            base = fetch_ai_translation(text, fl, tl)
-            f1, f2, f3 = build_formulas(base, tl)
+            f_pol, f_leg, f_eco, f_med, f_sci, f_gen = build_formulas(base, tl)
 
             c1, c2, c3 = st.columns(3)
             with c1:
-                st.markdown(f'<div class="rcard rcard-eng"><div class="rlabel rlabel-e">🏗 ENGINEERING</div><div class="rtext">{f1}</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="rcard rcard-pol"><div class="rlabel rlabel-pol">🏛 POLITICAL</div><div class="rtext">{f_pol}</div></div>', unsafe_allow_html=True)
             with c2:
-                st.markdown(f'<div class="rcard rcard-leg"><div class="rlabel rlabel-l">⚖ LEGAL</div><div class="rtext">{f2}</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="rcard rcard-leg"><div class="rlabel rlabel-leg">⚖ LEGAL</div><div class="rtext">{f_leg}</div></div>', unsafe_allow_html=True)
             with c3:
-                st.markdown(f'<div class="rcard rcard-dir"><div class="rlabel rlabel-g">💬 DIRECT</div><div class="rtext">{f3}</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="rcard rcard-eco"><div class="rlabel rlabel-eco">📈 ECONOMIC</div><div class="rtext">{f_eco}</div></div>', unsafe_allow_html=True)
+
+            c4, c5, c6 = st.columns(3)
+            with c4:
+                st.markdown(f'<div class="rcard rcard-med"><div class="rlabel rlabel-med">🏥 MEDICAL</div><div class="rtext">{f_med}</div></div>', unsafe_allow_html=True)
+            with c5:
+                st.markdown(f'<div class="rcard rcard-sci"><div class="rlabel rlabel-sci">🔬 SCIENTIFIC</div><div class="rtext">{f_sci}</div></div>', unsafe_allow_html=True)
+            with c6:
+                st.markdown(f'<div class="rcard rcard-gen"><div class="rlabel rlabel-gen">💬 GENERAL</div><div class="rtext">{f_gen}</div></div>', unsafe_allow_html=True)
 
             detected = detect_site_slang(text)
             if detected:
