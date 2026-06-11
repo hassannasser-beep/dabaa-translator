@@ -382,7 +382,7 @@ site_slang_db = {
 # ═══════════════════════════════════════════════════════════════════════════════
 #  Translation Engines
 # ═══════════════════════════════════════════════════════════════════════════════
-DEEPL_API_KEY = os.environ.get("DEEPL_API_KEY", "")
+DEEPL_API_KEY = os.environ.get("BTU8IJVMGLWVs3kvL", "")
 
 
 def fetch_deepl_translation(text, from_lang, to_lang):
