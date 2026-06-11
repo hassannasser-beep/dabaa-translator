@@ -1,7 +1,6 @@
 import streamlit as st
 import requests
 import os
-import re
 
 st.set_page_config(page_title="HASSAN NASSER", page_icon="🏗️", layout="wide")
 
@@ -39,8 +38,18 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 .rcard-eco { border-top: 3px solid #F4A261; }
 .rcard-med { border-top: 3px solid #2A9D8F; }
 .rcard-sci { border-top: 3px solid #264653; }
-.rcard-gen { border-top: 3px solid #6B7280; }
 .rcard-eng { border-top: 3px solid #1D9E75; }
+.rcard-mil { border-top: 3px solid #8B0000; }
+.rcard-edu { border-top: 3px solid #F4D03F; }
+.rcard-rel { border-top: 3px solid #6C3483; }
+.rcard-spt { border-top: 3px solid #E67E22; }
+.rcard-lit { border-top: 3px solid #D81B60; }
+.rcard-it  { border-top: 3px solid #00ACC1; }
+.rcard-env { border-top: 3px solid #43A047; }
+.rcard-agr { border-top: 3px solid #795548; }
+.rcard-med2 { border-top: 3px solid #5E35B1; }
+.rcard-tour { border-top: 3px solid #00838F; }
+.rcard-gen { border-top: 3px solid #6B7280; }
 .rcard-detected { box-shadow: 0 0 0 2px rgba(93,202,165,0.4); background: #f6fffd; }
 
 .rlabel { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 8px; }
@@ -49,8 +58,18 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 .rlabel-eco { color: #9C6644; }
 .rlabel-med { color: #1B6B5E; }
 .rlabel-sci { color: #1D3A4C; }
-.rlabel-gen { color: #4B5563; }
 .rlabel-eng { color: #085041; }
+.rlabel-mil { color: #8B0000; }
+.rlabel-edu { color: #9A7D0A; }
+.rlabel-rel { color: #6C3483; }
+.rlabel-spt { color: #A04000; }
+.rlabel-lit { color: #AD1457; }
+.rlabel-it  { color: #006064; }
+.rlabel-env { color: #1B5E20; }
+.rlabel-agr { color: #4E342E; }
+.rlabel-med2 { color: #4527A0; }
+.rlabel-tour { color: #006064; }
+.rlabel-gen { color: #4B5563; }
 .rtext { font-size: 14px; line-height: 1.75; color: #1f2937; direction: auto; }
 
 .slang-wrap { border-radius: 12px; overflow: hidden; border: 0.5px solid #9FE1CB; margin-top: 1rem; }
@@ -98,6 +117,16 @@ textarea { border-radius: 8px !important; border: 0.5px solid #d1d5db !important
 .db-med { background: #2A9D8F; color: white; }
 .db-sci { background: #264653; color: white; }
 .db-eng { background: #1D9E75; color: white; }
+.db-mil { background: #8B0000; color: white; }
+.db-edu { background: #F4D03F; color: #3E2723; }
+.db-rel { background: #6C3483; color: white; }
+.db-spt { background: #E67E22; color: white; }
+.db-lit { background: #D81B60; color: white; }
+.db-it  { background: #00ACC1; color: white; }
+.db-env { background: #43A047; color: white; }
+.db-agr { background: #795548; color: white; }
+.db-med2 { background: #5E35B1; color: white; }
+.db-tour { background: #00838F; color: white; }
 .db-gen { background: #6B7280; color: white; }
 </style>
 """, unsafe_allow_html=True)
@@ -105,7 +134,7 @@ textarea { border-radius: 8px !important; border: 0.5px solid #d1d5db !important
 st.markdown("""
 <div class="hero">
     <div class="hero-name">HASSAN <span>NASSER</span></div>
-    <div class="hero-sub">ENGINEERING · LEGAL · CONTRACTUAL · POLITICAL · ECONOMIC · MEDICAL · SCIENTIFIC TRANSLATIONS</div>
+    <div class="hero-sub">MULTI-DOMAIN SMART TRANSLATOR — 15+ SPECIALIZED FIELDS</div>
     <div class="hero-pills">
         <span class="pill pill-active">Auto-Domain Detect</span>
         <span class="pill pill-muted">DeepL Precision</span>
@@ -130,7 +159,7 @@ languages_dict = {
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  Domain Detection Engine
+#  Domain Detection Engine — 15 DOMAINS
 # ═══════════════════════════════════════════════════════════════════════════════
 DOMAIN_KEYWORDS = {
     "political": {
@@ -140,7 +169,8 @@ DOMAIN_KEYWORDS = {
             "بيان", "تصريح", "قمة", "مؤتمر", "جلسة", "تشريع", "دستور", "حقوق", "مواطن",
             "political", "government", "minister", "parliament", "diplomatic", "treaty",
             "election", "vote", "policy", "embassy", "summit", "legislation", "constitution",
-            "foreign affairs", "national security", "coalition", "sanctions", "bilateral"
+            "foreign affairs", "national security", "coalition", "sanctions", "bilateral",
+            "parliamentary", "senate", "congress", "diplomacy", "negotiation", "referendum"
         ],
         "emoji": "🏛️", "name_ar": "سياسي", "name_en": "Political", "color": "#E63946"
     },
@@ -148,10 +178,11 @@ DOMAIN_KEYWORDS = {
         "ar": [
             "عقد", "اتفاقية", "بند", "ملحق", "تعاقد", "قانون", "مرسوم", "لائحة", "نظام",
             "شرط", "جزاء", "تعويض", "مسؤولية", "ضمان", "FIDIC", "تحكيم", "دعوى", "محكمة",
-            "قاضي", "حكم", "قرار", "تنظيمي", "ترخيص", "ترخيص", "التزام", "حق", "ملكية",
+            "قاضي", "حكم", "قرار", "تنظيمي", "ترخيص", "التزام", "حق", "ملكية", "إثبات",
             "contract", "agreement", "clause", "appendix", "legal", "stipulation", "liable",
             "penalty", "compensation", "arbitration", "court", "judgment", "license", "obligation",
-            "terms and conditions", "binding", "jurisdiction", "warranty", "indemnity", "breach"
+            "terms and conditions", "binding", "jurisdiction", "warranty", "indemnity", "breach",
+            "plaintiff", "defendant", "litigation", "statute", "regulation", "compliance"
         ],
         "emoji": "⚖️", "name_ar": "قانوني", "name_en": "Legal", "color": "#534AB7"
     },
@@ -159,10 +190,11 @@ DOMAIN_KEYWORDS = {
         "ar": [
             "اقتصاد", "مالية", "استثمار", "تكلفة", "سعر", "ميزانية", "عائد", "ربح", "خسارة",
             "تمويل", "قرض", "بنك", "سوق", "تجارة", "استيراد", "تصدير", "عمولة", "ضريبة",
-            "رسوم", "تسعير", "عطاء", "مناقصة", "صرف", "عملة", "تضخم", "نمو",
+            "رسوم", "تسعير", "عطاء", "مناقصة", "صرف", "عملة", "تضخم", "نمو", "تجاري",
             "economic", "financial", "investment", "cost", "budget", "revenue", "profit", "loss",
             "loan", "bank", "market", "trade", "import", "export", "tax", "fee", "pricing",
-            "tender", "bid", "currency", "inflation", "growth", "GDP", "fiscal", "monetary"
+            "tender", "bid", "currency", "inflation", "growth", "GDP", "fiscal", "monetary",
+            "stock", "exchange", "broker", "dividend", "shareholder", "audit", "accounting"
         ],
         "emoji": "📈", "name_ar": "اقتصادي", "name_en": "Economic", "color": "#F4A261"
     },
@@ -173,7 +205,8 @@ DOMAIN_KEYWORDS = {
             "أشعة", "بكتيريا", "فيروس", "مناعة", "أنسجة", "أعضاء", "قلب", "كبد", "كلى",
             "doctor", "hospital", "treatment", "medication", "dose", "disease", "symptoms",
             "diagnosis", "laboratory", "clinical", "surgery", "patient", "health", "epidemic",
-            "vaccine", "radiology", "bacteria", "virus", "immunity", "tissue", "cardiac", "renal"
+            "vaccine", "radiology", "bacteria", "virus", "immunity", "tissue", "cardiac", "renal",
+            "pharmacy", "prescription", "physician", "nurse", "emergency", "ICU", "pharmaceutical"
         ],
         "emoji": "🏥", "name_ar": "طبي", "name_en": "Medical", "color": "#2A9D8F"
     },
@@ -184,7 +217,8 @@ DOMAIN_KEYWORDS = {
             "ذكاء اصطناعي", "تعلم آلي", "طاقة", "فيزياء", "كيمياء", "بيولوجيا", "فلك",
             "research", "study", "experiment", "hypothesis", "theory", "scientific", "discovery",
             "innovation", "technology", "analysis", "data", "statistical", "model", "simulation",
-            "algorithm", "AI", "machine learning", "physics", "chemistry", "biology", "astronomy"
+            "algorithm", "AI", "machine learning", "physics", "chemistry", "biology", "astronomy",
+            "quantum", "molecule", "particle", "observation", "peer review", "methodology"
         ],
         "emoji": "🔬", "name_ar": "علمي", "name_en": "Scientific", "color": "#264653"
     },
@@ -192,12 +226,113 @@ DOMAIN_KEYWORDS = {
         "ar": [
             "هندسة", "إنشائي", "مدني", "معماري", "كهرباء", "ميكانيك", "صرف", "مياه", "طرق",
             "جسور", "أنفاق", "خرسانة", "حديد", "تسليح", "صب", "ردم", "حفر", "أساسات",
-            "تصميم", "مخططات", "مواصفات", "بناء", "تشييد", "إشراف", "جودة", "اختبار",
+            "تصميم", "مخططات", "مواصفات", "بناء", "تشييد", "إشراف", "جودة", "اختبار", "مساحة",
             "engineering", "structural", "civil", "architectural", "electrical", "mechanical",
             "concrete", "rebar", "foundation", "excavation", "backfill", "pouring", "drawings",
-            "specifications", "construction", "supervision", "quality", "inspection", "survey"
+            "specifications", "construction", "supervision", "quality", "inspection", "survey",
+            "pipeline", "HVAC", "plumbing", "welding", "blueprint", "geotechnical", "load"
         ],
         "emoji": "🏗️", "name_ar": "هندسي", "name_en": "Engineering", "color": "#1D9E75"
+    },
+    "military": {
+        "ar": [
+            "جيش", "عسكري", "دفاع", "حرب", "معركة", "سلاح", "سلاح الجو", "بحرية", "دبابة",
+            "صاروخ", "قنبلة", "قاعدة عسكرية", "تجنيد", "ضابط", "جندي", "رتبة", "عملية عسكرية",
+            "military", "army", "defense", "war", "battle", "weapon", "air force", "navy", "tank",
+            "missile", "bomb", "base", "recruitment", "officer", "soldier", "rank", "operation",
+            "tactical", "strategic", "intelligence", "surveillance", "drone", "armored", "combat"
+        ],
+        "emoji": "🎖️", "name_ar": "عسكري", "name_en": "Military", "color": "#8B0000"
+    },
+    "educational": {
+        "ar": [
+            "مدرسة", "جامعة", "تعليم", "تدريس", "معلم", "أستاذ", "طالب", "دراسة", "مناهج",
+            "امتحان", "اختبار", "شهادة", "بحث علمي", "رسالة", "أطروحة", "تدريب", "دورة",
+            "school", "university", "education", "teaching", "teacher", "professor", "student",
+            "curriculum", "exam", "test", "certificate", "thesis", "dissertation", "training",
+            "course", "academic", "scholarship", "tuition", "faculty", "campus", "enrollment"
+        ],
+        "emoji": "📚", "name_ar": "تعليمي", "name_en": "Educational", "color": "#F4D03F"
+    },
+    "religious": {
+        "ar": [
+            "مسجد", "كنيسة", "معبد", "صلاة", "قرآن", "إنجيل", "حديث", "فقه", "شريعة",
+            "حج", "عمرة", "صوم", "زكاة", "إمام", "خطيب", "دين", "عقيدة", "عبادة", "تفسير",
+            "mosque", "church", "temple", "prayer", "Quran", "Bible", "hadith", "jurisprudence",
+            "sharia", "pilgrimage", "fasting", "charity", "imam", "sermon", "religion", "faith",
+            "worship", "exegesis", "theology", "monastery", "ritual", "sacred", "holy", "doctrine"
+        ],
+        "emoji": "🕌", "name_ar": "ديني", "name_en": "Religious", "color": "#6C3483"
+    },
+    "sports": {
+        "ar": [
+            "رياضة", "كرة القدم", "كرة السلة", "تنس", "سباحة", "جري", "ملعب", "نادي", "فريق",
+            "لاعب", "مدرب", "حكم", "بطولة", "كأس", "مباراة", "تدريب", "لياقة", "مسابقة",
+            "sports", "football", "soccer", "basketball", "tennis", "swimming", "running", "stadium",
+            "club", "team", "player", "coach", "referee", "championship", "cup", "match", "fitness",
+            "competition", "athlete", "olympic", "tournament", "league", "score", "goal", "medal"
+        ],
+        "emoji": "⚽", "name_ar": "رياضي", "name_en": "Sports", "color": "#E67E22"
+    },
+    "literary": {
+        "ar": [
+            "أدب", "قصة", "رواية", "شعر", "قصيدة", "كاتب", "مؤلف", "نص", "أسلوب", "بلاغة",
+            "مجاز", "استعارة", "تشبيه", "فصل", "فقرة", "سرد", "حبكة", "شخصية", "حوار",
+            "literature", "story", "novel", "poetry", "poem", "writer", "author", "text", "style",
+            "rhetoric", "metaphor", "simile", "chapter", "paragraph", "narrative", "plot", "character",
+            "dialogue", "prose", "fiction", "non-fiction", "anthology", "manuscript", "publisher"
+        ],
+        "emoji": "📖", "name_ar": "أدبي", "name_en": "Literary", "color": "#D81B60"
+    },
+    "it": {
+        "ar": [
+            "برمجة", "كود", "حاسوب", "كمبيوتر", "شبكة", "إنترنت", "برنامج", "تطبيق", "موقع",
+            "خادم", "قاعدة بيانات", "أمن سيبراني", "هاكر", "ذكاء اصطناعي", "تعلم آلي", "سحابي",
+            "programming", "code", "computer", "network", "internet", "software", "application", "website",
+            "server", "database", "cybersecurity", "hacker", "AI", "machine learning", "cloud", "API",
+            "frontend", "backend", "devops", "blockchain", "cryptocurrency", "domain", "hosting"
+        ],
+        "emoji": "💻", "name_ar": "تقني", "name_en": "IT / Tech", "color": "#00ACC1"
+    },
+    "environmental": {
+        "ar": [
+            "بيئة", "تلوث", "مناخ", "احتباس حراري", "طاقة متجددة", "شمسية", "رياح", "مياه جوفية",
+            "غابة", "صحراء", "تصحر", "تنوع حيوي", "محمية", "طبيعة", "أوزون", "كربون",
+            "environment", "pollution", "climate", "global warming", "renewable", "solar", "wind",
+            "groundwater", "forest", "desert", "biodiversity", "reserve", "nature", "ozone", "carbon",
+            "sustainability", "ecosystem", "greenhouse", "emission", "recycling", "conservation"
+        ],
+        "emoji": "🌿", "name_ar": "بيئي", "name_en": "Environmental", "color": "#43A047"
+    },
+    "agricultural": {
+        "ar": [
+            "زراعة", "مزرعة", "محصول", "قمح", "أرز", "ذرة", "أشجار", "ماء ري", "تربة",
+            "سماد", "مبيد", "حصاد", "حصادة", "ثروة حيوانية", "مواشي", "أغنام", "دواجن", "سمك",
+            "agriculture", "farm", "crop", "wheat", "rice", "corn", "trees", "irrigation", "soil",
+            "fertilizer", "pesticide", "harvest", "combine", "livestock", "cattle", "sheep", "poultry",
+            "fishery", "aquaculture", "greenhouse", "plowing", "seeding", "organic", "horticulture"
+        ],
+        "emoji": "🌾", "name_ar": "زراعي", "name_en": "Agricultural", "color": "#795548"
+    },
+    "media": {
+        "ar": [
+            "إعلام", "صحافة", "تلفزيون", "إذاعة", "صحيفة", "خبر", "تقرير", "مذيع", "مراسل",
+            "تحقيق", "صحفي", "إعلان", "دعاية", "بث", "قناة", "برنامج إعلامي", "صحفي",
+            "media", "journalism", "television", "radio", "newspaper", "news", "report", "anchor",
+            "correspondent", "investigation", "journalist", "advertising", "broadcast", "channel",
+            "press", "editorial", "column", "headline", "scoop", "documentary", "podcast"
+        ],
+        "emoji": "📺", "name_ar": "إعلامي", "name_en": "Media", "color": "#5E35B1"
+    },
+    "tourism": {
+        "ar": [
+            "سياحة", "فندق", "سفر", "رحلة", "مطار", "طيران", "جواز", "تأشيرة", "جولة",
+            "أثر", "تاريخي", "معلم", "منتجع", "شاطئ", "جبل", "صحراء", "متحف", "تراث",
+            "tourism", "hotel", "travel", "trip", "airport", "aviation", "passport", "visa", "tour",
+            "monument", "historic", "landmark", "resort", "beach", "mountain", "desert", "museum",
+            "heritage", "cruise", "destination", "itinerary", "booking", "check-in", "souvenir"
+        ],
+        "emoji": "✈️", "name_ar": "سياحي", "name_en": "Tourism", "color": "#00838F"
     },
     "general": {
         "ar": [],
@@ -207,7 +342,7 @@ DOMAIN_KEYWORDS = {
 
 
 def detect_domains(text):
-    """Returns list of detected domain keys sorted by relevance (score)."""
+    """Returns list of detected domain keys ONLY if found. Empty if nothing detected."""
     text_lower = text.lower()
     scores = {}
     for domain, data in DOMAIN_KEYWORDS.items():
@@ -215,24 +350,16 @@ def detect_domains(text):
             continue
         score = 0
         for keyword in data["ar"]:
-            # count occurrences
             count = text_lower.count(keyword.lower())
             if count > 0:
-                # longer keywords = more specific = higher weight
                 weight = 1 + (len(keyword) / 50)
                 score += count * weight
         if score > 0:
             scores[domain] = score
 
     if not scores:
-        return ["general"]
-
-    # sort by score descending
-    sorted_domains = sorted(scores, key=scores.get, reverse=True)
-    # always include general as last option
-    if "general" not in sorted_domains:
-        sorted_domains.append("general")
-    return sorted_domains
+        return []
+    return sorted(scores, key=scores.get, reverse=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -328,7 +455,7 @@ def detect_site_slang(text):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  Formulation Engine (per domain)
+#  Formulation Engine (per domain) — 15 DOMAINS
 # ═══════════════════════════════════════════════════════════════════════════════
 FORMULA_TEMPLATES = {
     "political": {
@@ -355,6 +482,46 @@ FORMULA_TEMPLATES = {
         "ar": {"يجب": "يتطلب التصميم الهندسي", "المقاول": "المقاول المنفذ", "رب العمل": "المالك (Employer)", "من أجل": "لضمان الموثوقية الفنية في"},
         "en_prefix": "From an engineering standpoint, "
     },
+    "military": {
+        "ar": {"يجب": "تقتضي الضرورة العسكرية", "المقاول": "الوحدة المنفذة", "رب العمل": "القيادة العليا", "من أجل": "في إطار المهمة العسكرية لـ"},
+        "en_prefix": "From a military standpoint, "
+    },
+    "educational": {
+        "ar": {"يجب": "يُوصي المنهج التعليمي بـ", "المقاول": "الجهة التعليمية المنفذة", "رب العمل": "الإدارة الأكاديمية", "من أجل": "لتحقيق الأهداف التعليمية لـ"},
+        "en_prefix": "From an educational perspective, "
+    },
+    "religious": {
+        "ar": {"يجب": "يُشير الشرع الحنيف إلى", "المقاول": "الجهة الدينية المنفذة", "رب العمل": "الهيئة الشرعية", "من أجل": "في سبيل تحقيق المقصد الديني لـ"},
+        "en_prefix": "From a religious perspective, "
+    },
+    "sports": {
+        "ar": {"يجب": "يقتضي النظام الرياضي", "المقاول": "الفريق المنفذ", "رب العمل": "الإدارة الرياضية", "من أجل": "لتحقيق الأداء الرياضي في"},
+        "en_prefix": "In the sporting context, "
+    },
+    "literary": {
+        "ar": {"يجب": "يقتضي الأسلوب الأدبي", "المقاول": "الكاتب المنفذ", "رب العمل": "دار النشر", "من أجل": "لإبراز البعد الأدبي في"},
+        "en_prefix": "From a literary perspective, "
+    },
+    "it": {
+        "ar": {"يجب": "تقتضي متطلبات النظام التقني", "المقاول": "مطور البرنامج", "رب العمل": "مدير المشروع التقني", "من أجل": "لتحقيق الأداء التقني لـ"},
+        "en_prefix": "From a technical standpoint, "
+    },
+    "environmental": {
+        "ar": {"يجب": "تقتضي المعايير البيئية", "المقاول": "الجهة البيئية المنفذة", "رب العمل": "الجهة الراعية للبيئة", "من أجل": "لحماية البيئة في"},
+        "en_prefix": "From an environmental standpoint, "
+    },
+    "agricultural": {
+        "ar": {"يجب": "تقتضي الممارسات الزراعية", "المقاول": "المزارع المنفذ", "رب العمل": "صاحب المزرعة", "من أجل": "لتحسين الإنتاج الزراعي في"},
+        "en_prefix": "From an agricultural perspective, "
+    },
+    "media": {
+        "ar": {"يجب": "تقتضي المهنية الإعلامية", "المقاول": "الجهة الإعلامية المنفذة", "رب العمل": "الإدارة الإعلامية", "من أجل": "لتحقيق التغطية الإعلامية لـ"},
+        "en_prefix": "From a media perspective, "
+    },
+    "tourism": {
+        "ar": {"يجب": "تقتضي معايير السياحة", "المقاول": "وكالة السفر المنفذة", "رب العمل": "الجهة السياحية المالكة", "من أجل": "لتعزيز التجربة السياحية في"},
+        "en_prefix": "From a tourism standpoint, "
+    },
     "general": {
         "ar": {},
         "en_prefix": ""
@@ -369,7 +536,6 @@ def build_formula(base, domain, to_lang):
         if prefix and base:
             return prefix + base[0].lower() + base[1:]
         return base
-    # Arabic
     result = base
     for k, v in tmpl.get("ar", {}).items():
         result = result.replace(k, v)
@@ -469,13 +635,12 @@ if should_translate:
 
         if is_single:
             st.markdown(f"### 🗄️ Contextual Lexicon: `{text}`")
-            # Show all domain meanings for single word
+            show_domains = detected_domains if detected_domains else ["general"]
             rows = ""
-            for d in detected_domains:
+            for d in show_domains:
                 info = DOMAIN_KEYWORDS[d]
                 formulated = build_formula(base, d, tl)
-                rows += f"| {info['emoji']} {info['name_ar']} | {formulated} |
-"
+                rows += f"| {info['emoji']} {info['name_ar']} | {formulated} |\n"
             st.markdown(f"""
 | المجال | المعنى |
 |:---|:---|
@@ -493,7 +658,6 @@ if should_translate:
             for d in domains_to_show:
                 info = DOMAIN_KEYWORDS[d]
                 formulated = build_formula(base, d, tl)
-                # highlight the top detected domain
                 highlight_class = " rcard-detected" if (detected_domains and d == detected_domains[0]) else ""
                 cards.append((d, info, formulated, highlight_class))
 
