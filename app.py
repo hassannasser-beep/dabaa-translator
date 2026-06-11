@@ -783,7 +783,8 @@ def detect_abbreviations(text):
             })
 
     # Reverse acronym detection: check if words form acronym
-    words_clean = [w.strip(".,;:!?()[]{}"'").upper() for w in text_words if len(w.strip(".,;:!?()[]{}"'")) > 1]
+    strip_chars = """.,;:!?()[]{}"'"""
+    words_clean = [w.strip(strip_chars).upper() for w in text_words if len(w.strip(strip_chars)) > 1]
     for abbr, data in abbreviations_db.items():
         if len(abbr) >= 2:
             abbr_chars = list(abbr.upper())
