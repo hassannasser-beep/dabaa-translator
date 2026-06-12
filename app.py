@@ -1010,31 +1010,32 @@ if should_translate:
         base, engine_used = fetch_ai_translation(text, fl, tl)
 
         if is_single:
-            st.markdown(f"### 🗄️ Contextual Lexicon: `{text}`")
-            show_domains = detected_domains if detected_domains else ["general"]
+            st.markdown(f"### 🗄️ All Possible Meanings for: `{text}`")
+            # Show ALL domains, highlighting detected ones
+            all_domains = [k for k in DOMAIN_KEYWORDS.keys() if k != "general"] + ["general"]
             rows = ""
-            for d in show_domains:
+            for d in all_domains:
                 info = DOMAIN_KEYWORDS[d]
                 formulated = build_formula(base, d, tl)
-                rows += f"| {info['emoji']} {info['name_ar']} | {formulated} |\n"
+                highlight = " ✅ **(Detected)**" if d in detected_domains else ""
+                rows += f"| {info['emoji']} **{info['name_ar']}**{highlight} | {formulated} |\n"
             st.markdown(f"""
 | المجال | المعنى |
 |:---|:---|
 {rows}
 """)
         else:
-            # Show ONLY detected domains (no general if domains found)
-            if detected_domains:
-                domains_to_show = detected_domains
-            else:
-                domains_to_show = ["general"]
+            st.markdown("### 📚 All Possible Domain Translations")
+            # Show ALL domains, highlighting detected ones
+            all_domains = [k for k in DOMAIN_KEYWORDS.keys() if k != "general"] + ["general"]
 
-            # Build cards
+            # Build cards for ALL domains
             cards = []
-            for d in domains_to_show:
+            for d in all_domains:
                 info = DOMAIN_KEYWORDS[d]
                 formulated = build_formula(base, d, tl)
-                highlight_class = " rcard-detected" if (detected_domains and d == detected_domains[0]) else ""
+                # Highlight detected domains
+                highlight_class = " rcard-detected" if d in detected_domains else ""
                 cards.append((d, info, formulated, highlight_class))
 
             # Render in rows of 3
@@ -1043,9 +1044,10 @@ if should_translate:
                 cols = st.columns(len(batch))
                 for col, (d, info, formulated, highlight) in zip(cols, batch):
                     with col:
+                        detected_badge = " ✅" if d in detected_domains else ""
                         st.markdown(
                             f'<div class="rcard rcard-{d}{highlight}">'
-                            f'<div class="rlabel rlabel-{d}">{info["emoji"]} {info["name_en"].upper()}</div>'
+                            f'<div class="rlabel rlabel-{d}">{info["emoji"]} {info["name_en"].upper()}{detected_badge}</div>'
                             f'<div class="rtext">{formulated}</div>'
                             f'</div>',
                             unsafe_allow_html=True
