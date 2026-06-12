@@ -132,16 +132,15 @@ DOMAINS = {
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  DATABASE CONNECTION
+#  DATABASE
 # ═══════════════════════════════════════════════════════════════════════════════
 DB_PATH = Path(__file__).parent / "dictionary.db"
 
 def get_db_connection():
-    """Get SQLite database connection."""
     return sqlite3.connect(str(DB_PATH))
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  DOMAIN DETECTION KEYWORDS (in-memory for speed)
+#  DOMAIN DETECTION
 # ═══════════════════════════════════════════════════════════════════════════════
 DOMAIN_KEYWORDS = {
     "political": ["وزير", "حكومة", "مجلس", "وزارة", "برلمان", "سياسة", "دبلوماسي", "سفير", "معاهدة",
@@ -223,27 +222,6 @@ def detect_domains(text):
 # ═══════════════════════════════════════════════════════════════════════════════
 #  DATABASE FUNCTIONS
 # ═══════════════════════════════════════════════════════════════════════════════
-def get_db_connection():
-    """Get SQLite database connection."""
-    return sqlite3.connect(str(DB_PATH))
-
-def get_domain_translation_from_db(word, domain, target_lang):
-    """Get domain-specific translation from SQLite database."""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute(
-            "SELECT translation, description FROM domain_translations WHERE word = ? AND domain = ? AND target_lang = ?",
-            (word.lower(), domain, target_lang)
-        )
-        result = cursor.fetchone()
-        conn.close()
-        if result:
-            return {"translation": result[0], "desc": result[1]}
-        return None
-    except Exception:
-        return None
-
 def get_all_domain_translations_from_db(word, target_lang):
     """Get all domain translations for a word from database."""
     try:
@@ -451,9 +429,9 @@ def build_formula(text, domain, target_lang):
 #  SESSION STATE INITIALIZATION
 # ═══════════════════════════════════════════════════════════════════════════════
 if "source_lang_idx" not in st.session_state:
-    st.session_state.source_lang_idx = 0  # Default to Arabic
+    st.session_state.source_lang_idx = 0
 if "target_lang_idx" not in st.session_state:
-    st.session_state.target_lang_idx = 1  # Default to English
+    st.session_state.target_lang_idx = 1
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  UI — LANGUAGE PAIR
@@ -474,7 +452,6 @@ with left:
 target_lang_options = [k for k in lang_list if k != source_lang_name]
 
 with right:
-    # Ensure target index is valid
     valid_target_idx = min(st.session_state.target_lang_idx, len(target_lang_options) - 1)
     if valid_target_idx < 0:
         valid_target_idx = 0
@@ -493,9 +470,11 @@ target_lang = languages_dict[target_lang_name]
 c1, c2, c3 = st.columns([1, 0.15, 1])
 with c2:
     if st.button("⇄", key="swap_btn", help="Swap languages"):
-        # Find indices for swap
         new_source_idx = lang_list.index(target_lang_name)
-        new_target_idx = target_lang_options.index(source_lang_name) if source_lang_name in target_lang_options else 0
+        if source_lang_name in target_lang_options:
+            new_target_idx = target_lang_options.index(source_lang_name)
+        else:
+            new_target_idx = 0
         st.session_state.source_lang_idx = new_source_idx
         st.session_state.target_lang_idx = new_target_idx
         st.rerun()
