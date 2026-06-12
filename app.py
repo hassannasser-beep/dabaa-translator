@@ -473,15 +473,16 @@ with left:
 # Filter target options (exclude source language)
 target_lang_options = [k for k in lang_list if k != source_lang_name]
 
-# Adjust target index if needed
-if target_lang_name not in target_lang_options:
-    st.session_state.target_lang_idx = 0
-
 with right:
+    # Ensure target index is valid
+    valid_target_idx = min(st.session_state.target_lang_idx, len(target_lang_options) - 1)
+    if valid_target_idx < 0:
+        valid_target_idx = 0
+
     target_lang_name = st.selectbox(
         "To", 
         target_lang_options,
-        index=min(st.session_state.target_lang_idx, len(target_lang_options) - 1),
+        index=valid_target_idx,
         key="target_lang_select"
     )
 
