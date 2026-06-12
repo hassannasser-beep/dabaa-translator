@@ -881,21 +881,105 @@ FORMULA_TEMPLATES = {
     },
     "general": {
         "ar": {},
-        "en_prefix": ""
+        "en_prefix": "",
+        "en_replacements": {}
+    }
+}
+
+# Domain-specific terminology replacements for richer translations
+DOMAIN_TERMS = {
+    "political": {
+        "ar": {"عقد": "اتفاقية سياسية", "اتفاقية": "معاهدة دولية", "قانون": "تشريع", "حكم": "قرار سياسي", "قرار": "قرار سياسي", "بند": "بند اتفاقي", "التزام": "التزام دولي", "حق": "حق سياسي", "ملكية": "سيادة", "مسؤولية": "مسؤولية سياسية"},
+        "en": {"contract": "political agreement", "agreement": "treaty", "law": "legislation", "judgment": "political decision", "decision": "political resolution", "clause": "diplomatic clause", "obligation": "international commitment", "right": "political right", "property": "sovereignty", "liability": "political responsibility"}
+    },
+    "legal": {
+        "ar": {"عقد": "عقد قانوني ملزم", "اتفاقية": "اتفاقية قانونية", "قانون": "نص قانوني", "حكم": "حكم قضائي", "قرار": "قرار قضائي", "بند": "بند تعاقدي", "التزام": "التزام قانوني", "حق": "حق قانوني", "ملكية": "ملكية شرعية", "مسؤولية": "مسؤولية قانونية"},
+        "en": {"contract": "legally binding contract", "agreement": "legal agreement", "law": "statute", "judgment": "court ruling", "decision": "legal decision", "clause": "contractual clause", "obligation": "legal obligation", "right": "legal right", "property": "legal property", "liability": "legal liability"}
+    },
+    "economic": {
+        "ar": {"عقد": "عقد اقتصادي", "اتفاقية": "اتفاقية تجارية", "قانون": "قانون مالي", "حكم": "قرار اقتصادي", "قرار": "قرار استثماري", "بند": "بند مالي", "التزام": "التزام مالي", "حق": "حق اقتصادي", "ملكية": "ملكية اقتصادية", "مسؤولية": "مسؤولية مالية"},
+        "en": {"contract": "economic contract", "agreement": "trade agreement", "law": "financial law", "judgment": "economic decision", "decision": "investment decision", "clause": "financial clause", "obligation": "financial obligation", "right": "economic right", "property": "economic asset", "liability": "financial liability"}
+    },
+    "medical": {
+        "ar": {"عقد": "بروتوكول علاجي", "اتفاقية": "اتفاقية صحية", "قانون": "قانون صحي", "حكم": "تشخيص", "قرار": "قرار طبي", "بند": "بند صحي", "التزام": "التزام صحي", "حق": "حق صحي", "ملكية": "ملكية صحية", "مسؤولية": "مسؤولية طبية"},
+        "en": {"contract": "treatment protocol", "agreement": "health agreement", "law": "health law", "judgment": "diagnosis", "decision": "medical decision", "clause": "health clause", "obligation": "health obligation", "right": "health right", "property": "health facility", "liability": "medical liability"}
+    },
+    "scientific": {
+        "ar": {"عقد": "بروتوكول بحثي", "اتفاقية": "اتفاقية علمية", "قانون": "قانون علمي", "حكم": "نتيجة علمية", "قرار": "قرار بحثي", "بند": "بند علمي", "التزام": "التزام علمي", "حق": "حق علمي", "ملكية": "ملكية فكرية", "مسؤولية": "مسؤولية علمية"},
+        "en": {"contract": "research protocol", "agreement": "scientific agreement", "law": "scientific law", "judgment": "scientific finding", "decision": "research decision", "clause": "scientific clause", "obligation": "research obligation", "right": "scientific right", "property": "intellectual property", "liability": "scientific liability"}
+    },
+    "engineering": {
+        "ar": {"عقد": "عقد إنشائي", "اتفاقية": "اتفاقية هندسية", "قانون": "مواصفة فنية", "حكم": "قرار هندسي", "قرار": "قرار فني", "بند": "بند هندسي", "التزام": "التزام فني", "حق": "حق هندسي", "ملكية": "ملكية هندسية", "مسؤولية": "مسؤولية فنية"},
+        "en": {"contract": "construction contract", "agreement": "engineering agreement", "law": "technical specification", "judgment": "engineering decision", "decision": "technical decision", "clause": "technical clause", "obligation": "technical obligation", "right": "engineering right", "property": "engineering asset", "liability": "technical liability"}
+    },
+    "military": {
+        "ar": {"عقد": "أمر عسكري", "اتفاقية": "اتفاقية عسكرية", "قانون": "قانون عسكري", "حكم": "قرار عسكري", "قرار": "أمر عمليات", "بند": "بند عسكري", "التزام": "التزام عسكري", "حق": "حق عسكري", "ملكية": "ملكية عسكرية", "مسؤولية": "مسؤولية عسكرية"},
+        "en": {"contract": "military order", "agreement": "military agreement", "law": "military law", "judgment": "military decision", "decision": "operational order", "clause": "military clause", "obligation": "military obligation", "right": "military right", "property": "military asset", "liability": "military liability"}
+    },
+    "educational": {
+        "ar": {"عقد": "عقد تعليمي", "اتفاقية": "اتفاقية أكاديمية", "قانون": "قانون تعليمي", "حكم": "قرار أكاديمي", "قرار": "قرار تعليمي", "بند": "بند أكاديمي", "التزام": "التزام أكاديمي", "حق": "حق تعليمي", "ملكية": "ملكية فكرية", "مسؤولية": "مسؤولية تعليمية"},
+        "en": {"contract": "educational contract", "agreement": "academic agreement", "law": "education law", "judgment": "academic decision", "decision": "educational decision", "clause": "academic clause", "obligation": "academic obligation", "right": "educational right", "property": "academic property", "liability": "educational liability"}
+    },
+    "religious": {
+        "ar": {"عقد": "عقد ديني", "اتفاقية": "اتفاقية شرعية", "قانون": "حكم شرعي", "حكم": "فتوى", "قرار": "قرار ديني", "بند": "بند شرعي", "التزام": "التزام ديني", "حق": "حق شرعي", "ملكية": "ملكية شرعية", "مسؤولية": "مسؤولية دينية"},
+        "en": {"contract": "religious covenant", "agreement": "religious agreement", "law": "religious law", "judgment": "religious ruling", "decision": "religious decision", "clause": "religious clause", "obligation": "religious obligation", "right": "religious right", "property": "religious property", "liability": "religious liability"}
+    },
+    "sports": {
+        "ar": {"عقد": "عقد رياضي", "اتفاقية": "اتفاقية رياضية", "قانون": "قانون رياضي", "حكم": "قرار تحكيمي", "قرار": "قرار رياضي", "بند": "بند رياضي", "التزام": "التزام رياضي", "حق": "حق رياضي", "ملكية": "ملكية نادي", "مسؤولية": "مسؤولية رياضية"},
+        "en": {"contract": "sports contract", "agreement": "sports agreement", "law": "sports law", "judgment": "referee decision", "decision": "sports decision", "clause": "sports clause", "obligation": "sports obligation", "right": "sports right", "property": "club asset", "liability": "sports liability"}
+    },
+    "literary": {
+        "ar": {"عقد": "عقد أدبي", "اتفاقية": "اتفاقية أدبية", "قانون": "قانون أدبي", "حكم": "حكم أدبي", "قرار": "قرار أدبي", "بند": "بند أدبي", "التزام": "التزام أدبي", "حق": "حق أدبي", "ملكية": "ملكية فكرية", "مسؤولية": "مسؤولية أدبية"},
+        "en": {"contract": "literary contract", "agreement": "literary agreement", "law": "copyright law", "judgment": "literary critique", "decision": "editorial decision", "clause": "literary clause", "obligation": "literary obligation", "right": "author right", "property": "intellectual property", "liability": "literary liability"}
+    },
+    "it": {
+        "ar": {"عقد": "عقد تقني", "اتفاقية": "اتفاقية تقنية", "قانون": "قانون تقني", "حكم": "قرار تقني", "قرار": "قرار تقني", "بند": "بند تقني", "التزام": "التزام تقني", "حق": "حق تقني", "ملكية": "ملكية رقمية", "مسؤولية": "مسؤولية تقنية"},
+        "en": {"contract": "tech contract", "agreement": "tech agreement", "law": "tech law", "judgment": "tech decision", "decision": "tech decision", "clause": "tech clause", "obligation": "tech obligation", "right": "tech right", "property": "digital asset", "liability": "tech liability"}
+    },
+    "environmental": {
+        "ar": {"عقد": "عقد بيئي", "اتفاقية": "اتفاقية بيئية", "قانون": "قانون بيئي", "حكم": "حكم بيئي", "قرار": "قرار بيئي", "بند": "بند بيئي", "التزام": "التزام بيئي", "حق": "حق بيئي", "ملكية": "ملكية طبيعية", "مسؤولية": "مسؤولية بيئية"},
+        "en": {"contract": "environmental contract", "agreement": "environmental agreement", "law": "environmental law", "judgment": "environmental ruling", "decision": "environmental decision", "clause": "environmental clause", "obligation": "environmental obligation", "right": "environmental right", "property": "natural resource", "liability": "environmental liability"}
+    },
+    "agricultural": {
+        "ar": {"عقد": "عقد زراعي", "اتفاقية": "اتفاقية زراعية", "قانون": "قانون زراعي", "حكم": "حكم زراعي", "قرار": "قرار زراعي", "بند": "بند زراعي", "التزام": "التزام زراعي", "حق": "حق زراعي", "ملكية": "ملكية زراعية", "مسؤولية": "مسؤولية زراعية"},
+        "en": {"contract": "farm contract", "agreement": "agricultural agreement", "law": "agricultural law", "judgment": "agricultural ruling", "decision": "agricultural decision", "clause": "agricultural clause", "obligation": "agricultural obligation", "right": "agricultural right", "property": "farmland", "liability": "agricultural liability"}
+    },
+    "media": {
+        "ar": {"عقد": "عقد إعلامي", "اتفاقية": "اتفاقية إعلامية", "قانون": "قانون إعلامي", "حكم": "حكم إعلامي", "قرار": "قرار إعلامي", "بند": "بند إعلامي", "التزام": "التزام إعلامي", "حق": "حق إعلامي", "ملكية": "ملكية إعلامية", "مسؤولية": "مسؤولية إعلامية"},
+        "en": {"contract": "media contract", "agreement": "media agreement", "law": "media law", "judgment": "media ruling", "decision": "editorial decision", "clause": "media clause", "obligation": "media obligation", "right": "media right", "property": "media asset", "liability": "media liability"}
+    },
+    "tourism": {
+        "ar": {"عقد": "عقد سياحي", "اتفاقية": "اتفاقية سياحية", "قانون": "قانون سياحي", "حكم": "حكم سياحي", "قرار": "قرار سياحي", "بند": "بند سياحي", "التزام": "التزام سياحي", "حق": "حق سياحي", "ملكية": "ملكية سياحية", "مسؤولية": "مسؤولية سياحية"},
+        "en": {"contract": "tourism contract", "agreement": "tourism agreement", "law": "tourism law", "judgment": "tourism ruling", "decision": "tourism decision", "clause": "tourism clause", "obligation": "tourism obligation", "right": "tourism right", "property": "tourism asset", "liability": "tourism liability"}
+    },
+    "general": {
+        "ar": {},
+        "en": {}
     }
 }
 
 
 def build_formula(base, domain, to_lang):
     tmpl = FORMULA_TEMPLATES.get(domain, FORMULA_TEMPLATES["general"])
-    if to_lang != "ar":
-        prefix = tmpl.get("en_prefix", "")
-        if prefix and base:
-            return prefix + base[0].lower() + base[1:]
-        return base
+    terms = DOMAIN_TERMS.get(domain, DOMAIN_TERMS["general"])
+
     result = base
-    for k, v in tmpl.get("ar", {}).items():
-        result = result.replace(k, v)
+
+    # Apply domain-specific terminology replacements
+    if to_lang == "ar":
+        for k, v in terms.get("ar", {}).items():
+            result = result.replace(k, v)
+        # Apply formula templates
+        for k, v in tmpl.get("ar", {}).items():
+            result = result.replace(k, v)
+    else:
+        # For English and other languages
+        for k, v in terms.get("en", {}).items():
+            result = result.replace(k, v)
+        prefix = tmpl.get("en_prefix", "")
+        if prefix and result:
+            result = prefix + result[0].lower() + result[1:]
+
     return result
 
 
