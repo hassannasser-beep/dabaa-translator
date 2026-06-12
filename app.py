@@ -450,22 +450,40 @@ def build_formula(text, domain, target_lang):
 # ═══════════════════════════════════════════════════════════════════════════════
 #  SESSION STATE INITIALIZATION
 # ═══════════════════════════════════════════════════════════════════════════════
-if "source_lang" not in st.session_state:
-    st.session_state.source_lang = "العربية"
-if "target_lang" not in st.session_state:
-    st.session_state.target_lang = "English"
+if "source_lang_idx" not in st.session_state:
+    st.session_state.source_lang_idx = 0  # Default to Arabic
+if "target_lang_idx" not in st.session_state:
+    st.session_state.target_lang_idx = 1  # Default to English
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  UI — LANGUAGE PAIR
 # ═══════════════════════════════════════════════════════════════════════════════
 left, right = st.columns([1, 1])
+
+lang_list = list(languages_dict.keys())
+
 with left:
-    source_lang_name = st.selectbox("From", list(languages_dict.keys()), key="source_lang")
+    source_lang_name = st.selectbox(
+        "From", 
+        lang_list, 
+        index=st.session_state.source_lang_idx,
+        key="source_lang_select"
+    )
+
+# Filter target options (exclude source language)
+target_lang_options = [k for k in lang_list if k != source_lang_name]
+
+# Adjust target index if needed
+if target_lang_name not in target_lang_options:
+    st.session_state.target_lang_idx = 0
+
 with right:
-    target_lang_options = [k for k in languages_dict.keys() if k != source_lang_name]
-    if "target_lang" not in st.session_state or st.session_state.target_lang not in target_lang_options:
-        st.session_state.target_lang = target_lang_options[0]
-    target_lang_name = st.selectbox("To", target_lang_options, key="target_lang")
+    target_lang_name = st.selectbox(
+        "To", 
+        target_lang_options,
+        index=min(st.session_state.target_lang_idx, len(target_lang_options) - 1),
+        key="target_lang_select"
+    )
 
 source_lang = languages_dict[source_lang_name]
 target_lang = languages_dict[target_lang_name]
@@ -474,7 +492,11 @@ target_lang = languages_dict[target_lang_name]
 c1, c2, c3 = st.columns([1, 0.15, 1])
 with c2:
     if st.button("⇄", key="swap_btn", help="Swap languages"):
-        st.session_state.source_lang, st.session_state.target_lang = st.session_state.target_lang, st.session_state.source_lang
+        # Find indices for swap
+        new_source_idx = lang_list.index(target_lang_name)
+        new_target_idx = target_lang_options.index(source_lang_name) if source_lang_name in target_lang_options else 0
+        st.session_state.source_lang_idx = new_source_idx
+        st.session_state.target_lang_idx = new_target_idx
         st.rerun()
 
 # Input
