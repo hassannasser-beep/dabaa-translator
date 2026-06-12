@@ -448,6 +448,14 @@ def build_formula(text, domain, target_lang):
     return result
 
 # ═══════════════════════════════════════════════════════════════════════════════
+#  SESSION STATE INITIALIZATION
+# ═══════════════════════════════════════════════════════════════════════════════
+if "source_lang" not in st.session_state:
+    st.session_state.source_lang = "العربية"
+if "target_lang" not in st.session_state:
+    st.session_state.target_lang = "English"
+
+# ═══════════════════════════════════════════════════════════════════════════════
 #  UI — LANGUAGE PAIR
 # ═══════════════════════════════════════════════════════════════════════════════
 left, right = st.columns([1, 1])
