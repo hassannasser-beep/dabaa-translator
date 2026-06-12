@@ -5,7 +5,7 @@ import sqlite3
 import re
 from pathlib import Path
 
-st.set_page_config(page_title="HASSAN NASSER", page_icon="🏗️", layout="wide")
+st.set_page_config(page_title="HASSAN NASSER | Multi-Domain Translator", page_icon="🏗️", layout="wide")
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  CSS
@@ -77,6 +77,9 @@ textarea { border-radius: 8px !important; border: 0.5px solid #d1d5db !important
 .db-med2 { background: #5E35B1; color: white; } .db-tour { background: #00838F; color: white; }
 .db-gen { background: #6B7280; color: white; }
 .meaning-diff { background: #fff3e0; border-radius: 4px; padding: 2px 6px; font-size: 12px; color: #e65100; font-weight: 600; display: inline-block; margin-top: 4px; }
+.domain-card { margin-bottom: 12px; }
+.all-meanings-header { font-size: 18px; font-weight: 600; color: #1a1a2e; margin: 1.5rem 0 1rem; }
+.meaning-count { background: #5DCAA5; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-left: 8px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -94,7 +97,7 @@ st.markdown("""
         <span class="ldot"></span><span class="ldot"></span><span class="ldot"></span>
         <span class="ldot"></span><span class="ldot"></span><span class="ldot"></span>
         <span class="ldot"></span><span class="ldot"></span>
-        <span class="lang-bar-txt">8 languages</span>
+        <span class="lang-bar-txt">8 languages supported</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -102,33 +105,39 @@ st.markdown("""
 # ═══════════════════════════════════════════════════════════════════════════════
 #  CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════════════════
-languages_dict = {"العربية": "ar", "English": "en", "Русский": "ru", "中文": "zh",
-                  "Deutsch": "de", "Español": "es", "Português": "pt", "한국어": "ko"}
+languages_dict = {
+    "Arabic": "ar", "English": "en", "Russian": "ru", "Chinese": "zh",
+    "German": "de", "Spanish": "es", "Portuguese": "pt", "Korean": "ko"
+}
 
-lang_names = {"ar": "العربية", "en": "English", "ru": "Русский", "zh": "中文",
-              "de": "Deutsch", "es": "Español", "pt": "Português", "ko": "한국어"}
+lang_names = {
+    "ar": "Arabic", "en": "English", "ru": "Russian", "zh": "Chinese",
+    "de": "German", "es": "Spanish", "pt": "Portuguese", "ko": "Korean"
+}
 
-lang_flags = {"ar": "🇸🇦", "en": "🇬🇧", "ru": "🇷🇺", "zh": "🇨🇳",
-              "de": "🇩🇪", "es": "🇪🇸", "pt": "🇵🇹", "ko": "🇰🇷"}
+lang_flags = {
+    "ar": "🇸🇦", "en": "🇬🇧", "ru": "🇷🇺", "zh": "🇨🇳",
+    "de": "🇩🇪", "es": "🇪🇸", "pt": "🇵🇹", "ko": "🇰🇷"
+}
 
 DOMAINS = {
-    "political":  {"emoji": "🏛️", "name_ar": "سياسي",  "name_en": "Political",     "color": "#E63946"},
-    "legal":      {"emoji": "⚖️", "name_ar": "قانوني", "name_en": "Legal",         "color": "#534AB7"},
-    "economic":   {"emoji": "📈", "name_ar": "اقتصادي","name_en": "Economic",      "color": "#F4A261"},
-    "medical":    {"emoji": "🏥", "name_ar": "طبي",    "name_en": "Medical",       "color": "#2A9D8F"},
-    "scientific": {"emoji": "🔬", "name_ar": "علمي",   "name_en": "Scientific",    "color": "#264653"},
-    "engineering":{"emoji": "🏗️", "name_ar": "هندسي",  "name_en": "Engineering",   "color": "#1D9E75"},
-    "military":   {"emoji": "🎖️", "name_ar": "عسكري",  "name_en": "Military",      "color": "#8B0000"},
-    "educational":{"emoji": "📚", "name_ar": "تعليمي", "name_en": "Educational",   "color": "#F4D03F"},
-    "religious":  {"emoji": "🕌", "name_ar": "ديني",   "name_en": "Religious",     "color": "#6C3483"},
-    "sports":     {"emoji": "⚽", "name_ar": "رياضي",  "name_en": "Sports",        "color": "#E67E22"},
-    "literary":   {"emoji": "📖", "name_ar": "أدبي",   "name_en": "Literary",      "color": "#D81B60"},
-    "it":         {"emoji": "💻", "name_ar": "تقني",   "name_en": "IT / Tech",     "color": "#00ACC1"},
-    "environmental":{"emoji": "🌿", "name_ar": "بيئي",  "name_en": "Environmental", "color": "#43A047"},
-    "agricultural":{"emoji": "🌾", "name_ar": "زراعي", "name_en": "Agricultural",  "color": "#795548"},
-    "media":      {"emoji": "📺", "name_ar": "إعلامي", "name_en": "Media",         "color": "#5E35B1"},
-    "tourism":    {"emoji": "✈️", "name_ar": "سياحي",  "name_en": "Tourism",       "color": "#00838F"},
-    "general":    {"emoji": "💬", "name_ar": "عام",    "name_en": "General",       "color": "#6B7280"},
+    "political":  {"emoji": "🏛️", "name_en": "Political",     "color": "#E63946"},
+    "legal":      {"emoji": "⚖️", "name_en": "Legal",         "color": "#534AB7"},
+    "economic":   {"emoji": "📈", "name_en": "Economic",      "color": "#F4A261"},
+    "medical":    {"emoji": "🏥", "name_en": "Medical",       "color": "#2A9D8F"},
+    "scientific": {"emoji": "🔬", "name_en": "Scientific",    "color": "#264653"},
+    "engineering":{"emoji": "🏗️", "name_en": "Engineering",   "color": "#1D9E75"},
+    "military":   {"emoji": "🎖️", "name_en": "Military",      "color": "#8B0000"},
+    "educational":{"emoji": "📚", "name_en": "Educational",   "color": "#F4D03F"},
+    "religious":  {"emoji": "🕌", "name_en": "Religious",     "color": "#6C3483"},
+    "sports":     {"emoji": "⚽", "name_en": "Sports",        "color": "#E67E22"},
+    "literary":   {"emoji": "📖", "name_en": "Literary",      "color": "#D81B60"},
+    "it":         {"emoji": "💻", "name_en": "IT / Tech",     "color": "#00ACC1"},
+    "environmental":{"emoji": "🌿", "name_en": "Environmental", "color": "#43A047"},
+    "agricultural":{"emoji": "🌾", "name_en": "Agricultural",  "color": "#795548"},
+    "media":      {"emoji": "📺", "name_en": "Media",         "color": "#5E35B1"},
+    "tourism":    {"emoji": "✈️", "name_en": "Tourism",       "color": "#00838F"},
+    "general":    {"emoji": "💬", "name_en": "General",       "color": "#6B7280"},
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -143,72 +152,22 @@ def get_db_connection():
 #  DOMAIN DETECTION
 # ═══════════════════════════════════════════════════════════════════════════════
 DOMAIN_KEYWORDS = {
-    "political": ["وزير", "حكومة", "مجلس", "وزارة", "برلمان", "سياسة", "دبلوماسي", "سفير", "معاهدة",
-        "اتفاقية دولية", "حزب", "انتخابات", "تصويت", "أمن قومي", "استراتيجية وطنية", "بيان", "تصريح", "قمة",
-        "مؤتمر", "جلسة", "تشريع", "دستور", "حقوق", "مواطن", "political", "government", "minister",
-        "parliament", "diplomatic", "treaty", "election", "vote", "policy", "embassy", "summit", "legislation",
-        "constitution", "foreign affairs", "national security", "coalition", "sanctions", "bilateral"],
-    "legal": ["عقد", "اتفاقية", "بند", "ملحق", "تعاقد", "قانون", "مرسوم", "لائحة", "نظام", "شرط", "جزاء",
-        "تعويض", "مسؤولية", "ضمان", "FIDIC", "تحكيم", "دعوى", "محكمة", "قاضي", "حكم", "قرار", "تنظيمي",
-        "ترخيص", "التزام", "حق", "ملكية", "إثبات", "contract", "agreement", "clause", "appendix", "legal",
-        "stipulation", "liable", "penalty", "compensation", "arbitration", "court", "judgment", "license",
-        "obligation", "terms and conditions", "binding", "jurisdiction", "warranty", "indemnity", "breach"],
-    "economic": ["اقتصاد", "مالية", "استثمار", "تكلفة", "سعر", "ميزانية", "عائد", "ربح", "خسارة", "تمويل",
-        "قرض", "بنك", "سوق", "تجارة", "استيراد", "تصدير", "عمولة", "ضريبة", "رسوم", "تسعير", "عطاء",
-        "مناقصة", "صرف", "عملة", "تضخم", "نمو", "تجاري", "economic", "financial", "investment", "cost",
-        "budget", "revenue", "profit", "loss", "loan", "bank", "market", "trade", "import", "export", "tax",
-        "fee", "pricing", "tender", "bid", "currency", "inflation", "growth", "GDP", "fiscal", "monetary"],
-    "medical": ["طبيب", "مستشفى", "علاج", "دواء", "جرعة", "مرض", "أعراض", "تشخيص", "فحص", "تحليل",
-        "مختبر", "سريري", "جراحة", "عملية", "مريض", "صحة", "وباء", "تطعيم", "أشعة", "بكتيريا", "فيروس",
-        "مناعة", "أنسجة", "أعضاء", "قلب", "كبد", "كلى", "doctor", "hospital", "treatment", "medication",
-        "dose", "disease", "symptoms", "diagnosis", "laboratory", "clinical", "surgery", "patient", "health",
-        "epidemic", "vaccine", "radiology", "bacteria", "virus", "immunity", "tissue", "cardiac", "renal"],
-    "scientific": ["بحث", "دراسة", "مختبر", "تجربة", "فرضية", "نظرية", "علمي", "اكتشاف", "ابتكار", "تقنية",
-        "تكنولوجيا", "تحليل", "بيانات", "إحصائية", "نموذج", "محاكاة", "خوارزمية", "ذكاء اصطناعي", "تعلم آلي",
-        "طاقة", "فيزياء", "كيمياء", "بيولوجيا", "فلك", "research", "study", "experiment", "hypothesis",
-        "theory", "scientific", "discovery", "innovation", "technology", "analysis", "data", "statistical",
-        "model", "simulation", "algorithm", "AI", "machine learning", "physics", "chemistry", "biology", "astronomy"],
-    "engineering": ["هندسة", "إنشائي", "مدني", "معماري", "كهرباء", "ميكانيك", "صرف", "مياه", "طرق", "جسور",
-        "أنفاق", "خرسانة", "حديد", "تسليح", "صب", "ردم", "حفر", "أساسات", "تصميم", "مخططات", "مواصفات",
-        "بناء", "تشييد", "إشراف", "جودة", "اختبار", "مساحة", "engineering", "structural", "civil",
-        "architectural", "electrical", "mechanical", "concrete", "rebar", "foundation", "excavation", "backfill",
-        "pouring", "drawings", "specifications", "construction", "supervision", "quality", "inspection", "survey"],
-    "military": ["جيش", "عسكري", "دفاع", "حرب", "معركة", "سلاح", "سلاح الجو", "بحرية", "دبابة", "صاروخ",
-        "قنبلة", "قاعدة عسكرية", "تجنيد", "ضابط", "جندي", "رتبة", "عملية عسكرية", "military", "army",
-        "defense", "war", "battle", "weapon", "air force", "navy", "tank", "missile", "bomb", "base",
-        "recruitment", "officer", "soldier", "rank", "operation"],
-    "educational": ["مدرسة", "جامعة", "تعليم", "تدريس", "معلم", "أستاذ", "طالب", "دراسة", "مناهج", "امتحان",
-        "اختبار", "شهادة", "بحث علمي", "رسالة", "أطروحة", "تدريب", "دورة", "school", "university",
-        "education", "teaching", "teacher", "professor", "student", "curriculum", "exam", "test", "certificate",
-        "thesis", "dissertation", "training"],
-    "religious": ["مسجد", "كنيسة", "معبد", "صلاة", "قرآن", "إنجيل", "حديث", "فقه", "شريعة", "حج", "عمرة",
-        "صوم", "زكاة", "إمام", "خطيب", "دين", "عقيدة", "عبادة", "تفسير", "mosque", "church", "temple",
-        "prayer", "Quran", "Bible", "hadith", "jurisprudence", "sharia", "pilgrimage", "fasting", "charity",
-        "imam", "sermon", "religion", "faith"],
-    "sports": ["رياضة", "كرة القدم", "كرة السلة", "تنس", "سباحة", "جري", "ملعب", "نادي", "فريق", "لاعب",
-        "مدرب", "حكم", "بطولة", "كأس", "مباراة", "تدريب", "لياقة", "مسابقة", "sports", "football", "soccer",
-        "basketball", "tennis", "swimming", "running", "stadium", "club", "team", "player", "coach", "referee",
-        "championship", "cup", "match", "fitness"],
-    "literary": ["أدب", "قصة", "رواية", "شعر", "قصيدة", "كاتب", "مؤلف", "نص", "أسلوب", "بلاغة", "مجاز",
-        "استعارة", "تشبيه", "فصل", "فقرة", "سرد", "حبكة", "شخصية", "حوار", "literature", "story", "novel",
-        "poetry", "poem", "writer", "author", "text", "style", "rhetoric", "metaphor", "simile", "chapter",
-        "paragraph", "narrative", "plot", "character"],
-    "it": ["برمجة", "كود", "حاسوب", "كمبيوتر", "شبكة", "إنترنت", "برنامج", "تطبيق", "موقع", "خادم",
-        "قاعدة بيانات", "أمن سيبراني", "هاكر", "ذكاء اصطناعي", "تعلم آلي", "سحابي", "programming", "code",
-        "computer", "network", "internet", "software", "application", "website", "server", "database",
-        "cybersecurity", "hacker", "AI", "machine learning", "cloud", "API"],
-    "environmental": ["بيئة", "تلوث", "مناخ", "احتباس حراري", "طاقة متجددة", "شمسية", "رياح", "مياه جوفية",
-        "غابة", "صحراء", "تصحر", "تنوع حيوي", "محمية", "طبيعة", "أوزون", "كربون", "environment", "pollution",
-        "climate", "global warming", "renewable", "solar", "wind"],
-    "agricultural": ["زراعة", "مزرعة", "محصول", "قمح", "أرز", "ذرة", "أشجار", "ماء ري", "تربة", "سماد",
-        "مبيد", "حصاد", "حصادة", "ثروة حيوانية", "مواشي", "أغنام", "دواجن", "سمك", "agriculture", "farm",
-        "crop", "wheat", "rice", "corn", "trees", "irrigation", "soil"],
-    "media": ["إعلام", "صحافة", "تلفزيون", "إذاعة", "صحيفة", "خبر", "تقرير", "مذيع", "مراسل", "تحقيق",
-        "صحفي", "إعلان", "دعاية", "بث", "قناة", "برنامج إعلامي", "صحفي", "media", "journalism", "television",
-        "radio", "newspaper", "news", "report", "anchor"],
-    "tourism": ["سياحة", "فندق", "سفر", "رحلة", "مطار", "طيران", "جواز", "تأشيرة", "جولة", "أثر", "تاريخي",
-        "معلم", "منتجع", "شاطئ", "جبل", "صحراء", "متحف", "تراث", "tourism", "hotel", "travel", "trip",
-        "airport", "aviation", "passport", "visa", "tour"],
+    "political": ["minister", "government", "council", "ministry", "parliament", "political", "diplomatic", "treaty", "election", "vote", "policy", "embassy", "summit", "legislation", "constitution", "foreign affairs", "national security", "coalition", "sanctions", "bilateral", "وزير", "حكومة", "مجلس", "وزارة", "برلمان", "سياسة", "دبلوماسي", "سفير", "معاهدة", "اتفاقية دولية", "حزب", "انتخابات", "تصويت", "أمن قومي", "استراتيجية وطنية", "بيان", "تصريح", "قمة", "مؤتمر", "جلسة", "تشريع", "دستور", "حقوق", "مواطن"],
+    "legal": ["contract", "agreement", "clause", "appendix", "legal", "stipulation", "liable", "penalty", "compensation", "arbitration", "court", "judgment", "license", "obligation", "terms and conditions", "binding", "jurisdiction", "warranty", "indemnity", "breach", "عقد", "اتفاقية", "بند", "ملحق", "تعاقد", "قانون", "مرسوم", "لائحة", "نظام", "شرط", "جزاء", "تعويض", "مسؤولية", "ضمان", "FIDIC", "تحكيم", "دعوى", "محكمة", "قاضي", "حكم", "قرار", "تنظيمي", "ترخيص", "التزام", "حق", "ملكية", "إثبات"],
+    "economic": ["economic", "financial", "investment", "cost", "budget", "revenue", "profit", "loss", "loan", "bank", "market", "trade", "import", "export", "tax", "fee", "pricing", "tender", "bid", "currency", "inflation", "growth", "GDP", "fiscal", "monetary", "اقتصاد", "مالية", "استثمار", "تكلفة", "سعر", "ميزانية", "عائد", "ربح", "خسارة", "تمويل", "قرض", "بنك", "سوق", "تجارة", "استيراد", "تصدير", "عمولة", "ضريبة", "رسوم", "تسعير", "عطاء", "مناقصة", "صرف", "عملة", "تضخم", "نمو", "تجاري"],
+    "medical": ["doctor", "hospital", "treatment", "medication", "dose", "disease", "symptoms", "diagnosis", "laboratory", "clinical", "surgery", "patient", "health", "epidemic", "vaccine", "radiology", "bacteria", "virus", "immunity", "tissue", "cardiac", "renal", "طبيب", "مستشفى", "علاج", "دواء", "جرعة", "مرض", "أعراض", "تشخيص", "فحص", "تحليل", "مختبر", "سريري", "جراحة", "عملية", "مريض", "صحة", "وباء", "تطعيم", "أشعة", "بكتيريا", "فيروس", "مناعة", "أنسجة", "أعضاء", "قلب", "كبد", "كلى"],
+    "scientific": ["research", "study", "experiment", "hypothesis", "theory", "scientific", "discovery", "innovation", "technology", "analysis", "data", "statistical", "model", "simulation", "algorithm", "AI", "machine learning", "physics", "chemistry", "biology", "astronomy", "بحث", "دراسة", "مختبر", "تجربة", "فرضية", "نظرية", "علمي", "اكتشاف", "ابتكار", "تقنية", "تكنولوجيا", "تحليل", "بيانات", "إحصائية", "نموذج", "محاكاة", "خوارزمية", "ذكاء اصطناعي", "تعلم آلي", "طاقة", "فيزياء", "كيمياء", "بيولوجيا", "فلك"],
+    "engineering": ["engineering", "structural", "civil", "architectural", "electrical", "mechanical", "concrete", "rebar", "foundation", "excavation", "backfill", "pouring", "drawings", "specifications", "construction", "supervision", "quality", "inspection", "survey", "هندسة", "إنشائي", "مدني", "معماري", "كهرباء", "ميكانيك", "صرف", "مياه", "طرق", "جسور", "أنفاق", "خرسانة", "حديد", "تسليح", "صب", "ردم", "حفر", "أساسات", "تصميم", "مخططات", "مواصفات", "بناء", "تشييد", "إشراف", "جودة", "اختبار", "مساحة"],
+    "military": ["military", "army", "defense", "war", "battle", "weapon", "air force", "navy", "tank", "missile", "bomb", "base", "recruitment", "officer", "soldier", "rank", "operation", "جيش", "عسكري", "دفاع", "حرب", "معركة", "سلاح", "سلاح الجو", "بحرية", "دبابة", "صاروخ", "قنبلة", "قاعدة عسكرية", "تجنيد", "ضابط", "جندي", "رتبة", "عملية عسكرية"],
+    "educational": ["school", "university", "education", "teaching", "teacher", "professor", "student", "curriculum", "exam", "test", "certificate", "thesis", "dissertation", "training", "مدرسة", "جامعة", "تعليم", "تدريس", "معلم", "أستاذ", "طالب", "دراسة", "مناهج", "امتحان", "اختبار", "شهادة", "بحث علمي", "رسالة", "أطروحة", "تدريب", "دورة"],
+    "religious": ["mosque", "church", "temple", "prayer", "Quran", "Bible", "hadith", "jurisprudence", "sharia", "pilgrimage", "fasting", "charity", "imam", "sermon", "religion", "faith", "مسجد", "كنيسة", "معبد", "صلاة", "قرآن", "إنجيل", "حديث", "فقه", "شريعة", "حج", "عمرة", "صوم", "زكاة", "إمام", "خطيب", "دين", "عقيدة", "عبادة", "تفسير"],
+    "sports": ["sports", "football", "soccer", "basketball", "tennis", "swimming", "running", "stadium", "club", "team", "player", "coach", "referee", "championship", "cup", "match", "fitness", "رياضة", "كرة القدم", "كرة السلة", "تنس", "سباحة", "جري", "ملعب", "نادي", "فريق", "لاعب", "مدرب", "حكم", "بطولة", "كأس", "مباراة", "تدريب", "لياقة", "مسابقة"],
+    "literary": ["literature", "story", "novel", "poetry", "poem", "writer", "author", "text", "style", "rhetoric", "metaphor", "simile", "chapter", "paragraph", "narrative", "plot", "character", "أدب", "قصة", "رواية", "شعر", "قصيدة", "كاتب", "مؤلف", "نص", "أسلوب", "بلاغة", "مجاز", "استعارة", "تشبيه", "فصل", "فقرة", "سرد", "حبكة", "شخصية", "حوار"],
+    "it": ["programming", "code", "computer", "network", "internet", "software", "application", "website", "server", "database", "cybersecurity", "hacker", "AI", "machine learning", "cloud", "API", "برمجة", "كود", "حاسوب", "كمبيوتر", "شبكة", "إنترنت", "برنامج", "تطبيق", "موقع", "خادم", "قاعدة بيانات", "أمن سيبراني", "هاكر", "ذكاء اصطناعي", "تعلم آلي", "سحابي"],
+    "environmental": ["environment", "pollution", "climate", "global warming", "renewable", "solar", "wind", "بيئة", "تلوث", "مناخ", "احتباس حراري", "طاقة متجددة", "شمسية", "رياح", "مياه جوفية", "غابة", "صحراء", "تصحر", "تنوع حيوي", "محمية", "طبيعة", "أوزون", "كربون"],
+    "agricultural": ["agriculture", "farm", "crop", "wheat", "rice", "corn", "trees", "irrigation", "soil", "زراعة", "مزرعة", "محصول", "قمح", "أرز", "ذرة", "أشجار", "ماء ري", "تربة", "سماد", "مبيد", "حصاد", "حصادة", "ثروة حيوانية", "مواشي", "أغنام", "دواجن", "سمك"],
+    "media": ["media", "journalism", "television", "radio", "newspaper", "news", "report", "anchor", "إعلام", "صحافة", "تلفزيون", "إذاعة", "صحيفة", "خبر", "تقرير", "مذيع", "مراسل", "تحقيق", "صحفي", "إعلان", "دعاية", "بث", "قناة", "برنامج إعلامي"],
+    "tourism": ["tourism", "hotel", "travel", "trip", "airport", "aviation", "passport", "visa", "tour", "سياحة", "فندق", "سفر", "رحلة", "مطار", "طيران", "جواز", "تأشيرة", "جولة", "أثر", "تاريخي", "معلم", "منتجع", "شاطئ", "جبل", "صحراء", "متحف", "تراث"],
 }
 
 def detect_domains(text):
@@ -234,6 +193,44 @@ def get_all_domain_translations_from_db(word, target_lang):
         results = cursor.fetchall()
         conn.close()
         return {row[0]: {"translation": row[1], "desc": row[2]} for row in results}
+    except Exception:
+        return {}
+
+def get_all_domain_translations_by_translation(translation, target_lang):
+    """Get all domain translations where the translation matches."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT domain, word, description FROM domain_translations WHERE translation = ? AND target_lang = ?",
+            (translation.lower(), target_lang)
+        )
+        results = cursor.fetchall()
+        conn.close()
+        return {row[0]: {"word": row[1], "desc": row[2]} for row in results}
+    except Exception:
+        return {}
+
+def search_domain_translations_fuzzy(word, target_lang):
+    """Search for similar words in domain translations."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT word, domain, translation, description FROM domain_translations WHERE target_lang = ?",
+            (target_lang,)
+        )
+        all_rows = cursor.fetchall()
+        conn.close()
+
+        word_lower = word.lower()
+        results = {}
+        for db_word, domain, translation, desc in all_rows:
+            if word_lower in db_word.lower() or db_word.lower() in word_lower:
+                if domain not in results:
+                    results[domain] = []
+                results[domain].append({"word": db_word, "translation": translation, "desc": desc})
+        return results
     except Exception:
         return {}
 
@@ -320,7 +317,6 @@ def detect_abbreviations_from_words(text):
                 found.append((first_letters, abbrev_data, phrase))
     return found
 
-
 # ═══════════════════════════════════════════════════════════════════════════════
 #  TRANSLATION ENGINES
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -361,7 +357,6 @@ def fetch_ai_translation(text, source_lang, target_lang):
     result = translate_google(text, source_lang, target_lang)
     if result: return result, "Google"
     return None, None
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  HELPER FUNCTIONS
@@ -428,60 +423,75 @@ def build_formula(text, domain, target_lang):
 # ═══════════════════════════════════════════════════════════════════════════════
 #  SESSION STATE INITIALIZATION
 # ═══════════════════════════════════════════════════════════════════════════════
-if "source_lang_idx" not in st.session_state:
-    st.session_state.source_lang_idx = 0
-if "target_lang_idx" not in st.session_state:
-    st.session_state.target_lang_idx = 1
+if "source_lang" not in st.session_state:
+    st.session_state.source_lang = "English"
+if "target_lang" not in st.session_state:
+    st.session_state.target_lang = "Arabic"
+if "input_text" not in st.session_state:
+    st.session_state.input_text = ""
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  UI — LANGUAGE PAIR
 # ═══════════════════════════════════════════════════════════════════════════════
-left, right = st.columns([1, 1])
-
 lang_list = list(languages_dict.keys())
+
+def update_source():
+    """Callback when source language changes."""
+    selected = st.session_state.source_lang_select
+    st.session_state.source_lang = selected
+    # Ensure target is different from source
+    if st.session_state.target_lang == selected:
+        # Pick first available language that is not the source
+        for lang in lang_list:
+            if lang != selected:
+                st.session_state.target_lang = lang
+                break
+
+def update_target():
+    """Callback when target language changes."""
+    selected = st.session_state.target_lang_select
+    st.session_state.target_lang = selected
+
+left, mid, right = st.columns([1, 0.12, 1])
 
 with left:
     source_lang_name = st.selectbox(
-        "From", 
+        "From Language", 
         lang_list, 
-        index=st.session_state.source_lang_idx,
-        key="source_lang_select"
+        index=lang_list.index(st.session_state.source_lang),
+        key="source_lang_select",
+        on_change=update_source
     )
 
-# Filter target options (exclude source language)
-target_lang_options = [k for k in lang_list if k != source_lang_name]
+with mid:
+    st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
+    if st.button("⇄", key="swap_btn", help="Swap languages", use_container_width=True):
+        # Swap the languages
+        old_source = st.session_state.source_lang
+        old_target = st.session_state.target_lang
+        st.session_state.source_lang = old_target
+        st.session_state.target_lang = old_source
+        st.rerun()
 
 with right:
-    valid_target_idx = min(st.session_state.target_lang_idx, len(target_lang_options) - 1)
-    if valid_target_idx < 0:
-        valid_target_idx = 0
+    target_lang_options = [k for k in lang_list if k != source_lang_name]
+    target_index = target_lang_options.index(st.session_state.target_lang) if st.session_state.target_lang in target_lang_options else 0
 
     target_lang_name = st.selectbox(
-        "To", 
+        "To Language", 
         target_lang_options,
-        index=valid_target_idx,
-        key="target_lang_select"
+        index=target_index,
+        key="target_lang_select",
+        on_change=update_target
     )
 
 source_lang = languages_dict[source_lang_name]
 target_lang = languages_dict[target_lang_name]
 
-# Swap button
-c1, c2, c3 = st.columns([1, 0.15, 1])
-with c2:
-    if st.button("⇄", key="swap_btn", help="Swap languages"):
-        # New source = current target
-        new_source_idx = lang_list.index(target_lang_name)
-        # New target options = all except new source
-        new_target_options = [k for k in lang_list if k != target_lang_name]
-        # New target = current source (must be in new_target_options since it's different from new_source)
-        new_target_idx = new_target_options.index(source_lang_name)
-        st.session_state.source_lang_idx = new_source_idx
-        st.session_state.target_lang_idx = new_target_idx
-        st.rerun()
-
 # Input
-input_text = st.text_area("Enter text to translate", height=140, placeholder="Type or paste text here...")
+input_text = st.text_area("Enter text to translate", height=140, placeholder="Type or paste text here...", value=st.session_state.input_text, key="input_text_area")
+if input_text != st.session_state.input_text:
+    st.session_state.input_text = input_text
 
 # Detected domains
 if input_text.strip():
@@ -492,7 +502,7 @@ if input_text.strip():
             dn = DOMAINS[d]["name_en"]
             dc = DOMAINS[d]["color"]
             badges += f'<span class="domain-badge" style="background:{dc};color:white;">{dn}</span>'
-        st.markdown(f'<div class="detected-box">Detected domains: {badges}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="detected-box"><b>Detected domains:</b> {badges}</div>', unsafe_allow_html=True)
     else:
         st.markdown('<div class="detected-box">No specific domain detected — using General context.</div>', unsafe_allow_html=True)
 
@@ -541,51 +551,161 @@ if st.button("Translate", type="primary"):
             else:
                 # Show base translation
                 api_badge = f'<span class="api-badge api-deepl">{api_used}</span>' if api_used == "DeepL" else f'<span class="api-badge api-google">{api_used}</span>'
-                st.markdown(f"{api_badge} **Base Translation:**", unsafe_allow_html=True)
+                st.markdown(f"{api_badge} <b>Base Translation:</b>", unsafe_allow_html=True)
                 st.markdown(f'<div class="rtext">{base_translation}</div>', unsafe_allow_html=True)
 
-                # Check if translated word has domain-specific translations
-                base_word = base_translation.strip().lower()
-                is_single_word = len(base_word.split()) == 1
+                # ═══════════════════════════════════════════════════════════════════
+                #  COMPREHENSIVE DICTIONARY LOOKUP — ALL DOMAINS
+                # ═══════════════════════════════════════════════════════════════════
 
-                # Also check original word (for English source words)
-                input_word = input_text.strip().lower()
-                is_single_word_original = len(input_word.split()) == 1
+                # Strategy: Search for the word in multiple ways
+                # 1. Direct lookup of original word (if in dictionary)
+                # 2. Lookup via English translation (dictionary is English-based)
+                # 3. Fuzzy search for partial matches
+                # 4. Reverse lookup: find entries where translation matches
 
-                all_trans = {}
+                all_meanings = {}  # domain -> list of meanings
+                lookup_sources = []  # Track what we searched for
+
+                # Clean up input
+                original_word = input_text.strip().lower()
+                is_single_word = len(original_word.split()) == 1
+
+                # 1. Try original word directly (works if dictionary has entries in source language)
                 if is_single_word:
-                    all_trans = get_all_domain_translations_from_db(base_word, target_lang)
-                if not all_trans and is_single_word_original:
-                    all_trans = get_all_domain_translations_from_db(input_word, target_lang)
+                    direct_results = get_all_domain_translations_from_db(original_word, target_lang)
+                    if direct_results:
+                        for domain, data in direct_results.items():
+                            if domain not in all_meanings:
+                                all_meanings[domain] = []
+                            all_meanings[domain].append({
+                                "translation": data["translation"],
+                                "desc": data["desc"],
+                                "source": f"Direct lookup: '{original_word}'"
+                            })
+                        lookup_sources.append(f"direct: {original_word}")
 
-                if all_trans:
-                        st.markdown("---")
-                        st.markdown("### 🎯 Domain-Specific Meanings")
-                        st.markdown(f"*Showing different meanings for '{input_text.strip()}' across all domains:*")
+                # 2. Translate to English for lookup (most dictionaries are English-based)
+                english_word = None
+                if source_lang != "en":
+                    english_word = translate_google(input_text.strip(), source_lang, "en")
+                    if english_word:
+                        english_word = english_word.strip().lower()
+                        lookup_sources.append(f"english translation: {english_word}")
+                else:
+                    english_word = original_word
+                    lookup_sources.append(f"english original: {english_word}")
 
-                        cols = st.columns(3)
-                        col_idx = 0
-                        for domain in all_trans:
-                            if domain == "general":
-                                continue
-                            with cols[col_idx % 3]:
-                                dinfo = DOMAINS[domain]
-                                trans = all_trans[domain]["translation"]
-                                desc = all_trans[domain]["desc"]
+                # 2a. Lookup English word
+                if english_word and is_single_word:
+                    en_results = get_all_domain_translations_from_db(english_word, target_lang)
+                    for domain, data in en_results.items():
+                        if domain not in all_meanings:
+                            all_meanings[domain] = []
+                        # Avoid duplicates
+                        existing = [m["translation"] for m in all_meanings.get(domain, [])]
+                        if data["translation"] not in existing:
+                            all_meanings[domain].append({
+                                "translation": data["translation"],
+                                "desc": data["desc"],
+                                "source": f"English lookup: '{english_word}'"
+                            })
+
+                # 2b. Lookup translated result (what the AI returned)
+                translated_word = base_translation.strip().lower()
+                if is_single_word and translated_word != english_word and translated_word != original_word:
+                    trans_results = get_all_domain_translations_from_db(translated_word, target_lang)
+                    for domain, data in trans_results.items():
+                        if domain not in all_meanings:
+                            all_meanings[domain] = []
+                        existing = [m["translation"] for m in all_meanings.get(domain, [])]
+                        if data["translation"] not in existing:
+                            all_meanings[domain].append({
+                                "translation": data["translation"],
+                                "desc": data["desc"],
+                                "source": f"Translated lookup: '{translated_word}'"
+                            })
+                    lookup_sources.append(f"translated: {translated_word}")
+
+                # 3. Fuzzy search for partial matches (if no exact matches found)
+                if not all_meanings and is_single_word:
+                    fuzzy_results = search_domain_translations_fuzzy(english_word or original_word, target_lang)
+                    for domain, matches in fuzzy_results.items():
+                        if domain not in all_meanings:
+                            all_meanings[domain] = []
+                        for match in matches:
+                            existing = [m["translation"] for m in all_meanings.get(domain, [])]
+                            if match["translation"] not in existing:
+                                all_meanings[domain].append({
+                                    "translation": match["translation"],
+                                    "desc": match["desc"],
+                                    "source": f"Fuzzy match: '{match['word']}'"
+                                })
+                    if fuzzy_results:
+                        lookup_sources.append("fuzzy search")
+
+                # 4. Reverse lookup: find where translation matches the result
+                # This helps find the source word when we know the translation
+                if is_single_word:
+                    reverse_results = get_all_domain_translations_by_translation(translated_word, target_lang)
+                    for domain, data in reverse_results.items():
+                        if domain not in all_meanings:
+                            all_meanings[domain] = []
+                        existing = [m["translation"] for m in all_meanings.get(domain, [])]
+                        # In reverse lookup, the "word" is the source and we want the translation
+                        # But we already have the translation (translated_word), so we show the source word as context
+                        if translated_word not in existing:
+                            all_meanings[domain].append({
+                                "translation": translated_word,
+                                "desc": f"{data['desc']} (Source: {data['word']})",
+                                "source": f"Reverse lookup: '{translated_word}'"
+                            })
+                    if reverse_results:
+                        lookup_sources.append("reverse lookup")
+
+                # ═══════════════════════════════════════════════════════════════════
+                #  DISPLAY ALL DOMAIN-SPECIFIC MEANINGS
+                # ═══════════════════════════════════════════════════════════════════
+
+                if all_meanings:
+                    total_meanings = sum(len(v) for v in all_meanings.values())
+                    st.markdown("---")
+                    st.markdown(f'<div class="all-meanings-header">🎯 All Domain-Specific Meanings <span class="meaning-count">{total_meanings}</span></div>', unsafe_allow_html=True)
+                    st.caption(f"Searched via: {', '.join(lookup_sources)}")
+
+                    # Sort domains: general last, others by number of meanings
+                    sorted_domains = sorted(
+                        [d for d in all_meanings.keys() if d != "general"],
+                        key=lambda d: len(all_meanings[d]),
+                        reverse=True
+                    )
+                    if "general" in all_meanings:
+                        sorted_domains.append("general")
+
+                    cols = st.columns(3)
+                    col_idx = 0
+                    for domain in sorted_domains:
+                        dinfo = DOMAINS.get(domain, DOMAINS["general"])
+                        meanings = all_meanings[domain]
+
+                        with cols[col_idx % 3]:
+                            for meaning in meanings:
                                 st.markdown(
-                                    '<div class="rcard rcard-' + domain + '">' +
-                                    '<div class="rlabel rlabel-' + domain + '">' + dinfo["emoji"] + ' ' + dinfo["name_en"] + ' | ' + dinfo["name_ar"] + '</div>' +
-                                    '<div class="rtext" style="font-weight:600;">' + trans + '</div>' +
-                                    '<div class="meaning-diff">' + desc + '</div>' +
+                                    '<div class="rcard rcard-' + domain + ' domain-card">' +
+                                    '<div class="rlabel rlabel-' + domain + '">' + dinfo["emoji"] + ' ' + dinfo["name_en"] + '</div>' +
+                                    '<div class="rtext" style="font-weight:600;">' + meaning["translation"] + '</div>' +
+                                    '<div class="meaning-diff">' + meaning["desc"] + '</div>' +
+                                    '<div style="font-size:10px;color:#9ca3af;margin-top:4px;">' + meaning.get("source", "") + '</div>' +
                                     '</div>',
                                     unsafe_allow_html=True
                                 )
-                            col_idx += 1
+                        col_idx += 1
 
                 elif detected:
-                    # Show domain-specific translations for phrases
+                    # Fallback: show domain-specific translations for phrases using keyword replacement
                     st.markdown("---")
-                    st.markdown("### 🎯 Domain-Specific Translations")
+                    st.markdown('<div class="all-meanings-header">🎯 Domain-Specific Translations</div>', unsafe_allow_html=True)
+                    st.caption("No exact dictionary matches found. Showing context-aware translations.")
 
                     for domain in detected[:3]:
                         dinfo = DOMAINS[domain]
@@ -593,8 +713,8 @@ if st.button("Translate", type="primary"):
 
                         if domain_translation != base_translation:
                             st.markdown(
-                                '<div class="rcard rcard-' + domain + ' rcard-detected">' +
-                                '<div class="rlabel rlabel-' + domain + '">' + dinfo["emoji"] + ' ' + dinfo["name_en"] + ' | ' + dinfo["name_ar"] + '</div>' +
+                                '<div class="rcard rcard-' + domain + ' rcard-detected domain-card">' +
+                                '<div class="rlabel rlabel-' + domain + '">' + dinfo["emoji"] + ' ' + dinfo["name_en"] + '</div>' +
                                 '<div class="rtext">' + domain_translation + '</div>' +
                                 '<div class="meaning-diff">Domain-specific formulation</div>' +
                                 '</div>',
@@ -602,18 +722,18 @@ if st.button("Translate", type="primary"):
                             )
                         else:
                             st.markdown(
-                                '<div class="rcard rcard-' + domain + '">' +
-                                '<div class="rlabel rlabel-' + domain + '">' + dinfo["emoji"] + ' ' + dinfo["name_en"] + ' | ' + dinfo["name_ar"] + '</div>' +
+                                '<div class="rcard rcard-' + domain + ' domain-card">' +
+                                '<div class="rlabel rlabel-' + domain + '">' + dinfo["emoji"] + ' ' + dinfo["name_en"] + '</div>' +
                                 '<div class="rtext">' + base_translation + '</div>' +
                                 '<div class="meaning-diff">General translation (no domain-specific terms found)</div>' +
                                 '</div>',
                                 unsafe_allow_html=True
                             )
 
-                # Show general translation as fallback
+                # Always show general translation
                 st.markdown("---")
-                st.markdown("### 💬 General Translation")
+                st.markdown('<div class="all-meanings-header">💬 General Translation</div>', unsafe_allow_html=True)
                 st.markdown(
-                    '<div class="rcard rcard-gen"><div class="rlabel rlabel-gen">💬 General | عام</div><div class="rtext">' + base_translation + '</div></div>',
+                    '<div class="rcard rcard-gen"><div class="rlabel rlabel-gen">💬 General</div><div class="rtext">' + base_translation + '</div></div>',
                     unsafe_allow_html=True
                 )
