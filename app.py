@@ -470,11 +470,12 @@ target_lang = languages_dict[target_lang_name]
 c1, c2, c3 = st.columns([1, 0.15, 1])
 with c2:
     if st.button("⇄", key="swap_btn", help="Swap languages"):
+        # New source = current target
         new_source_idx = lang_list.index(target_lang_name)
-        if source_lang_name in target_lang_options:
-            new_target_idx = target_lang_options.index(source_lang_name)
-        else:
-            new_target_idx = 0
+        # New target options = all except new source
+        new_target_options = [k for k in lang_list if k != target_lang_name]
+        # New target = current source (must be in new_target_options since it's different from new_source)
+        new_target_idx = new_target_options.index(source_lang_name)
         st.session_state.source_lang_idx = new_source_idx
         st.session_state.target_lang_idx = new_target_idx
         st.rerun()
@@ -543,14 +544,21 @@ if st.button("Translate", type="primary"):
                 st.markdown(f"{api_badge} **Base Translation:**", unsafe_allow_html=True)
                 st.markdown(f'<div class="rtext">{base_translation}</div>', unsafe_allow_html=True)
 
-                # Check if input is a single word that has domain-specific translations
-                input_word = input_text.strip().lower()
-                is_single_word = len(input_word.split()) == 1
+                # Check if translated word has domain-specific translations
+                base_word = base_translation.strip().lower()
+                is_single_word = len(base_word.split()) == 1
 
+                # Also check original word (for English source words)
+                input_word = input_text.strip().lower()
+                is_single_word_original = len(input_word.split()) == 1
+
+                all_trans = {}
                 if is_single_word:
-                    # Check database for domain translations
+                    all_trans = get_all_domain_translations_from_db(base_word, target_lang)
+                if not all_trans and is_single_word_original:
                     all_trans = get_all_domain_translations_from_db(input_word, target_lang)
-                    if all_trans:
+
+                if all_trans:
                         st.markdown("---")
                         st.markdown("### 🎯 Domain-Specific Meanings")
                         st.markdown(f"*Showing different meanings for '{input_text.strip()}' across all domains:*")
