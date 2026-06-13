@@ -241,24 +241,24 @@ DOMAIN_SPECIFIC_TRANSLATIONS = load_domain_dictionary()
 # ═══════════════════════════════════════════════════════════════════════════════
 #  DEEPL API KEY — FROM ENV OR SIDEBAR INPUT
 # ═══════════════════════════════════════════════════════════════════════════════
-st.sidebar.markdown("### 🔑BTU8IJVMGLWVs3kvL")
+st.sidebar.markdown("### 🔑 DeepL API Configuration")
 st.sidebar.markdown("<div style='font-size:12px;color:#6b7280;margin-bottom:8px;'>The app requires a DeepL API key to translate. Get one free at deepl.com/pro-api.</div>", unsafe_allow_html=True)
 
 # Try env var first, then session state, then empty
 env_key = os.environ.get("BTU8IJVMGLWVs3kvL", "")
 if "deepl_api_key" not in st.session_state:
-    st.session_state. BTU8IJVMGLWVs3kvL= env_key
+    st.session_state.deepl_api_key = env_key
 
 DEEPL_API_KEY = st.sidebar.text_input(
-    "BTU8IJVMGLWVs3kvL",
+    "DeepL API Key",
     value=st.session_state.deepl_api_key,
     type="password",
-    placeholder="BTU8IJVMGLWVs3kvL...",
+    placeholder="Enter your DeepL API key...",
     help="Free tier: 500,000 characters/month. Key is stored only in this session."
 )
 
 # Save to session state
-st.session_state.deepl_api_key = BTU8IJVMGLWVs3kvL
+st.session_state.deepl_api_key = DEEPL_API_KEY
 
 if not DEEPL_API_KEY:
     st.sidebar.error("⚠️ No API key provided. Translation will not work.")
