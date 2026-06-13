@@ -51,6 +51,7 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 .rcard-med2 { border-top: 3px solid #5E35B1; }
 .rcard-tour { border-top: 3px solid #00838F; }
 .rcard-gen { border-top: 3px solid #6B7280; }
+.rcard-priority { box-shadow: 0 0 0 2px rgba(93,202,165,0.5); background: #f6fffd; }
 
 .rlabel { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 8px; }
 .rlabel-pol { color: #9B2226; }
@@ -118,6 +119,17 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 .domain-card { margin-bottom: 12px; }
 .dict-stats { font-size: 11px; color: #6b7280; margin-top: 4px; }
 
+.priority-badge {
+    display: inline-block;
+    background: #5DCAA5;
+    color: white;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    margin-left: 6px;
+}
+
 textarea { border-radius: 8px !important; border: 0.5px solid #d1d5db !important; font-size: 14px !important; }
 </style>
 """, unsafe_allow_html=True)
@@ -130,7 +142,7 @@ st.markdown("""
         <span class="pill pill-active">Auto-Domain Detect</span>
         <span class="pill pill-muted">DeepL Precision</span>
         <span class="pill pill-muted">Smart Swap</span>
-        <span class="pill pill-muted">All Contexts</span>
+        <span class="pill pill-muted">Style Selector</span>
     </div>
     <div class="lang-bar">
         <span class="ldot"></span><span class="ldot"></span><span class="ldot"></span>
@@ -167,6 +179,28 @@ DOMAINS = {
     "media":      {"emoji": "📺", "name_en": "Media",         "color": "#5E35B1"},
     "tourism":    {"emoji": "✈️", "name_en": "Tourism",       "color": "#00838F"},
     "general":    {"emoji": "💬", "name_en": "General",       "color": "#6B7280"},
+}
+
+# Style / Tone options mapping to domains
+STYLE_OPTIONS = {
+    "Auto-Detect": None,
+    "🏛️ Political": "political",
+    "⚖️ Legal": "legal",
+    "📈 Economic": "economic",
+    "🏥 Medical": "medical",
+    "🔬 Scientific": "scientific",
+    "🏗️ Engineering": "engineering",
+    "🎖️ Military": "military",
+    "📚 Educational": "educational",
+    "🕌 Religious": "religious",
+    "⚽ Sports": "sports",
+    "📖 Literary": "literary",
+    "💻 IT / Tech": "it",
+    "🌿 Environmental": "environmental",
+    "🌾 Agricultural": "agricultural",
+    "📺 Media": "media",
+    "✈️ Tourism": "tourism",
+    "💬 General": "general",
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -215,7 +249,7 @@ def detect_domains(text):
 # ═══════════════════════════════════════════════════════════════════════════════
 #  TRANSLATION ENGINES
 # ═══════════════════════════════════════════════════════════════════════════════
-DEEPL_API_KEY = os.environ.get("BTU8IJVMGLWVs3kvL", "")
+DEEPL_API_KEY = os.environ.get("DEEPL_API_KEY", "")
 
 def translate_deepl(text, source_lang, target_lang):
     if not DEEPL_API_KEY: return None
@@ -228,7 +262,7 @@ def translate_deepl(text, source_lang, target_lang):
     try:
         resp = requests.post(
             "https://api-free.deepl.com/v2/translate",
-            headers={"Authorization": f"DeepL-Auth-Key {BTU8IJVMGLWVs3kvL}", "Content-Type": "application/x-www-form-urlencoded"},
+            headers={"Authorization": f"DeepL-Auth-Key {DEEPL_API_KEY}", "Content-Type": "application/x-www-form-urlencoded"},
             data={"text": text, "source_lang": source_lang, "target_lang": target_lang},
             timeout=15
         )
@@ -262,34 +296,37 @@ if "target_lang" not in st.session_state:
     st.session_state.target_lang = "Arabic"
 if "input_text" not in st.session_state:
     st.session_state.input_text = ""
+if "selected_style" not in st.session_state:
+    st.session_state.selected_style = "Auto-Detect"
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  SWAP CALLBACK (runs before script rerun)
+#  SWAP CALLBACK
 # ═══════════════════════════════════════════════════════════════════════════════
 def swap_languages():
-    """Swap source and target languages in session state."""
     old_source = st.session_state.source_lang
     old_target = st.session_state.target_lang
     st.session_state.source_lang = old_target
     st.session_state.target_lang = old_source
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  UI — LANGUAGE PAIR
+#  UI — LANGUAGE PAIR + STYLE
 # ═══════════════════════════════════════════════════════════════════════════════
 lang_list = list(languages_dict.keys())
+style_list = list(STYLE_OPTIONS.keys())
 
-# Ensure target != source (safety check)
+# Ensure target != source
 if st.session_state.target_lang == st.session_state.source_lang:
     for lang in lang_list:
         if lang != st.session_state.source_lang:
             st.session_state.target_lang = lang
             break
 
-# Compute indices from session state
 src_idx = lang_list.index(st.session_state.source_lang)
 tgt_options = [k for k in lang_list if k != st.session_state.source_lang]
 tgt_idx = tgt_options.index(st.session_state.target_lang) if st.session_state.target_lang in tgt_options else 0
+style_idx = style_list.index(st.session_state.selected_style) if st.session_state.selected_style in style_list else 0
 
+# ── Language Row ──
 left, mid, right = st.columns([1, 0.12, 1])
 
 with left:
@@ -302,12 +339,49 @@ with mid:
 with right:
     target_lang_name = st.selectbox("To Language", tgt_options, index=tgt_idx)
 
-# Update session state from widget values
+# ── Style Row ──
+st.markdown("<div style='margin-top: 0.5rem;'></div>", unsafe_allow_html=True)
+style_col1, style_col2 = st.columns([1, 2])
+with style_col1:
+    selected_style_label = st.selectbox(
+        "Translation Style / Domain",
+        style_list,
+        index=style_idx,
+        help="Choose the tone/domain to prioritize. 'Auto-Detect' lets the app decide based on keywords."
+    )
+with style_col2:
+    selected_domain = STYLE_OPTIONS[selected_style_label]
+    if selected_domain and selected_domain != "general":
+        dinfo = DOMAINS[selected_domain]
+        st.markdown(
+            f"<div style='margin-top: 28px; font-size: 13px; color: {dinfo['color']}; font-weight: 600;'>"
+            f"{dinfo['emoji']} Priority: {dinfo['name_en']} translations will be shown first"
+            f"</div>",
+            unsafe_allow_html=True
+        )
+    elif selected_domain == "general":
+        st.markdown(
+            "<div style='margin-top: 28px; font-size: 13px; color: #6B7280;'>"
+            "💬 General / standard translations prioritized"
+            "</div>",
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown(
+            "<div style='margin-top: 28px; font-size: 13px; color: #6B7280;'>"
+            "🔍 Auto-detecting domain from your text..."
+            "</div>",
+            unsafe_allow_html=True
+        )
+
+# Update session state
 st.session_state.source_lang = source_lang_name
 st.session_state.target_lang = target_lang_name
+st.session_state.selected_style = selected_style_label
 
 source_lang = languages_dict[source_lang_name]
 target_lang = languages_dict[target_lang_name]
+selected_domain = STYLE_OPTIONS[selected_style_label]
 
 # Show dictionary stats
 if DOMAIN_SPECIFIC_TRANSLATIONS:
@@ -320,7 +394,7 @@ input_text = st.text_area("Enter text to translate", height=140, placeholder="Ty
 if input_text != st.session_state.input_text:
     st.session_state.input_text = input_text
 
-# Detected domains
+# Detected domains (auto-detect display)
 if input_text.strip():
     detected = detect_domains(input_text)
     if detected:
@@ -339,25 +413,23 @@ if st.button("Translate", type="primary"):
         st.warning("Please enter text to translate.")
     else:
         with st.spinner("Translating..."):
-            # Get base translation
             base_translation, api_used = fetch_ai_translation(input_text, source_lang, target_lang)
 
             if not base_translation:
                 st.error("Translation failed. Please check your internet connection or API keys.")
             else:
-                # Show base translation
                 api_badge = f'<span class="api-badge api-deepl">{api_used}</span>' if api_used == "DeepL" else f'<span class="api-badge api-google">{api_used}</span>'
                 st.markdown(f"{api_badge} <b>Base Translation:</b>", unsafe_allow_html=True)
                 st.markdown(f'<div class="rtext">{base_translation}</div>', unsafe_allow_html=True)
 
                 # ═══════════════════════════════════════════════════════════════════
-                #  COMPREHENSIVE DICTIONARY LOOKUP — ALL DOMAINS
+                #  DICTIONARY LOOKUP
                 # ═══════════════════════════════════════════════════════════════════
                 all_meanings = {}
                 lookup_word = input_text.strip().lower()
                 is_single_word = len(lookup_word.split()) == 1
 
-                # 1. Direct lookup of original word
+                # 1. Direct lookup
                 if is_single_word and lookup_word in DOMAIN_SPECIFIC_TRANSLATIONS:
                     word_data = DOMAIN_SPECIFIC_TRANSLATIONS[lookup_word]
                     for domain, trans in word_data.items():
@@ -369,7 +441,7 @@ if st.button("Translate", type="primary"):
                             "source": f"Direct: '{lookup_word}'"
                         })
 
-                # 2. Translate to English for lookup
+                # 2. English lookup
                 english_word = None
                 if source_lang != "en":
                     english_word = translate_google(input_text.strip(), source_lang, "en")
@@ -378,7 +450,6 @@ if st.button("Translate", type="primary"):
                 else:
                     english_word = lookup_word
 
-                # 2a. Lookup English word
                 if english_word and is_single_word and english_word in DOMAIN_SPECIFIC_TRANSLATIONS:
                     word_data = DOMAIN_SPECIFIC_TRANSLATIONS[english_word]
                     for domain, trans in word_data.items():
@@ -393,7 +464,7 @@ if st.button("Translate", type="primary"):
                                 "source": f"English: '{english_word}'"
                             })
 
-                # 3. Fuzzy search for partial matches
+                # 3. Fuzzy search
                 if not all_meanings and is_single_word and english_word:
                     for dict_word, word_data in DOMAIN_SPECIFIC_TRANSLATIONS.items():
                         if english_word in dict_word or dict_word in english_word:
@@ -410,32 +481,38 @@ if st.button("Translate", type="primary"):
                                     })
 
                 # ═══════════════════════════════════════════════════════════════════
-                #  DISPLAY ALL DOMAIN-SPECIFIC MEANINGS (ONLY IF FOUND IN DICTIONARY)
+                #  DISPLAY MEANINGS — PRIORITIZE SELECTED STYLE
                 # ═══════════════════════════════════════════════════════════════════
                 if all_meanings:
                     total_meanings = sum(len(v) for v in all_meanings.values())
                     st.markdown("---")
                     st.markdown(f'<div class="all-meanings-header">🎯 All Domain-Specific Meanings <span class="meaning-count">{total_meanings}</span></div>', unsafe_allow_html=True)
 
-                    sorted_domains = sorted(
-                        [d for d in all_meanings.keys() if d != "general"],
-                        key=lambda d: len(all_meanings[d]),
-                        reverse=True
-                    )
+                    # Sort domains: selected style first, then others, then general
+                    domain_keys = [d for d in all_meanings.keys() if d != "general"]
+
+                    # If user selected a specific domain and it exists in results, move it to front
+                    if selected_domain and selected_domain in domain_keys:
+                        domain_keys.remove(selected_domain)
+                        domain_keys.insert(0, selected_domain)
+
                     if "general" in all_meanings:
-                        sorted_domains.append("general")
+                        domain_keys.append("general")
 
                     cols = st.columns(3)
                     col_idx = 0
-                    for domain in sorted_domains:
+                    for domain in domain_keys:
                         dinfo = DOMAINS.get(domain, DOMAINS["general"])
                         meanings = all_meanings[domain]
+                        is_priority = (selected_domain == domain)
 
                         with cols[col_idx % 3]:
                             for meaning in meanings:
+                                priority_html = '<span class="priority-badge">SELECTED STYLE</span>' if is_priority else ''
+                                card_class = 'rcard-priority' if is_priority else ''
                                 st.markdown(
-                                    '<div class="rcard rcard-' + domain + ' domain-card">' +
-                                    '<div class="rlabel rlabel-' + domain + '">' + dinfo["emoji"] + ' ' + dinfo["name_en"] + '</div>' +
+                                    '<div class="rcard rcard-' + domain + ' domain-card ' + card_class + '">' +
+                                    '<div class="rlabel rlabel-' + domain + '">' + dinfo["emoji"] + ' ' + dinfo["name_en"] + priority_html + '</div>' +
                                     '<div class="rtext" style="font-weight:600;">' + meaning["translation"] + '</div>' +
                                     '<div class="meaning-diff">' + meaning["desc"] + '</div>' +
                                     '</div>',
