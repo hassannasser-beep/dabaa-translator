@@ -233,7 +233,7 @@ def detect_domains(text):
 # ═══════════════════════════════════════════════════════════════════════════════
 #  DEEPL API KEY — Main body (shows once, saves to session_state)
 # ═══════════════════════════════════════════════════════════════════════════════
-env_key = os.environ.get("DEEPL_API_KEY", "")
+env_key = os.environ.get("0d40f1a7-553b-44eb-9aab-837a828ca913:fx", "")
 if "deepl_api_key" not in st.session_state:
     st.session_state.deepl_api_key = env_key
 
