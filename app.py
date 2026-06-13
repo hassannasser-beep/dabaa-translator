@@ -215,7 +215,7 @@ def detect_domains(text):
 # ═══════════════════════════════════════════════════════════════════════════════
 #  TRANSLATION ENGINES
 # ═══════════════════════════════════════════════════════════════════════════════
-DEEPL_API_KEY = os.environ.get("BTU8IJVMGLWVs3kvL", "")
+DEEPL_API_KEY = os.environ.get("DEEPL_API_KEY", "")
 
 def translate_deepl(text, source_lang, target_lang):
     if not DEEPL_API_KEY: return None
@@ -228,7 +228,7 @@ def translate_deepl(text, source_lang, target_lang):
     try:
         resp = requests.post(
             "https://api-free.deepl.com/v2/translate",
-            headers={"Authorization": f"DeepL-Auth-Key {BTU8IJVMGLWVs3kvL}", "Content-Type": "application/x-www-form-urlencoded"},
+            headers={"Authorization": f"DeepL-Auth-Key {DEEPL_API_KEY}", "Content-Type": "application/x-www-form-urlencoded"},
             data={"text": text, "source_lang": source_lang, "target_lang": target_lang},
             timeout=15
         )
@@ -264,57 +264,45 @@ if "input_text" not in st.session_state:
     st.session_state.input_text = ""
 
 # ═══════════════════════════════════════════════════════════════════════════════
+#  SWAP CALLBACK (runs before script rerun)
+# ═══════════════════════════════════════════════════════════════════════════════
+def swap_languages():
+    """Swap source and target languages in session state."""
+    old_source = st.session_state.source_lang
+    old_target = st.session_state.target_lang
+    st.session_state.source_lang = old_target
+    st.session_state.target_lang = old_source
+
+# ═══════════════════════════════════════════════════════════════════════════════
 #  UI — LANGUAGE PAIR
 # ═══════════════════════════════════════════════════════════════════════════════
 lang_list = list(languages_dict.keys())
 
+# Ensure target != source (safety check)
+if st.session_state.target_lang == st.session_state.source_lang:
+    for lang in lang_list:
+        if lang != st.session_state.source_lang:
+            st.session_state.target_lang = lang
+            break
+
+# Compute indices from session state
+src_idx = lang_list.index(st.session_state.source_lang)
+tgt_options = [k for k in lang_list if k != st.session_state.source_lang]
+tgt_idx = tgt_options.index(st.session_state.target_lang) if st.session_state.target_lang in tgt_options else 0
+
 left, mid, right = st.columns([1, 0.12, 1])
 
 with left:
-    source_lang_name = st.selectbox(
-        "From Language", 
-        lang_list, 
-        index=lang_list.index(st.session_state.source_lang),
-        key="source_lang_select"
-    )
+    source_lang_name = st.selectbox("From Language", lang_list, index=src_idx)
 
 with mid:
     st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
-    if st.button("⇄", key="swap_btn", help="Swap languages", use_container_width=True):
-        # Safely get current values with fallbacks
-        old_source = st.session_state.get("source_lang_select", st.session_state.source_lang)
-        old_target = st.session_state.get("target_lang_select", st.session_state.target_lang)
-        # If target is same as source, pick a different one
-        if old_target == old_source:
-            for lang in lang_list:
-                if lang != old_source:
-                    old_target = lang
-                    break
-        # Swap
-        st.session_state.source_lang_select = old_target
-        st.session_state.target_lang_select = old_source
-        st.session_state.source_lang = old_target
-        st.session_state.target_lang = old_source
-        st.rerun()
+    st.button("⇄", on_click=swap_languages, help="Swap languages", use_container_width=True)
 
 with right:
-    target_lang_options = [k for k in lang_list if k != source_lang_name]
-    target_index = target_lang_options.index(st.session_state.target_lang) if st.session_state.target_lang in target_lang_options else 0
+    target_lang_name = st.selectbox("To Language", tgt_options, index=tgt_idx)
 
-    target_lang_name = st.selectbox(
-        "To Language", 
-        target_lang_options,
-        index=target_index,
-        key="target_lang_select"
-    )
-
-# Ensure target_lang_select is initialized (needed for swap button)
-if "target_lang_select" not in st.session_state:
-    st.session_state.target_lang_select = target_lang_name
-if "source_lang_select" not in st.session_state:
-    st.session_state.source_lang_select = source_lang_name
-
-# Sync canonical values
+# Update session state from widget values
 st.session_state.source_lang = source_lang_name
 st.session_state.target_lang = target_lang_name
 
@@ -454,10 +442,6 @@ if st.button("Translate", type="primary"):
                                     unsafe_allow_html=True
                                 )
                         col_idx += 1
-
-                # NOTE: Removed the "elif detected" block that was showing the SAME base translation 
-                # duplicated across all detected domains — this was causing the repeated/meaningless cards.
-                # Now we ONLY show domain cards when the word is ACTUALLY found in the dictionary with DIFFERENT meanings.
 
                 # Always show general translation
                 st.markdown("---")
