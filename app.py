@@ -215,7 +215,7 @@ def detect_domains(text):
 # ═══════════════════════════════════════════════════════════════════════════════
 #  TRANSLATION ENGINES
 # ═══════════════════════════════════════════════════════════════════════════════
-DEEPL_API_KEY = os.environ.get("BTU8IJVMGLWVs3kvL", "")
+DEEPL_API_KEY = os.environ.get("DEEPL_API_KEY", "")
 
 def translate_deepl(text, source_lang, target_lang):
     if not DEEPL_API_KEY: return None
@@ -228,7 +228,7 @@ def translate_deepl(text, source_lang, target_lang):
     try:
         resp = requests.post(
             "https://api-free.deepl.com/v2/translate",
-            headers={"Authorization": f"DeepL-Auth-Key {BTU8IJVMGLWVs3kvL}", "Content-Type": "application/x-www-form-urlencoded"},
+            headers={"Authorization": f"DeepL-Auth-Key {DEEPL_API_KEY}", "Content-Type": "application/x-www-form-urlencoded"},
             data={"text": text, "source_lang": source_lang, "target_lang": target_lang},
             timeout=15
         )
@@ -281,9 +281,16 @@ with left:
 with mid:
     st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
     if st.button("⇄", key="swap_btn", help="Swap languages", use_container_width=True):
-        # Swap: update both session state values and rerun
-        old_source = st.session_state.source_lang_select
-        old_target = st.session_state.target_lang_select
+        # Safely get current values with fallbacks
+        old_source = st.session_state.get("source_lang_select", st.session_state.source_lang)
+        old_target = st.session_state.get("target_lang_select", st.session_state.target_lang)
+        # If target is same as source, pick a different one
+        if old_target == old_source:
+            for lang in lang_list:
+                if lang != old_source:
+                    old_target = lang
+                    break
+        # Swap
         st.session_state.source_lang_select = old_target
         st.session_state.target_lang_select = old_source
         st.session_state.source_lang = old_target
@@ -300,6 +307,12 @@ with right:
         index=target_index,
         key="target_lang_select"
     )
+
+# Ensure target_lang_select is initialized (needed for swap button)
+if "target_lang_select" not in st.session_state:
+    st.session_state.target_lang_select = target_lang_name
+if "source_lang_select" not in st.session_state:
+    st.session_state.source_lang_select = source_lang_name
 
 # Sync canonical values
 st.session_state.source_lang = source_lang_name
