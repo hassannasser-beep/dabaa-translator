@@ -373,40 +373,91 @@ if DOMAIN_SPECIFIC_TRANSLATIONS:
     st.markdown(f'<div class="dict-stats">📚 Dictionary loaded: {dict_size} words with {total_entries} total domain entries</div>', unsafe_allow_html=True)
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  VOICE INPUT (Web Speech API — Chrome & Safari)
+#  VOICE INPUT — Auto-inserts into text box (Web Speech API)
 # ═══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:1rem;margin-bottom:1rem;">
-    <div style="font-size:14px;font-weight:700;color:#1a1a2e;margin-bottom:4px;">🎤 Voice Input</div>
-    <div style="font-size:12px;color:#6b7280;">Speak and your voice will be converted to text. <b>Chrome, Edge, Safari only.</b></div>
+    <div style="font-size:14px;font-weight:700;color:#1a1a2e;margin-bottom:4px;">🎤 Voice Input — Auto-insert</div>
+    <div style="font-size:12px;color:#6b7280;">
+        Click 🎤, speak, and the text will <b>automatically appear</b> in the input box below.
+        <span style="color:#dc2626;">Chrome, Edge, Safari only.</span>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
 speech_lang_map = {"ar": "ar-SA", "en": "en-US", "ru": "ru-RU", "zh": "zh-CN", "de": "de-DE", "es": "es-ES", "pt": "pt-PT", "ko": "ko-KR"}
 speech_lang = speech_lang_map.get(source_lang, "en-US")
 
-st.components.v1.html("""
-<div style="font-family:Arial,sans-serif;padding:4px;">
+# Use st.markdown with script (runs in main page context, can access textarea)
+st.markdown(f"""
+<div id="speech-ui" style="font-family:Arial,sans-serif;padding:4px;margin-bottom:12px;">
   <button id="mic-btn" onclick="toggleSpeech()" 
-    style="background:#1a1a2e;color:#fff;border:none;border-radius:8px;padding:14px 28px;font-size:16px;font-weight:700;cursor:pointer;">
+    style="background:#1a1a2e;color:#fff;border:none;border-radius:8px;padding:14px 28px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
     🎤 Start Speaking
   </button>
   <span id="mic-status" style="margin-left:12px;font-size:14px;color:#6b7280;font-weight:500;"></span>
 
   <div id="result-box" style="display:none;margin-top:12px;background:#f0fdf4;border:2px solid #86efac;border-radius:10px;padding:14px;">
-    <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:6px;">✅ Recognized Text:</div>
+    <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:6px;">✅ Recognized & Inserted:</div>
     <div id="result-text" style="font-size:16px;color:#1f2937;font-weight:600;"></div>
-    <div style="font-size:11px;color:#6b7280;margin-top:8px;">📋 Copy this text and paste it into the input box below</div>
+    <div style="font-size:11px;color:#16a34a;margin-top:8px;">✨ Text has been automatically placed in the input box below</div>
   </div>
 
   <div id="error-box" style="display:none;margin-top:12px;background:#fee2e2;border:2px solid #fca5a5;border-radius:10px;padding:12px;font-size:14px;color:#991b1b;font-weight:500;"></div>
 </div>
 
 <script>
+(function() {{
   var rec = null;
   var recording = false;
 
-  function toggleSpeech() {
+  function findTextarea() {{
+    // Find the Streamlit textarea by its placeholder or aria-label
+    var textareas = document.querySelectorAll('textarea');
+    for (var i = 0; i < textareas.length; i++) {{
+      var ta = textareas[i];
+      var placeholder = ta.getAttribute('placeholder') || '';
+      var ariaLabel = ta.getAttribute('aria-label') || '';
+      if (placeholder.indexOf('Type, paste') !== -1 || ariaLabel.indexOf('Enter text') !== -1) {{
+        return ta;
+      }}
+    }}
+    // Fallback: find any textarea with data-testid="stTextArea"
+    var stTextareas = document.querySelectorAll('textarea[data-testid="stTextArea"]');
+    if (stTextareas.length > 0) return stTextareas[0];
+    // Last fallback: first textarea
+    if (textareas.length > 0) return textareas[0];
+    return null;
+  }}
+
+  function updateTextarea(text) {{
+    var ta = findTextarea();
+    if (!ta) {{
+      console.error('Streamlit textarea not found');
+      return false;
+    }}
+
+    // Update value
+    ta.value = text;
+
+    // Trigger React/Streamlit change detection
+    ta.dispatchEvent(new Event('input', {{ bubbles: true }}));
+    ta.dispatchEvent(new Event('change', {{ bubbles: true }}));
+
+    // Try to trigger React's internal tracker (if exists)
+    var tracker = ta._valueTracker;
+    if (tracker) {{
+      tracker.setValue(text);
+    }}
+
+    // Additional focus and input events
+    ta.focus();
+    ta.dispatchEvent(new Event('input', {{ bubbles: true }}));
+
+    return true;
+  }}
+
+  window.toggleSpeech = function() {{
     var btn = document.getElementById('mic-btn');
     var status = document.getElementById('mic-status');
     var resultBox = document.getElementById('result-box');
@@ -414,40 +465,48 @@ st.components.v1.html("""
     var errorBox = document.getElementById('error-box');
 
     var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) {
+    if (!SR) {{
       errorBox.style.display = 'block';
       errorBox.innerHTML = '❌ <b>Your browser does not support speech recognition.</b><br>Please use Chrome, Edge, or Safari.';
       return;
-    }
+    }}
 
-    if (recording && rec) {
+    if (recording && rec) {{
       rec.stop();
       return;
-    }
+    }}
 
     rec = new SR();
-    rec.lang = '""" + speech_lang + """';
+    rec.lang = '{speech_lang}';
     rec.continuous = false;
     rec.interimResults = false;
 
-    rec.onstart = function() {
+    rec.onstart = function() {{
       recording = true;
       btn.innerHTML = '⏹️ Stop Recording';
       btn.style.background = '#dc2626';
       status.innerHTML = '🔴 <b>Listening...</b> Speak now';
       status.style.color = '#dc2626';
       errorBox.style.display = 'none';
-    };
+      resultBox.style.display = 'none';
+    }};
 
-    rec.onresult = function(e) {
+    rec.onresult = function(e) {{
       var text = e.results[0][0].transcript;
       resultText.innerHTML = text;
       resultBox.style.display = 'block';
-      status.innerHTML = '✅ <b>Done!</b> Copy the green text';
+      status.innerHTML = '✅ <b>Inserted!</b> Check the text box below';
       status.style.color = '#16a34a';
-    };
 
-    rec.onerror = function(e) {
+      // AUTO-INSERT into Streamlit textarea
+      var success = updateTextarea(text);
+      if (!success) {{
+        status.innerHTML = '⚠️ Text recognized but could not auto-insert. Please copy manually.';
+        status.style.color = '#ca8a04';
+      }}
+    }};
+
+    rec.onerror = function(e) {{
       errorBox.style.display = 'block';
       var msg = e.error;
       if (msg === 'no-speech') msg = 'No speech detected. Try again.';
@@ -458,20 +517,21 @@ st.components.v1.html("""
       btn.innerHTML = '🎤 Start Speaking';
       btn.style.background = '#1a1a2e';
       status.innerHTML = '';
-    };
+    }};
 
-    rec.onend = function() {
+    rec.onend = function() {{
       recording = false;
       btn.innerHTML = '🎤 Start Speaking';
       btn.style.background = '#1a1a2e';
-    };
+    }};
 
     rec.start();
-  }
+  }};
+}})();
 </script>
-""", height=260)
+""", unsafe_allow_html=True)
 
-st.caption("🎤 Click → Speak → Copy green text → Paste below → Translate. Chrome/Edge/Safari only. Firefox does not support speech recognition.")
+st.caption("🎤 Click → Speak → text appears automatically in the box below. Chrome/Edge/Safari only.")
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  TEXT INPUT
