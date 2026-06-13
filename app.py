@@ -80,7 +80,6 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     font-size: 10px; font-weight: 600; letter-spacing: 0.04em; margin-right: 4px;
 }
 .api-deepl { background: #0F2B46; color: #8ECAE6; }
-.api-google { background: #F4A261; color: #5C3D1E; }
 
 .domain-badge {
     display: inline-block; padding: 3px 10px; border-radius: 20px;
@@ -130,6 +129,30 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     margin-left: 6px;
 }
 
+.api-key-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 1rem;
+}
+.api-key-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 6px;
+}
+
+.error-box {
+    background: #fee2e2;
+    border-left: 3px solid #ef4444;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #991b1b;
+    margin-bottom: 1rem;
+}
+
 textarea { border-radius: 8px !important; border: 0.5px solid #d1d5db !important; font-size: 14px !important; }
 </style>
 """, unsafe_allow_html=True)
@@ -137,7 +160,7 @@ textarea { border-radius: 8px !important; border: 0.5px solid #d1d5db !important
 st.markdown("""
 <div class="hero">
     <div class="hero-name">HASSAN <span>NASSER</span></div>
-    <div class="hero-sub">MULTI-DOMAIN SMART TRANSLATOR — 15+ SPECIALIZED FIELDS</div>
+    <div class="hero-sub">MULTI-DOMAIN SMART TRANSLATOR — POWERED BY DEEPL API</div>
     <div class="hero-pills">
         <span class="pill pill-active">Auto-Domain Detect</span>
         <span class="pill pill-muted">DeepL Precision</span>
@@ -148,7 +171,7 @@ st.markdown("""
         <span class="ldot"></span><span class="ldot"></span><span class="ldot"></span>
         <span class="ldot"></span><span class="ldot"></span><span class="ldot"></span>
         <span class="ldot"></span><span class="ldot"></span>
-        <span class="lang-bar-txt">8 languages supported</span>
+        <span class="lang-bar-txt">8 languages supported — DeepL API only</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -181,7 +204,6 @@ DOMAINS = {
     "general":    {"emoji": "💬", "name_en": "General",       "color": "#6B7280"},
 }
 
-# Style / Tone options mapping to domains
 STYLE_OPTIONS = {
     "Auto-Detect": None,
     "🏛️ Political": "political",
@@ -217,75 +239,83 @@ def load_domain_dictionary():
 DOMAIN_SPECIFIC_TRANSLATIONS = load_domain_dictionary()
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  DOMAIN DETECTION
+#  DEEPL API KEY — FROM ENV OR SIDEBAR INPUT
 # ═══════════════════════════════════════════════════════════════════════════════
-DOMAIN_KEYWORDS = {
-    "political": ["minister", "government", "council", "ministry", "parliament", "political", "diplomatic", "treaty", "election", "vote", "policy", "embassy", "summit", "legislation", "constitution", "foreign affairs", "national security", "coalition", "sanctions", "bilateral", "president", "state", "capital", "وزير", "حكومة", "مجلس", "وزارة", "برلمان", "سياسة", "دبلوماسي", "سفير", "معاهدة", "اتفاقية دولية", "حزب", "انتخابات", "تصويت", "أمن قومي", "استراتيجية وطنية", "بيان", "تصريح", "قمة", "مؤتمر", "جلسة", "تشريع", "دستور", "حقوق", "مواطن", "رئيس", "دولة", "عاصمة"],
-    "legal": ["contract", "agreement", "clause", "appendix", "legal", "stipulation", "liable", "penalty", "compensation", "arbitration", "court", "judgment", "license", "obligation", "terms and conditions", "binding", "jurisdiction", "warranty", "indemnity", "breach", "bill", "law", "code", "عقد", "اتفاقية", "بند", "ملحق", "تعاقد", "قانون", "مرسوم", "لائحة", "نظام", "شرط", "جزاء", "تعويض", "مسؤولية", "ضمان", "FIDIC", "تحكيم", "دعوى", "محكمة", "قاضي", "حكم", "قرار", "تنظيمي", "ترخيص", "التزام", "حق", "ملكية", "إثبات", "مشروع قانون"],
-    "economic": ["economic", "financial", "investment", "cost", "budget", "revenue", "profit", "loss", "loan", "bank", "market", "trade", "import", "export", "tax", "fee", "pricing", "tender", "bid", "currency", "inflation", "growth", "GDP", "fiscal", "monetary", "capital", "اقتصاد", "مالية", "استثمار", "تكلفة", "سعر", "ميزانية", "عائد", "ربح", "خسارة", "تمويل", "قرض", "بنك", "سوق", "تجارة", "استيراد", "تصدير", "عمولة", "ضريبة", "رسوم", "تسعير", "عطاء", "مناقصة", "صرف", "عملة", "تضخم", "نمو", "تجاري", "رأس مال"],
-    "medical": ["doctor", "hospital", "treatment", "medication", "dose", "disease", "symptoms", "diagnosis", "laboratory", "clinical", "surgery", "patient", "health", "epidemic", "vaccine", "radiology", "bacteria", "virus", "immunity", "tissue", "cardiac", "renal", "cell", "pupil", "طبيب", "مستشفى", "علاج", "دواء", "جرعة", "مرض", "أعراض", "تشخيص", "فحص", "تحليل", "مختبر", "سريري", "جراحة", "عملية", "مريض", "صحة", "وباء", "تطعيم", "أشعة", "بكتيريا", "فيروس", "مناعة", "أنسجة", "أعضاء", "قلب", "كبد", "كلى", "خلية", "بؤبؤ"],
-    "scientific": ["research", "study", "experiment", "hypothesis", "theory", "scientific", "discovery", "innovation", "technology", "analysis", "data", "statistical", "model", "simulation", "algorithm", "AI", "machine learning", "physics", "chemistry", "biology", "astronomy", "بحث", "دراسة", "مختبر", "تجربة", "فرضية", "نظرية", "علمي", "اكتشاف", "ابتكار", "تقنية", "تكنولوجيا", "تحليل", "بيانات", "إحصائية", "نموذج", "محاكاة", "خوارزمية", "ذكاء اصطناعي", "تعلم آلي", "طاقة", "فيزياء", "كيمياء", "بيولوجيا", "فلك"],
-    "engineering": ["engineering", "structural", "civil", "architectural", "electrical", "mechanical", "concrete", "rebar", "foundation", "excavation", "backfill", "pouring", "drawings", "specifications", "construction", "supervision", "quality", "inspection", "survey", "plane", "spring", "lead", "هندسة", "إنشائي", "مدني", "معماري", "كهرباء", "ميكانيك", "صرف", "مياه", "طرق", "جسور", "أنفاق", "خرسانة", "حديد", "تسليح", "صب", "ردم", "حفر", "أساسات", "تصميم", "مخططات", "مواصفات", "بناء", "تشييد", "إشراف", "جودة", "اختبار", "مساحة", "مستوى", "نابض", "رصاص"],
-    "military": ["military", "army", "defense", "war", "battle", "weapon", "air force", "navy", "tank", "missile", "bomb", "base", "recruitment", "officer", "soldier", "rank", "operation", "watch", "جيش", "عسكري", "دفاع", "حرب", "معركة", "سلاح", "سلاح الجو", "بحرية", "دبابة", "صاروخ", "قنبلة", "قاعدة عسكرية", "تجنيد", "ضابط", "جندي", "رتبة", "عملية عسكرية", "حرس"],
-    "educational": ["school", "university", "education", "teaching", "teacher", "professor", "student", "curriculum", "exam", "test", "certificate", "thesis", "dissertation", "training", "doctor", "pupil", "مدرسة", "جامعة", "تعليم", "تدريس", "معلم", "أستاذ", "طالب", "دراسة", "مناهج", "امتحان", "اختبار", "شهادة", "بحث علمي", "رسالة", "أطروحة", "تدريب", "دورة", "دكتوراه", "تلميذ"],
-    "religious": ["mosque", "church", "temple", "prayer", "Quran", "Bible", "hadith", "jurisprudence", "sharia", "pilgrimage", "fasting", "charity", "imam", "sermon", "religion", "faith", "مسجد", "كنيسة", "معبد", "صلاة", "قرآن", "إنجيل", "حديث", "فقه", "شريعة", "حج", "عمرة", "صوم", "زكاة", "إمام", "خطيب", "دين", "عقيدة", "عبادة", "تفسير"],
-    "sports": ["sports", "football", "soccer", "basketball", "tennis", "swimming", "running", "stadium", "club", "team", "player", "coach", "referee", "championship", "cup", "match", "fitness", "court", "ring", "bat", "رياضة", "كرة القدم", "كرة السلة", "تنس", "سباحة", "جري", "ملعب", "نادي", "فريق", "لاعب", "مدرب", "حكم", "بطولة", "كأس", "مباراة", "تدريب", "لياقة", "مسابقة", "ملعب", "حلبة", "مضرب"],
-    "literary": ["literature", "story", "novel", "poetry", "poem", "writer", "author", "text", "style", "rhetoric", "metaphor", "simile", "chapter", "paragraph", "narrative", "plot", "character", "أدب", "قصة", "رواية", "شعر", "قصيدة", "كاتب", "مؤلف", "نص", "أسلوب", "بلاغة", "مجاز", "استعارة", "تشبيه", "فصل", "فقرة", "سرد", "حبكة", "شخصية", "حوار"],
-    "it": ["programming", "code", "computer", "network", "internet", "software", "application", "website", "server", "database", "cybersecurity", "hacker", "AI", "machine learning", "cloud", "API", "cell", "برمجة", "كود", "حاسوب", "كمبيوتر", "شبكة", "إنترنت", "برنامج", "تطبيق", "موقع", "خادم", "قاعدة بيانات", "أمن سيبراني", "هاكر", "ذكاء اصطناعي", "تعلم آلي", "سحابي", "خلية"],
-    "environmental": ["environment", "pollution", "climate", "global warming", "renewable", "solar", "wind", "seal", "بيئة", "تلوث", "مناخ", "احتباس حراري", "طاقة متجددة", "شمسية", "رياح", "مياه جوفية", "غابة", "صحراء", "تصحر", "تنوع حيوي", "محمية", "طبيعة", "أوزون", "كربون", "فقمة"],
-    "agricultural": ["agriculture", "farm", "crop", "wheat", "rice", "corn", "trees", "irrigation", "soil", "date", "زراعة", "مزرعة", "محصول", "قمح", "أرز", "ذرة", "أشجار", "ماء ري", "تربة", "سماد", "مبيد", "حصاد", "حصادة", "ثروة حيوانية", "مواشي", "أغنام", "دواجن", "سمك", "تمر"],
-    "media": ["media", "journalism", "television", "radio", "newspaper", "news", "report", "anchor", "إعلام", "صحافة", "تلفزيون", "إذاعة", "صحيفة", "خبر", "تقرير", "مذيع", "مراسل", "تحقيق", "صحفي", "إعلان", "دعاية", "بث", "قناة", "برنامج إعلامي"],
-    "tourism": ["tourism", "hotel", "travel", "trip", "airport", "aviation", "passport", "visa", "tour", "plane", "سياحة", "فندق", "سفر", "رحلة", "مطار", "طيران", "جواز", "تأشيرة", "جولة", "أثر", "تاريخي", "معلم", "منتجع", "شاطئ", "جبل", "صحراء", "متحف", "تراث", "طائرة"],
-}
+st.sidebar.markdown("### 🔑 DeepL API Configuration")
+st.sidebar.markdown("<div style='font-size:12px;color:#6b7280;margin-bottom:8px;'>The app requires a DeepL API key to translate. Get one free at deepl.com/pro-api.</div>", unsafe_allow_html=True)
 
-def detect_domains(text):
-    text_lower = text.lower()
-    scores = {}
-    for domain, keywords in DOMAIN_KEYWORDS.items():
-        score = sum(text_lower.count(kw.lower()) * (1 + len(kw)/50) for kw in keywords)
-        if score > 0: scores[domain] = score
-    return sorted(scores, key=scores.get, reverse=True) if scores else []
+# Try env var first, then session state, then empty
+env_key = os.environ.get("DEEPL_API_KEY", "")
+if "deepl_api_key" not in st.session_state:
+    st.session_state.deepl_api_key = env_key
+
+DEEPL_API_KEY = st.sidebar.text_input(
+    "DeepL API Key",
+    value=st.session_state.deepl_api_key,
+    type="password",
+    placeholder="Enter your DeepL API key...",
+    help="Free tier: 500,000 characters/month. Key is stored only in this session."
+)
+
+# Save to session state
+st.session_state.deepl_api_key = DEEPL_API_KEY
+
+if not DEEPL_API_KEY:
+    st.sidebar.error("⚠️ No API key provided. Translation will not work.")
+else:
+    # Masked display
+    masked = DEEPL_API_KEY[:8] + "..." + DEEPL_API_KEY[-4:] if len(DEEPL_API_KEY) > 12 else "***"
+    st.sidebar.success(f"✅ Key loaded: {masked}")
+
+st.sidebar.markdown("<div style='font-size:11px;color:#9ca3af;margin-top:8px;'>Your key is never stored on disk. It only lives in this browser session.</div>", unsafe_allow_html=True)
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  TRANSLATION ENGINES
+#  TRANSLATION ENGINE — DEEPL ONLY
 # ═══════════════════════════════════════════════════════════════════════════════
-DEEPL_API_KEY = os.environ.get("BTU8IJVMGLWVs3kvL", "")
-
 def translate_deepl(text, source_lang, target_lang):
-    if not DEEPL_API_KEY: return None
-    if source_lang == "ar": source_lang = "AR"
-    elif source_lang == "zh": source_lang = "ZH"
-    else: source_lang = source_lang.upper()
-    target_lang = target_lang.upper()
-    if target_lang == "AR": target_lang = "AR"
-    elif target_lang == "ZH": target_lang = "ZH"
+    if not DEEPL_API_KEY:
+        return None, "No API key configured"
+
+    # DeepL language codes
+    sl = source_lang.upper()
+    tl = target_lang.upper()
+    if sl == "AR": sl = "AR"
+    elif sl == "ZH": sl = "ZH"
+    if tl == "AR": tl = "AR"
+    elif tl == "ZH": tl = "ZH"
+
     try:
         resp = requests.post(
             "https://api-free.deepl.com/v2/translate",
-            headers={"Authorization": f"DeepL-Auth-Key {BTU8IJVMGLWVs3kvL}", "Content-Type": "application/x-www-form-urlencoded"},
-            data={"text": text, "source_lang": source_lang, "target_lang": target_lang},
+            headers={
+                "Authorization": f"DeepL-Auth-Key {DEEPL_API_KEY}",
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            data={"text": text, "source_lang": sl, "target_lang": tl},
             timeout=15
         )
-        if resp.status_code == 200: return resp.json()["translations"][0]["text"]
-    except Exception: pass
-    return None
-
-def translate_google(text, source_lang, target_lang):
-    try:
-        url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl={source_lang}&tl={target_lang}&dt=t&q={requests.utils.quote(text)}"
-        resp = requests.get(url, timeout=10)
         if resp.status_code == 200:
-            data = resp.json()
-            return "".join([item[0] for item in data[0] if item[0]])
-    except Exception: pass
-    return None
+            return resp.json()["translations"][0]["text"], None
+        elif resp.status_code == 403:
+            return None, "Invalid API key or authentication failed"
+        elif resp.status_code == 429:
+            return None, "Rate limit exceeded (too many requests)"
+        elif resp.status_code == 456:
+            return None, "Quota exceeded — free tier limit reached"
+        else:
+            return None, f"DeepL error {resp.status_code}: {resp.text[:200]}"
+    except requests.exceptions.Timeout:
+        return None, "Request timed out — check your internet connection"
+    except requests.exceptions.ConnectionError:
+        return None, "Connection error — cannot reach DeepL servers"
+    except Exception as e:
+        return None, f"Unexpected error: {str(e)}"
 
 def fetch_ai_translation(text, source_lang, target_lang):
-    result = translate_deepl(text, source_lang, target_lang)
-    if result: return result, "DeepL"
-    result = translate_google(text, source_lang, target_lang)
-    if result: return result, "Google"
-    return None, None
+    result, error = translate_deepl(text, source_lang, target_lang)
+    if result:
+        return result, "DeepL"
+    return None, error
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  SESSION STATE
@@ -314,7 +344,6 @@ def swap_languages():
 lang_list = list(languages_dict.keys())
 style_list = list(STYLE_OPTIONS.keys())
 
-# Ensure target != source
 if st.session_state.target_lang == st.session_state.source_lang:
     for lang in lang_list:
         if lang != st.session_state.source_lang:
@@ -374,7 +403,6 @@ with style_col2:
             unsafe_allow_html=True
         )
 
-# Update session state
 st.session_state.source_lang = source_lang_name
 st.session_state.target_lang = target_lang_name
 st.session_state.selected_style = selected_style_label
@@ -394,7 +422,7 @@ input_text = st.text_area("Enter text to translate", height=140, placeholder="Ty
 if input_text != st.session_state.input_text:
     st.session_state.input_text = input_text
 
-# Detected domains (auto-detect display)
+# Detected domains
 if input_text.strip():
     detected = detect_domains(input_text)
     if detected:
@@ -411,14 +439,31 @@ if input_text.strip():
 if st.button("Translate", type="primary"):
     if not input_text.strip():
         st.warning("Please enter text to translate.")
+    elif not DEEPL_API_KEY:
+        st.markdown(
+            '<div class="error-box">'
+            '<b>🔑 DeepL API Key Required</b><br>'
+            'Please enter your DeepL API key in the sidebar to start translating. '
+            'Get a free key at <a href="https://www.deepl.com/pro-api" target="_blank">deepl.com/pro-api</a>.'
+            '</div>',
+            unsafe_allow_html=True
+        )
     else:
-        with st.spinner("Translating..."):
+        with st.spinner("Translating via DeepL..."):
             base_translation, api_used = fetch_ai_translation(input_text, source_lang, target_lang)
 
             if not base_translation:
-                st.error("Translation failed. Please check your internet connection or API keys.")
+                # Show detailed error
+                st.markdown(
+                    f'<div class="error-box">'
+                    f'<b>❌ Translation Failed</b><br>'
+                    f'{api_used}<br>'
+                    f'<span style="font-size:12px;color:#7f1d1d;">Please check your API key and quota at DeepL dashboard.</span>'
+                    f'</div>',
+                    unsafe_allow_html=True
+                )
             else:
-                api_badge = f'<span class="api-badge api-deepl">{api_used}</span>' if api_used == "DeepL" else f'<span class="api-badge api-google">{api_used}</span>'
+                api_badge = f'<span class="api-badge api-deepl">{api_used}</span>'
                 st.markdown(f"{api_badge} <b>Base Translation:</b>", unsafe_allow_html=True)
                 st.markdown(f'<div class="rtext">{base_translation}</div>', unsafe_allow_html=True)
 
@@ -441,12 +486,12 @@ if st.button("Translate", type="primary"):
                             "source": f"Direct: '{lookup_word}'"
                         })
 
-                # 2. English lookup
+                # 2. English lookup (via DeepL, not Google)
                 english_word = None
                 if source_lang != "en":
-                    english_word = translate_google(input_text.strip(), source_lang, "en")
-                    if english_word:
-                        english_word = english_word.strip().lower()
+                    eng_result, eng_err = translate_deepl(input_text.strip(), source_lang, "en")
+                    if eng_result:
+                        english_word = eng_result.strip().lower()
                 else:
                     english_word = lookup_word
 
@@ -488,14 +533,10 @@ if st.button("Translate", type="primary"):
                     st.markdown("---")
                     st.markdown(f'<div class="all-meanings-header">🎯 All Domain-Specific Meanings <span class="meaning-count">{total_meanings}</span></div>', unsafe_allow_html=True)
 
-                    # Sort domains: selected style first, then others, then general
                     domain_keys = [d for d in all_meanings.keys() if d != "general"]
-
-                    # If user selected a specific domain and it exists in results, move it to front
                     if selected_domain and selected_domain in domain_keys:
                         domain_keys.remove(selected_domain)
                         domain_keys.insert(0, selected_domain)
-
                     if "general" in all_meanings:
                         domain_keys.append("general")
 
