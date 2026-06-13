@@ -414,7 +414,7 @@ if DOMAIN_SPECIFIC_TRANSLATIONS:
     st.markdown(f'<div class="dict-stats">📚 Dictionary loaded: {dict_size} words with {total_entries} total domain entries</div>', unsafe_allow_html=True)
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  VOICE INPUT — Auto-insert via URL query params (reliable cross-origin method)
+#  VOICE INPUT — Inline JavaScript (no iframe, direct page access)
 # ═══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:1rem;margin-bottom:1rem;">
@@ -429,8 +429,9 @@ st.markdown("""
 speech_lang_map = {"ar": "ar-SA", "en": "en-US", "ru": "ru-RU", "zh": "zh-CN", "de": "de-DE", "es": "es-ES", "pt": "pt-PT", "ko": "ko-KR"}
 speech_lang = speech_lang_map.get(source_lang, "en-US")
 
-st.components.v1.html("""
-<div style="font-family:Arial,sans-serif;padding:4px;">
+# Inline script (runs in main page, not iframe) — can access window.location directly
+st.markdown(f"""
+<div id="speech-ui" style="font-family:Arial,sans-serif;padding:4px;margin-bottom:12px;">
   <button id="mic-btn" onclick="toggleSpeech()" 
     style="background:#1a1a2e;color:#fff;border:none;border-radius:8px;padding:14px 28px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
     🎤 Start Speaking
@@ -438,19 +439,20 @@ st.components.v1.html("""
   <span id="mic-status" style="margin-left:12px;font-size:14px;color:#6b7280;font-weight:500;"></span>
 
   <div id="result-box" style="display:none;margin-top:12px;background:#f0fdf4;border:2px solid #86efac;border-radius:10px;padding:14px;">
-    <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:6px;">✅ Recognized & Inserted:</div>
+    <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:6px;">✅ Recognized:</div>
     <div id="result-text" style="font-size:16px;color:#1f2937;font-weight:600;"></div>
-    <div style="font-size:11px;color:#16a34a;margin-top:8px;">✨ Page will refresh automatically to insert the text</div>
+    <div style="font-size:11px;color:#16a34a;margin-top:8px;">✨ Page will refresh to insert the text</div>
   </div>
 
   <div id="error-box" style="display:none;margin-top:12px;background:#fee2e2;border:2px solid #fca5a5;border-radius:10px;padding:12px;font-size:14px;color:#991b1b;font-weight:500;"></div>
 </div>
 
 <script>
+(function() {{
   var rec = null;
   var recording = false;
 
-  function toggleSpeech() {
+  window.toggleSpeech = function() {{
     var btn = document.getElementById('mic-btn');
     var status = document.getElementById('mic-status');
     var resultBox = document.getElementById('result-box');
@@ -458,23 +460,23 @@ st.components.v1.html("""
     var errorBox = document.getElementById('error-box');
 
     var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) {
+    if (!SR) {{
       errorBox.style.display = 'block';
       errorBox.innerHTML = '❌ <b>Your browser does not support speech recognition.</b><br>Please use Chrome, Edge, or Safari.';
       return;
-    }
+    }}
 
-    if (recording && rec) {
+    if (recording && rec) {{
       rec.stop();
       return;
-    }
+    }}
 
     rec = new SR();
-    rec.lang = '""" + speech_lang + """';
+    rec.lang = '{speech_lang}';
     rec.continuous = false;
     rec.interimResults = false;
 
-    rec.onstart = function() {
+    rec.onstart = function() {{
       recording = true;
       btn.innerHTML = '⏹️ Stop Recording';
       btn.style.background = '#dc2626';
@@ -482,27 +484,27 @@ st.components.v1.html("""
       status.style.color = '#dc2626';
       errorBox.style.display = 'none';
       resultBox.style.display = 'none';
-    };
+    }};
 
-    rec.onresult = function(e) {
+    rec.onresult = function(e) {{
       var text = e.results[0][0].transcript;
       resultText.innerHTML = text;
       resultBox.style.display = 'block';
-      status.innerHTML = '✅ <b>Done!</b> Refreshing page...';
+      status.innerHTML = '✅ <b>Done!</b> Refreshing...';
       status.style.color = '#16a34a';
 
-      // Update parent URL with speech text → triggers Streamlit rerun
-      var url = new URL(window.parent.location.href);
+      // Update URL with speech text → triggers Streamlit rerun
+      var url = new URL(window.location.href);
       url.searchParams.set('speech', text);
-      window.parent.history.replaceState({}, '', url);
+      window.history.replaceState({{}}, '', url);
 
-      // Refresh parent page after short delay
-      setTimeout(function() {
-        window.parent.location.href = url.toString();
-      }, 1200);
-    };
+      // Refresh after delay
+      setTimeout(function() {{
+        window.location.href = url.toString();
+      }}, 1000);
+    }};
 
-    rec.onerror = function(e) {
+    rec.onerror = function(e) {{
       errorBox.style.display = 'block';
       var msg = e.error;
       if (msg === 'no-speech') msg = 'No speech detected. Try again.';
@@ -513,18 +515,19 @@ st.components.v1.html("""
       btn.innerHTML = '🎤 Start Speaking';
       btn.style.background = '#1a1a2e';
       status.innerHTML = '';
-    };
+    }};
 
-    rec.onend = function() {
+    rec.onend = function() {{
       recording = false;
       btn.innerHTML = '🎤 Start Speaking';
       btn.style.background = '#1a1a2e';
-    };
+    }};
 
     rec.start();
-  }
+  }};
+}})();
 </script>
-""", height=260)
+""", unsafe_allow_html=True)
 
 st.caption("🎤 Click → Speak → page refreshes → text appears in box below. Chrome/Edge/Safari only.")
 
