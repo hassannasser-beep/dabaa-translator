@@ -275,7 +275,7 @@ DOMAIN_SPECIFIC_TRANSLATIONS = load_domain_dictionary()
 # ═══════════════════════════════════════════════════════════════════════════════
 #  DEEPL API KEY — MAIN INPUT (VISIBLE)
 # ═══════════════════════════════════════════════════════════════════════════════
-env_key = os.environ.get("DEEPL_API_KEY", "")
+env_key = os.environ.get("0d40f1a7-553b-44eb-9aab-837a828ca913:fx", "")
 if "deepl_api_key" not in st.session_state:
     st.session_state.deepl_api_key = env_key
 
