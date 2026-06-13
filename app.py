@@ -231,33 +231,53 @@ def detect_domains(text):
     return sorted(scores, key=scores.get, reverse=True) if scores else []
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  DEEPL API KEY
+#  DEEPL API KEY — MAIN BODY (prominent, hides after entry)
 # ═══════════════════════════════════════════════════════════════════════════════
 env_key = os.environ.get("0d40f1a7-553b-44eb-9aab-837a828ca913:fx", "")
 if "deepl_api_key" not in st.session_state:
     st.session_state.deepl_api_key = env_key
 
-with st.sidebar:
-    st.markdown("### 🔑 DeepL API Key")
-    if not st.session_state.deepl_api_key:
-        st.markdown("<div style='font-size:12px;color:#ef4444;margin-bottom:8px;'>⚠️ Required to translate</div>", unsafe_allow_html=True)
-        key_input = st.text_input("Paste your key", type="password", placeholder="e.g., abc123...xyz9:fx", label_visibility="collapsed")
-        if key_input:
-            st.session_state.deepl_api_key = key_input
-            st.success("✅ Saved! Reloading...")
-            st.rerun()
-        st.markdown("<div style='font-size:10px;color:#9ca3af;'>Get free at deepl.com/pro-api</div>", unsafe_allow_html=True)
-    else:
-        masked = st.session_state.deepl_api_key[:6] + "..." + st.session_state.deepl_api_key[-4:] if len(st.session_state.deepl_api_key) > 10 else "***"
-        st.markdown(f"<div style='font-size:12px;color:#16a34a;font-weight:600;'>✅ Active</div>", unsafe_allow_html=True)
-        st.markdown(f"<div style='font-size:10px;color:#6b7280;'>{masked}</div>", unsafe_allow_html=True)
-        if st.button("🔑 Change / Remove Key", use_container_width=True):
-            st.session_state.deepl_api_key = ""
-            st.rerun()
-        st.markdown("<div style='font-size:10px;color:#9ca3af;'>Session-only. Not stored.</div>", unsafe_allow_html=True)
-    st.divider()
+if not st.session_state.deepl_api_key:
+    st.markdown("""
+    <div style="background: #1a1a2e; border-radius: 14px; padding: 2rem; margin-bottom: 1.5rem; text-align: center;">
+        <div style="font-size: 26px; font-weight: 700; color: #ffffff; margin-bottom: 10px;">🔑 DeepL API Key Required</div>
+        <div style="font-size: 14px; color: rgba(255,255,255,0.6); margin-bottom: 20px;">
+            Translation requires a DeepL API key. Get a free key with 500,000 characters/month at 
+            <a href="https://www.deepl.com/pro-api" target="_blank" style="color: #5DCAA5; text-decoration: none;">deepl.com/pro-api</a>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    key_input = st.text_input(
+        "Enter your DeepL API Key",
+        type="password",
+        placeholder="Paste your key here (e.g., abc123...xyz9:fx)",
+        key="main_api_key_input"
+    )
+
+    if key_input:
+        st.session_state.deepl_api_key = key_input
+        st.success("✅ Key saved! Reloading...")
+        st.rerun()
+
+    st.info("📱 Please enter your API key above to continue. The key is stored only in this browser session.")
+
+    # Don't show the rest of the app until key is entered
+    st.stop()
 
 DEEPL_API_KEY = st.session_state.deepl_api_key
+
+# Show compact status in sidebar
+with st.sidebar:
+    st.markdown("### 🔑 DeepL API Key")
+    masked = DEEPL_API_KEY[:6] + "..." + DEEPL_API_KEY[-4:] if len(DEEPL_API_KEY) > 10 else "***"
+    st.markdown(f"<div style='font-size:12px;color:#16a34a;font-weight:600;'>✅ Active</div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='font-size:10px;color:#6b7280;'>{masked}</div>", unsafe_allow_html=True)
+    if st.button("🔑 Change / Remove Key", use_container_width=True):
+        st.session_state.deepl_api_key = ""
+        st.rerun()
+    st.markdown("<div style='font-size:10px;color:#9ca3af;'>Session-only. Not stored.</div>", unsafe_allow_html=True)
+    st.divider()
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  TRANSLATION ENGINE
