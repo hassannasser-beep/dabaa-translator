@@ -31,7 +31,6 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 .pill-muted { background: rgba(255,255,255,0.07); border: 0.5px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.5); }
 .lang-bar { display: flex; gap: 6px; margin-top: 14px; align-items: center; }
 .ldot { width: 8px; height: 8px; border-radius: 50%; background: #5DCAA5; display: inline-block; }
-.ldot-off { background: rgba(255,255,255,0.18); }
 .lang-bar-txt { font-size: 11px; color: rgba(255,255,255,0.35); margin-left: 4px; }
 
 .rcard { border-radius: 12px; padding: 1.1rem 1.3rem; border: 0.5px solid #e5e7eb; background: #fff; transition: all 0.2s; }
@@ -52,7 +51,6 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 .rcard-med2 { border-top: 3px solid #5E35B1; }
 .rcard-tour { border-top: 3px solid #00838F; }
 .rcard-gen { border-top: 3px solid #6B7280; }
-.rcard-detected { box-shadow: 0 0 0 2px rgba(93,202,165,0.4); background: #f6fffd; }
 
 .rlabel { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 8px; }
 .rlabel-pol { color: #9B2226; }
@@ -74,24 +72,7 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 .rlabel-gen { color: #4B5563; }
 .rtext { font-size: 14px; line-height: 1.75; color: #1f2937; direction: auto; }
 
-.dym-box { background: #FAEEDA; border-left: 3px solid #BA7517; border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 13px; color: #412402; margin-bottom: 1rem; }
 .detected-box { background: #E6F4F1; border-left: 3px solid #5DCAA5; border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 13px; color: #04342C; margin-bottom: 1rem; }
-.abbrev-box { background: #E3F2FD; border-left: 3px solid #1565C0; border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 13px; color: #0D47A1; margin-bottom: 1rem; }
-
-.swap-btn {
-    background: #f3f4f6 !important; color: #374151 !important; border: 1px solid #d1d5db !important;
-    border-radius: 8px !important; font-weight: 600 !important; font-size: 16px !important;
-    padding: 0.4rem 0.8rem !important; width: auto !important;
-}
-.swap-btn:hover { background: #e5e7eb !important; }
-
-div.stButton > button[kind="primary"] {
-    background: #1a1a2e !important; color: white !important; border: none !important;
-    border-radius: 8px !important; font-weight: 500 !important;
-    font-size: 15px !important; padding: 0.65rem 2rem !important; width: 100% !important;
-}
-div.stButton > button[kind="primary"]:hover { background: #0f0f1e !important; }
-textarea { border-radius: 8px !important; border: 0.5px solid #d1d5db !important; font-size: 14px !important; }
 
 .api-badge {
     display: inline-block; padding: 2px 8px; border-radius: 4px;
@@ -136,6 +117,8 @@ textarea { border-radius: 8px !important; border: 0.5px solid #d1d5db !important
 .meaning-count { background: #5DCAA5; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-left: 8px; }
 .domain-card { margin-bottom: 12px; }
 .dict-stats { font-size: 11px; color: #6b7280; margin-top: 4px; }
+
+textarea { border-radius: 8px !important; border: 0.5px solid #d1d5db !important; font-size: 14px !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -191,7 +174,6 @@ DOMAINS = {
 # ═══════════════════════════════════════════════════════════════════════════════
 @st.cache_data
 def load_domain_dictionary():
-    """Load domain dictionary from JSON file once and cache it."""
     dict_path = Path(__file__).parent / "domain_dict.json"
     if dict_path.exists():
         with open(dict_path, 'r', encoding='utf-8') as f:
@@ -204,22 +186,22 @@ DOMAIN_SPECIFIC_TRANSLATIONS = load_domain_dictionary()
 #  DOMAIN DETECTION
 # ═══════════════════════════════════════════════════════════════════════════════
 DOMAIN_KEYWORDS = {
-    "political": ["minister", "government", "council", "ministry", "parliament", "political", "diplomatic", "treaty", "election", "vote", "policy", "embassy", "summit", "legislation", "constitution", "foreign affairs", "national security", "coalition", "sanctions", "bilateral", "وزير", "حكومة", "مجلس", "وزارة", "برلمان", "سياسة", "دبلوماسي", "سفير", "معاهدة", "اتفاقية دولية", "حزب", "انتخابات", "تصويت", "أمن قومي", "استراتيجية وطنية", "بيان", "تصريح", "قمة", "مؤتمر", "جلسة", "تشريع", "دستور", "حقوق", "مواطن"],
-    "legal": ["contract", "agreement", "clause", "appendix", "legal", "stipulation", "liable", "penalty", "compensation", "arbitration", "court", "judgment", "license", "obligation", "terms and conditions", "binding", "jurisdiction", "warranty", "indemnity", "breach", "عقد", "اتفاقية", "بند", "ملحق", "تعاقد", "قانون", "مرسوم", "لائحة", "نظام", "شرط", "جزاء", "تعويض", "مسؤولية", "ضمان", "FIDIC", "تحكيم", "دعوى", "محكمة", "قاضي", "حكم", "قرار", "تنظيمي", "ترخيص", "التزام", "حق", "ملكية", "إثبات"],
-    "economic": ["economic", "financial", "investment", "cost", "budget", "revenue", "profit", "loss", "loan", "bank", "market", "trade", "import", "export", "tax", "fee", "pricing", "tender", "bid", "currency", "inflation", "growth", "GDP", "fiscal", "monetary", "اقتصاد", "مالية", "استثمار", "تكلفة", "سعر", "ميزانية", "عائد", "ربح", "خسارة", "تمويل", "قرض", "بنك", "سوق", "تجارة", "استيراد", "تصدير", "عمولة", "ضريبة", "رسوم", "تسعير", "عطاء", "مناقصة", "صرف", "عملة", "تضخم", "نمو", "تجاري"],
-    "medical": ["doctor", "hospital", "treatment", "medication", "dose", "disease", "symptoms", "diagnosis", "laboratory", "clinical", "surgery", "patient", "health", "epidemic", "vaccine", "radiology", "bacteria", "virus", "immunity", "tissue", "cardiac", "renal", "طبيب", "مستشفى", "علاج", "دواء", "جرعة", "مرض", "أعراض", "تشخيص", "فحص", "تحليل", "مختبر", "سريري", "جراحة", "عملية", "مريض", "صحة", "وباء", "تطعيم", "أشعة", "بكتيريا", "فيروس", "مناعة", "أنسجة", "أعضاء", "قلب", "كبد", "كلى"],
+    "political": ["minister", "government", "council", "ministry", "parliament", "political", "diplomatic", "treaty", "election", "vote", "policy", "embassy", "summit", "legislation", "constitution", "foreign affairs", "national security", "coalition", "sanctions", "bilateral", "president", "state", "capital", "وزير", "حكومة", "مجلس", "وزارة", "برلمان", "سياسة", "دبلوماسي", "سفير", "معاهدة", "اتفاقية دولية", "حزب", "انتخابات", "تصويت", "أمن قومي", "استراتيجية وطنية", "بيان", "تصريح", "قمة", "مؤتمر", "جلسة", "تشريع", "دستور", "حقوق", "مواطن", "رئيس", "دولة", "عاصمة"],
+    "legal": ["contract", "agreement", "clause", "appendix", "legal", "stipulation", "liable", "penalty", "compensation", "arbitration", "court", "judgment", "license", "obligation", "terms and conditions", "binding", "jurisdiction", "warranty", "indemnity", "breach", "bill", "law", "code", "عقد", "اتفاقية", "بند", "ملحق", "تعاقد", "قانون", "مرسوم", "لائحة", "نظام", "شرط", "جزاء", "تعويض", "مسؤولية", "ضمان", "FIDIC", "تحكيم", "دعوى", "محكمة", "قاضي", "حكم", "قرار", "تنظيمي", "ترخيص", "التزام", "حق", "ملكية", "إثبات", "مشروع قانون"],
+    "economic": ["economic", "financial", "investment", "cost", "budget", "revenue", "profit", "loss", "loan", "bank", "market", "trade", "import", "export", "tax", "fee", "pricing", "tender", "bid", "currency", "inflation", "growth", "GDP", "fiscal", "monetary", "capital", "اقتصاد", "مالية", "استثمار", "تكلفة", "سعر", "ميزانية", "عائد", "ربح", "خسارة", "تمويل", "قرض", "بنك", "سوق", "تجارة", "استيراد", "تصدير", "عمولة", "ضريبة", "رسوم", "تسعير", "عطاء", "مناقصة", "صرف", "عملة", "تضخم", "نمو", "تجاري", "رأس مال"],
+    "medical": ["doctor", "hospital", "treatment", "medication", "dose", "disease", "symptoms", "diagnosis", "laboratory", "clinical", "surgery", "patient", "health", "epidemic", "vaccine", "radiology", "bacteria", "virus", "immunity", "tissue", "cardiac", "renal", "cell", "pupil", "طبيب", "مستشفى", "علاج", "دواء", "جرعة", "مرض", "أعراض", "تشخيص", "فحص", "تحليل", "مختبر", "سريري", "جراحة", "عملية", "مريض", "صحة", "وباء", "تطعيم", "أشعة", "بكتيريا", "فيروس", "مناعة", "أنسجة", "أعضاء", "قلب", "كبد", "كلى", "خلية", "بؤبؤ"],
     "scientific": ["research", "study", "experiment", "hypothesis", "theory", "scientific", "discovery", "innovation", "technology", "analysis", "data", "statistical", "model", "simulation", "algorithm", "AI", "machine learning", "physics", "chemistry", "biology", "astronomy", "بحث", "دراسة", "مختبر", "تجربة", "فرضية", "نظرية", "علمي", "اكتشاف", "ابتكار", "تقنية", "تكنولوجيا", "تحليل", "بيانات", "إحصائية", "نموذج", "محاكاة", "خوارزمية", "ذكاء اصطناعي", "تعلم آلي", "طاقة", "فيزياء", "كيمياء", "بيولوجيا", "فلك"],
-    "engineering": ["engineering", "structural", "civil", "architectural", "electrical", "mechanical", "concrete", "rebar", "foundation", "excavation", "backfill", "pouring", "drawings", "specifications", "construction", "supervision", "quality", "inspection", "survey", "هندسة", "إنشائي", "مدني", "معماري", "كهرباء", "ميكانيك", "صرف", "مياه", "طرق", "جسور", "أنفاق", "خرسانة", "حديد", "تسليح", "صب", "ردم", "حفر", "أساسات", "تصميم", "مخططات", "مواصفات", "بناء", "تشييد", "إشراف", "جودة", "اختبار", "مساحة"],
-    "military": ["military", "army", "defense", "war", "battle", "weapon", "air force", "navy", "tank", "missile", "bomb", "base", "recruitment", "officer", "soldier", "rank", "operation", "جيش", "عسكري", "دفاع", "حرب", "معركة", "سلاح", "سلاح الجو", "بحرية", "دبابة", "صاروخ", "قنبلة", "قاعدة عسكرية", "تجنيد", "ضابط", "جندي", "رتبة", "عملية عسكرية"],
-    "educational": ["school", "university", "education", "teaching", "teacher", "professor", "student", "curriculum", "exam", "test", "certificate", "thesis", "dissertation", "training", "مدرسة", "جامعة", "تعليم", "تدريس", "معلم", "أستاذ", "طالب", "دراسة", "مناهج", "امتحان", "اختبار", "شهادة", "بحث علمي", "رسالة", "أطروحة", "تدريب", "دورة"],
+    "engineering": ["engineering", "structural", "civil", "architectural", "electrical", "mechanical", "concrete", "rebar", "foundation", "excavation", "backfill", "pouring", "drawings", "specifications", "construction", "supervision", "quality", "inspection", "survey", "plane", "spring", "lead", "هندسة", "إنشائي", "مدني", "معماري", "كهرباء", "ميكانيك", "صرف", "مياه", "طرق", "جسور", "أنفاق", "خرسانة", "حديد", "تسليح", "صب", "ردم", "حفر", "أساسات", "تصميم", "مخططات", "مواصفات", "بناء", "تشييد", "إشراف", "جودة", "اختبار", "مساحة", "مستوى", "نابض", "رصاص"],
+    "military": ["military", "army", "defense", "war", "battle", "weapon", "air force", "navy", "tank", "missile", "bomb", "base", "recruitment", "officer", "soldier", "rank", "operation", "watch", "جيش", "عسكري", "دفاع", "حرب", "معركة", "سلاح", "سلاح الجو", "بحرية", "دبابة", "صاروخ", "قنبلة", "قاعدة عسكرية", "تجنيد", "ضابط", "جندي", "رتبة", "عملية عسكرية", "حرس"],
+    "educational": ["school", "university", "education", "teaching", "teacher", "professor", "student", "curriculum", "exam", "test", "certificate", "thesis", "dissertation", "training", "doctor", "pupil", "مدرسة", "جامعة", "تعليم", "تدريس", "معلم", "أستاذ", "طالب", "دراسة", "مناهج", "امتحان", "اختبار", "شهادة", "بحث علمي", "رسالة", "أطروحة", "تدريب", "دورة", "دكتوراه", "تلميذ"],
     "religious": ["mosque", "church", "temple", "prayer", "Quran", "Bible", "hadith", "jurisprudence", "sharia", "pilgrimage", "fasting", "charity", "imam", "sermon", "religion", "faith", "مسجد", "كنيسة", "معبد", "صلاة", "قرآن", "إنجيل", "حديث", "فقه", "شريعة", "حج", "عمرة", "صوم", "زكاة", "إمام", "خطيب", "دين", "عقيدة", "عبادة", "تفسير"],
-    "sports": ["sports", "football", "soccer", "basketball", "tennis", "swimming", "running", "stadium", "club", "team", "player", "coach", "referee", "championship", "cup", "match", "fitness", "رياضة", "كرة القدم", "كرة السلة", "تنس", "سباحة", "جري", "ملعب", "نادي", "فريق", "لاعب", "مدرب", "حكم", "بطولة", "كأس", "مباراة", "تدريب", "لياقة", "مسابقة"],
+    "sports": ["sports", "football", "soccer", "basketball", "tennis", "swimming", "running", "stadium", "club", "team", "player", "coach", "referee", "championship", "cup", "match", "fitness", "court", "ring", "bat", "رياضة", "كرة القدم", "كرة السلة", "تنس", "سباحة", "جري", "ملعب", "نادي", "فريق", "لاعب", "مدرب", "حكم", "بطولة", "كأس", "مباراة", "تدريب", "لياقة", "مسابقة", "ملعب", "حلبة", "مضرب"],
     "literary": ["literature", "story", "novel", "poetry", "poem", "writer", "author", "text", "style", "rhetoric", "metaphor", "simile", "chapter", "paragraph", "narrative", "plot", "character", "أدب", "قصة", "رواية", "شعر", "قصيدة", "كاتب", "مؤلف", "نص", "أسلوب", "بلاغة", "مجاز", "استعارة", "تشبيه", "فصل", "فقرة", "سرد", "حبكة", "شخصية", "حوار"],
-    "it": ["programming", "code", "computer", "network", "internet", "software", "application", "website", "server", "database", "cybersecurity", "hacker", "AI", "machine learning", "cloud", "API", "برمجة", "كود", "حاسوب", "كمبيوتر", "شبكة", "إنترنت", "برنامج", "تطبيق", "موقع", "خادم", "قاعدة بيانات", "أمن سيبراني", "هاكر", "ذكاء اصطناعي", "تعلم آلي", "سحابي"],
-    "environmental": ["environment", "pollution", "climate", "global warming", "renewable", "solar", "wind", "بيئة", "تلوث", "مناخ", "احتباس حراري", "طاقة متجددة", "شمسية", "رياح", "مياه جوفية", "غابة", "صحراء", "تصحر", "تنوع حيوي", "محمية", "طبيعة", "أوزون", "كربون"],
-    "agricultural": ["agriculture", "farm", "crop", "wheat", "rice", "corn", "trees", "irrigation", "soil", "زراعة", "مزرعة", "محصول", "قمح", "أرز", "ذرة", "أشجار", "ماء ري", "تربة", "سماد", "مبيد", "حصاد", "حصادة", "ثروة حيوانية", "مواشي", "أغنام", "دواجن", "سمك"],
+    "it": ["programming", "code", "computer", "network", "internet", "software", "application", "website", "server", "database", "cybersecurity", "hacker", "AI", "machine learning", "cloud", "API", "cell", "برمجة", "كود", "حاسوب", "كمبيوتر", "شبكة", "إنترنت", "برنامج", "تطبيق", "موقع", "خادم", "قاعدة بيانات", "أمن سيبراني", "هاكر", "ذكاء اصطناعي", "تعلم آلي", "سحابي", "خلية"],
+    "environmental": ["environment", "pollution", "climate", "global warming", "renewable", "solar", "wind", "seal", "بيئة", "تلوث", "مناخ", "احتباس حراري", "طاقة متجددة", "شمسية", "رياح", "مياه جوفية", "غابة", "صحراء", "تصحر", "تنوع حيوي", "محمية", "طبيعة", "أوزون", "كربون", "فقمة"],
+    "agricultural": ["agriculture", "farm", "crop", "wheat", "rice", "corn", "trees", "irrigation", "soil", "date", "زراعة", "مزرعة", "محصول", "قمح", "أرز", "ذرة", "أشجار", "ماء ري", "تربة", "سماد", "مبيد", "حصاد", "حصادة", "ثروة حيوانية", "مواشي", "أغنام", "دواجن", "سمك", "تمر"],
     "media": ["media", "journalism", "television", "radio", "newspaper", "news", "report", "anchor", "إعلام", "صحافة", "تلفزيون", "إذاعة", "صحيفة", "خبر", "تقرير", "مذيع", "مراسل", "تحقيق", "صحفي", "إعلان", "دعاية", "بث", "قناة", "برنامج إعلامي"],
-    "tourism": ["tourism", "hotel", "travel", "trip", "airport", "aviation", "passport", "visa", "tour", "سياحة", "فندق", "سفر", "رحلة", "مطار", "طيران", "جواز", "تأشيرة", "جولة", "أثر", "تاريخي", "معلم", "منتجع", "شاطئ", "جبل", "صحراء", "متحف", "تراث"],
+    "tourism": ["tourism", "hotel", "travel", "trip", "airport", "aviation", "passport", "visa", "tour", "plane", "سياحة", "فندق", "سفر", "رحلة", "مطار", "طيران", "جواز", "تأشيرة", "جولة", "أثر", "تاريخي", "معلم", "منتجع", "شاطئ", "جبل", "صحراء", "متحف", "تراث", "طائرة"],
 }
 
 def detect_domains(text):
@@ -233,7 +215,7 @@ def detect_domains(text):
 # ═══════════════════════════════════════════════════════════════════════════════
 #  TRANSLATION ENGINES
 # ═══════════════════════════════════════════════════════════════════════════════
-DEEPL_API_KEY = os.environ.get("DEEPL_API_KEY", "")
+DEEPL_API_KEY = os.environ.get("BTU8IJVMGLWVs3kvL", "")
 
 def translate_deepl(text, source_lang, target_lang):
     if not DEEPL_API_KEY: return None
@@ -246,7 +228,7 @@ def translate_deepl(text, source_lang, target_lang):
     try:
         resp = requests.post(
             "https://api-free.deepl.com/v2/translate",
-            headers={"Authorization": f"DeepL-Auth-Key {DEEPL_API_KEY}", "Content-Type": "application/x-www-form-urlencoded"},
+            headers={"Authorization": f"DeepL-Auth-Key {BTU8IJVMGLWVs3kvL}", "Content-Type": "application/x-www-form-urlencoded"},
             data={"text": text, "source_lang": source_lang, "target_lang": target_lang},
             timeout=15
         )
@@ -299,9 +281,11 @@ with left:
 with mid:
     st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
     if st.button("⇄", key="swap_btn", help="Swap languages", use_container_width=True):
-        # Swap logic: update session state and rerun
-        old_source = st.session_state.source_lang
-        old_target = st.session_state.target_lang
+        # Swap: update both session state values and rerun
+        old_source = st.session_state.source_lang_select
+        old_target = st.session_state.target_lang_select
+        st.session_state.source_lang_select = old_target
+        st.session_state.target_lang_select = old_source
         st.session_state.source_lang = old_target
         st.session_state.target_lang = old_source
         st.rerun()
@@ -317,7 +301,7 @@ with right:
         key="target_lang_select"
     )
 
-# Update session state after widgets render
+# Sync canonical values
 st.session_state.source_lang = source_lang_name
 st.session_state.target_lang = target_lang_name
 
@@ -425,7 +409,7 @@ if st.button("Translate", type="primary"):
                                     })
 
                 # ═══════════════════════════════════════════════════════════════════
-                #  DISPLAY ALL DOMAIN-SPECIFIC MEANINGS
+                #  DISPLAY ALL DOMAIN-SPECIFIC MEANINGS (ONLY IF FOUND IN DICTIONARY)
                 # ═══════════════════════════════════════════════════════════════════
                 if all_meanings:
                     total_meanings = sum(len(v) for v in all_meanings.values())
@@ -458,20 +442,9 @@ if st.button("Translate", type="primary"):
                                 )
                         col_idx += 1
 
-                elif detected:
-                    st.markdown("---")
-                    st.markdown('<div class="all-meanings-header">🎯 Domain-Specific Context</div>', unsafe_allow_html=True)
-                    st.caption("No exact dictionary match. Showing detected domain context.")
-                    for domain in detected[:3]:
-                        dinfo = DOMAINS[domain]
-                        st.markdown(
-                            '<div class="rcard rcard-' + domain + ' domain-card">' +
-                            '<div class="rlabel rlabel-' + domain + '">' + dinfo["emoji"] + ' ' + dinfo["name_en"] + '</div>' +
-                            '<div class="rtext">' + base_translation + '</div>' +
-                            '<div class="meaning-diff">General translation in ' + dinfo["name_en"] + ' context</div>' +
-                            '</div>',
-                            unsafe_allow_html=True
-                        )
+                # NOTE: Removed the "elif detected" block that was showing the SAME base translation 
+                # duplicated across all detected domains — this was causing the repeated/meaningless cards.
+                # Now we ONLY show domain cards when the word is ACTUALLY found in the dictionary with DIFFERENT meanings.
 
                 # Always show general translation
                 st.markdown("---")
