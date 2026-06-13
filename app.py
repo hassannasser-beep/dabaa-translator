@@ -334,7 +334,7 @@ with st.sidebar:
     st.markdown("### 🔑 DeepL API Key")
     st.markdown("<div style='font-size:11px;color:#6b7280;margin-bottom:8px;'>Required for translation. Get free at deepl.com/pro-api</div>", unsafe_allow_html=True)
 
-    env_key = os.environ.get("DEEPL_API_KEY", "")
+    env_key = os.environ.get("0d40f1a7-553b-44eb-9aab-837a828ca913:fx", "")
     if "deepl_api_key" not in st.session_state:
         st.session_state.deepl_api_key = env_key
 
@@ -354,6 +354,36 @@ with st.sidebar:
 
     st.markdown("<div style='font-size:10px;color:#9ca3af;'>Session-only. Not stored.</div>", unsafe_allow_html=True)
     st.divider()
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  MAIN BODY — Show warning if no key (mobile-friendly)
+# ═══════════════════════════════════════════════════════════════════════════════
+if not st.session_state.deepl_api_key:
+    st.markdown("""
+    <div style="background:#1a1a2e;border-radius:12px;padding:1.5rem;margin-bottom:1rem;text-align:center;">
+        <div style="font-size:20px;font-weight:700;color:#ffffff;margin-bottom:8px;">🔑 DeepL API Key Required</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:12px;">
+            Please enter your API key in the sidebar to start translating.
+        </div>
+        <div style="font-size:12px;color:#5DCAA5;font-weight:600;">
+            ☰ Tap the arrow (top left) to open the sidebar
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.info("📱 On mobile: tap the ☰ arrow in the top-left corner to open the sidebar and paste your key.")
+
+    # Backup input in main body for mobile convenience
+    mobile_key = st.text_input(
+        "Or enter your key here directly:",
+        type="password",
+        placeholder="Paste DeepL API key...",
+        key="mobile_key_input"
+    )
+    if mobile_key:
+        st.session_state.deepl_api_key = mobile_key
+        st.success("✅ Key saved! Reloading...")
+        st.rerun()
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  TRANSLATION ENGINE — DEEPL ONLY
