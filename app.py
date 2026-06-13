@@ -249,7 +249,7 @@ def detect_domains(text):
 # ═══════════════════════════════════════════════════════════════════════════════
 #  TRANSLATION ENGINES
 # ═══════════════════════════════════════════════════════════════════════════════
-DEEPL_API_KEY = os.environ.get("DEEPL_API_KEY", "")
+DEEPL_API_KEY = os.environ.get("BTU8IJVMGLWVs3kvL", "")
 
 def translate_deepl(text, source_lang, target_lang):
     if not DEEPL_API_KEY: return None
@@ -262,7 +262,7 @@ def translate_deepl(text, source_lang, target_lang):
     try:
         resp = requests.post(
             "https://api-free.deepl.com/v2/translate",
-            headers={"Authorization": f"DeepL-Auth-Key {DEEPL_API_KEY}", "Content-Type": "application/x-www-form-urlencoded"},
+            headers={"Authorization": f"DeepL-Auth-Key {BTU8IJVMGLWVs3kvL}", "Content-Type": "application/x-www-form-urlencoded"},
             data={"text": text, "source_lang": source_lang, "target_lang": target_lang},
             timeout=15
         )
