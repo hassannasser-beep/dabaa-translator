@@ -272,33 +272,32 @@ DOMAIN_SPECIFIC_TRANSLATIONS = load_domain_dictionary()
 # ═══════════════════════════════════════════════════════════════════════════════
 #  DEEPL API KEY — FROM ENV OR SIDEBAR INPUT
 # ═══════════════════════════════════════════════════════════════════════════════
-st.sidebar.markdown("### 🔑 DeepL API Configuration")
-st.sidebar.markdown("<div style='font-size:12px;color:#6b7280;margin-bottom:8px;'>The app requires a DeepL API key to translate. Get one free at deepl.com/pro-api.</div>", unsafe_allow_html=True)
-
-# Try env var first, then session state, then empty
-env_key = os.environ.get("0d40f1a7-553b-44eb-9aab-837a828ca913:fx", "")
+# ═══════════════════════════════════════════════════════════════════════════════
+#  DEEPL API KEY — MAIN INPUT (VISIBLE)
+# ═══════════════════════════════════════════════════════════════════════════════
+env_key = os.environ.get("DEEPL_API_KEY", "")
 if "deepl_api_key" not in st.session_state:
     st.session_state.deepl_api_key = env_key
 
-DEEPL_API_KEY = st.sidebar.text_input(
-    "DeepL API Key",
-    value=st.session_state.deepl_api_key,
-    type="password",
-    placeholder="Enter your DeepL API key...",
-    help="Free tier: 500,000 characters/month. Key is stored only in this session."
-)
+key_col1, key_col2 = st.columns([3, 1])
+with key_col1:
+    DEEPL_API_KEY = st.text_input(
+        "🔑 DeepL API Key",
+        value=st.session_state.deepl_api_key,
+        type="password",
+        placeholder="Paste your DeepL API key here...",
+        help="Get a free key at deepl.com/pro-api | 500,000 chars/month free tier"
+    )
+with key_col2:
+    if not DEEPL_API_KEY:
+        st.markdown("<div style='margin-top:28px;'></div>", unsafe_allow_html=True)
+        st.error("⚠️ Required", icon="🔴")
+    else:
+        masked = DEEPL_API_KEY[:8] + "..." + DEEPL_API_KEY[-4:] if len(DEEPL_API_KEY) > 12 else "***"
+        st.markdown(f"<div style='margin-top:28px;font-size:13px;color:#16a34a;font-weight:600;'>✅ {masked}</div>", unsafe_allow_html=True)
 
-# Save to session state
 st.session_state.deepl_api_key = DEEPL_API_KEY
-
-if not DEEPL_API_KEY:
-    st.sidebar.error("⚠️ No API key provided. Translation will not work.")
-else:
-    # Masked display
-    masked = DEEPL_API_KEY[:8] + "..." + DEEPL_API_KEY[-4:] if len(DEEPL_API_KEY) > 12 else "***"
-    st.sidebar.success(f"✅ Key loaded: {masked}")
-
-st.sidebar.markdown("<div style='font-size:11px;color:#9ca3af;margin-top:8px;'>Your key is never stored on disk. It only lives in this browser session.</div>", unsafe_allow_html=True)
+st.markdown("<div style='font-size:11px;color:#9ca3af;margin-bottom:12px;'>Your key stays in this browser session only. Never stored on disk.</div>", unsafe_allow_html=True)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  TRANSLATION ENGINE — DEEPL ONLY
