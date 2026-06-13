@@ -1,1 +1,1 @@
-ENV DEEPL_API_KEY=your-key-here
+ENV DEEPL_API_KEY=0d40f1a7-553b-44eb-9aab-837a828ca913:fx
