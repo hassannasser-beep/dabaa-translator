@@ -129,18 +129,73 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     margin-left: 6px;
 }
 
-.api-key-box {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 12px;
-    margin-bottom: 1rem;
+.meaning-card {
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    border: 0.5px solid #e5e7eb;
+    background: #fff;
+    margin-bottom: 10px;
+    transition: all 0.2s;
 }
-.api-key-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: #1a1a2e;
+.meaning-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transform: translateY(-1px);
+}
+.meaning-domain {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.meaning-text {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a2e;
+    line-height: 1.4;
+    margin-bottom: 6px;
+}
+.meaning-desc {
+    font-size: 12px;
+    color: #6b7280;
+    line-height: 1.5;
+}
+.meaning-context {
+    display: inline-block;
+    background: #f3f4f6;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    color: #4b5563;
+    margin-top: 6px;
+}
+
+.all-meanings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    margin-top: 1rem;
+}
+
+.synonyms-box {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 8px;
+}
+.synonyms-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #0369a1;
+    margin-bottom: 4px;
+}
+.synonyms-list {
+    font-size: 13px;
+    color: #0c4a6e;
 }
 
 .error-box {
@@ -273,31 +328,32 @@ DOMAIN_SPECIFIC_TRANSLATIONS = load_domain_dictionary()
 #  DEEPL API KEY — FROM ENV OR SIDEBAR INPUT
 # ═══════════════════════════════════════════════════════════════════════════════
 # ═══════════════════════════════════════════════════════════════════════════════
-#  DEEPL API KEY — MAIN INPUT (VISIBLE)
+#  DEEPL API KEY — SIDEBAR (COLLAPSIBLE BUT ACCESSIBLE)
 # ═══════════════════════════════════════════════════════════════════════════════
-env_key = os.environ.get("0d40f1a7-553b-44eb-9aab-837a828ca913:fx", "")
-if "deepl_api_key" not in st.session_state:
-    st.session_state.deepl_api_key = env_key
+with st.sidebar:
+    st.markdown("### 🔑 DeepL API Key")
+    st.markdown("<div style='font-size:11px;color:#6b7280;margin-bottom:8px;'>Required for translation. Get free at deepl.com/pro-api</div>", unsafe_allow_html=True)
 
-key_col1, key_col2 = st.columns([3, 1])
-with key_col1:
+    env_key = os.environ.get("0d40f1a7-553b-44eb-9aab-837a828ca913:fx", "")
+    if "deepl_api_key" not in st.session_state:
+        st.session_state.deepl_api_key = env_key
+
     DEEPL_API_KEY = st.text_input(
-        "🔑 DeepL API Key",
+        "API Key",
         value=st.session_state.deepl_api_key,
         type="password",
-        placeholder="Paste your DeepL API key here...",
-        help="Get a free key at deepl.com/pro-api | 500,000 chars/month free tier"
+        placeholder="Paste key here...",
+        label_visibility="collapsed"
     )
-with key_col2:
-    if not DEEPL_API_KEY:
-        st.markdown("<div style='margin-top:28px;'></div>", unsafe_allow_html=True)
-        st.error("⚠️ Required", icon="🔴")
-    else:
-        masked = DEEPL_API_KEY[:8] + "..." + DEEPL_API_KEY[-4:] if len(DEEPL_API_KEY) > 12 else "***"
-        st.markdown(f"<div style='margin-top:28px;font-size:13px;color:#16a34a;font-weight:600;'>✅ {masked}</div>", unsafe_allow_html=True)
+    st.session_state.deepl_api_key = DEEPL_API_KEY
 
-st.session_state.deepl_api_key = DEEPL_API_KEY
-st.markdown("<div style='font-size:11px;color:#9ca3af;margin-bottom:12px;'>Your key stays in this browser session only. Never stored on disk.</div>", unsafe_allow_html=True)
+    if not DEEPL_API_KEY:
+        st.error("⚠️ Key required", icon="🔴")
+    else:
+        st.success("✅ Active", icon="🟢")
+
+    st.markdown("<div style='font-size:10px;color:#9ca3af;'>Session-only. Not stored.</div>", unsafe_allow_html=True)
+    st.divider()
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  TRANSLATION ENGINE — DEEPL ONLY
@@ -565,13 +621,15 @@ if st.button("Translate", type="primary"):
                                     })
 
                 # ═══════════════════════════════════════════════════════════════════
-                #  DISPLAY MEANINGS — PRIORITIZE SELECTED STYLE
+                #  DISPLAY ALL POSSIBLE MEANINGS
                 # ═══════════════════════════════════════════════════════════════════
                 if all_meanings:
                     total_meanings = sum(len(v) for v in all_meanings.values())
                     st.markdown("---")
-                    st.markdown(f'<div class="all-meanings-header">🎯 All Domain-Specific Meanings <span class="meaning-count">{total_meanings}</span></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="all-meanings-header">📚 All Possible Meanings & Contexts <span class="meaning-count">{total_meanings}</span></div>', unsafe_allow_html=True)
+                    st.caption("Showing every domain-specific translation found in dictionary")
 
+                    # Sort: selected domain first, then others, then general
                     domain_keys = [d for d in all_meanings.keys() if d != "general"]
                     if selected_domain and selected_domain in domain_keys:
                         domain_keys.remove(selected_domain)
@@ -579,31 +637,40 @@ if st.button("Translate", type="primary"):
                     if "general" in all_meanings:
                         domain_keys.append("general")
 
-                    cols = st.columns(3)
-                    col_idx = 0
+                    # Display in a responsive grid
                     for domain in domain_keys:
                         dinfo = DOMAINS.get(domain, DOMAINS["general"])
                         meanings = all_meanings[domain]
                         is_priority = (selected_domain == domain)
 
-                        with cols[col_idx % 3]:
-                            for meaning in meanings:
-                                priority_html = '<span class="priority-badge">SELECTED STYLE</span>' if is_priority else ''
-                                card_class = 'rcard-priority' if is_priority else ''
-                                st.markdown(
-                                    '<div class="rcard rcard-' + domain + ' domain-card ' + card_class + '">' +
-                                    '<div class="rlabel rlabel-' + domain + '">' + dinfo["emoji"] + ' ' + dinfo["name_en"] + priority_html + '</div>' +
-                                    '<div class="rtext" style="font-weight:600;">' + meaning["translation"] + '</div>' +
-                                    '<div class="meaning-diff">' + meaning["desc"] + '</div>' +
-                                    '</div>',
-                                    unsafe_allow_html=True
-                                )
-                        col_idx += 1
+                        for meaning in meanings:
+                            priority_html = '<span class="priority-badge">★ SELECTED</span>' if is_priority else ''
+                            border_color = dinfo["color"]
+
+                            st.markdown(
+                                f'<div class="meaning-card" style="border-left: 4px solid {border_color};">' +
+                                f'<div class="meaning-domain" style="color: {border_color};">' +
+                                f'{dinfo["emoji"]} {dinfo["name_en"]}{priority_html}</div>' +
+                                f'<div class="meaning-text">{meaning["translation"]}</div>' +
+                                f'<div class="meaning-desc">{meaning["desc"]}</div>' +
+                                f'<div class="meaning-context">Source: {meaning["source"]}</div>' +
+                                '</div>',
+                                unsafe_allow_html=True
+                            )
+
+                # If no dictionary meanings found, show info
+                if not all_meanings:
+                    st.markdown("---")
+                    st.info("ℹ️ No specialized dictionary meanings found for this word. Showing general translation only. Try selecting a specific style above, or add this word to the dictionary.")
 
                 # Always show general translation
                 st.markdown("---")
-                st.markdown('<div class="all-meanings-header">💬 General Translation</div>', unsafe_allow_html=True)
+                st.markdown('<div class="all-meanings-header">💬 General Translation (DeepL)</div>', unsafe_allow_html=True)
                 st.markdown(
-                    '<div class="rcard rcard-gen"><div class="rlabel rlabel-gen">💬 General</div><div class="rtext">' + base_translation + '</div></div>',
+                    f'<div class="meaning-card" style="border-left: 4px solid #6B7280;">' +
+                    f'<div class="meaning-domain" style="color: #6B7280;">💬 General</div>' +
+                    f'<div class="meaning-text">{base_translation}</div>' +
+                    f'<div class="meaning-desc">Standard translation via DeepL API</div>' +
+                    '</div>',
                     unsafe_allow_html=True
                 )
