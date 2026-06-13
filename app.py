@@ -4,7 +4,7 @@ import os
 import json
 from pathlib import Path
 
-st.set_page_config(page_title="HASSAN NASSER | Multi-Domain Translator", page_icon="🏗️", layout="wide")
+st.set_page_config(page_title="HASSAN NASSER | Voice Translator", page_icon="🎤", layout="wide")
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  CSS
@@ -75,16 +75,10 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 
 .detected-box { background: #E6F4F1; border-left: 3px solid #5DCAA5; border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 13px; color: #04342C; margin-bottom: 1rem; }
 
-.api-badge {
-    display: inline-block; padding: 2px 8px; border-radius: 4px;
-    font-size: 10px; font-weight: 600; letter-spacing: 0.04em; margin-right: 4px;
-}
+.api-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; margin-right: 4px; }
 .api-deepl { background: #0F2B46; color: #8ECAE6; }
 
-.domain-badge {
-    display: inline-block; padding: 3px 10px; border-radius: 20px;
-    font-size: 11px; font-weight: 600; letter-spacing: 0.04em; margin-right: 6px; margin-bottom: 4px;
-}
+.domain-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; margin-right: 6px; margin-bottom: 4px; }
 .db-pol { background: #E63946; color: white; }
 .db-leg { background: #534AB7; color: white; }
 .db-eco { background: #F4A261; color: #3E2723; }
@@ -103,110 +97,22 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 .db-tour { background: #00838F; color: white; }
 .db-gen { background: #6B7280; color: white; }
 
-.meaning-diff { 
-    background: #fff3e0; 
-    border-radius: 4px; 
-    padding: 2px 6px; 
-    font-size: 12px; 
-    color: #e65100; 
-    font-weight: 600;
-    display: inline-block;
-    margin-top: 4px;
-}
+.meaning-diff { background: #fff3e0; border-radius: 4px; padding: 2px 6px; font-size: 12px; color: #e65100; font-weight: 600; display: inline-block; margin-top: 4px; }
 .all-meanings-header { font-size: 18px; font-weight: 600; color: #1a1a2e; margin: 1.5rem 0 1rem; }
 .meaning-count { background: #5DCAA5; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-left: 8px; }
 .domain-card { margin-bottom: 12px; }
 .dict-stats { font-size: 11px; color: #6b7280; margin-top: 4px; }
 
-.priority-badge {
-    display: inline-block;
-    background: #5DCAA5;
-    color: white;
-    padding: 1px 6px;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: 700;
-    margin-left: 6px;
-}
+.priority-badge { display: inline-block; background: #5DCAA5; color: white; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-left: 6px; }
 
-.meaning-card {
-    border-radius: 12px;
-    padding: 1rem 1.2rem;
-    border: 0.5px solid #e5e7eb;
-    background: #fff;
-    margin-bottom: 10px;
-    transition: all 0.2s;
-}
-.meaning-card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    transform: translateY(-1px);
-}
-.meaning-domain {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    margin-bottom: 6px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.meaning-text {
-    font-size: 18px;
-    font-weight: 700;
-    color: #1a1a2e;
-    line-height: 1.4;
-    margin-bottom: 6px;
-}
-.meaning-desc {
-    font-size: 12px;
-    color: #6b7280;
-    line-height: 1.5;
-}
-.meaning-context {
-    display: inline-block;
-    background: #f3f4f6;
-    border-radius: 4px;
-    padding: 2px 8px;
-    font-size: 11px;
-    color: #4b5563;
-    margin-top: 6px;
-}
+.meaning-card { border-radius: 12px; padding: 1rem 1.2rem; border: 0.5px solid #e5e7eb; background: #fff; margin-bottom: 10px; transition: all 0.2s; }
+.meaning-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-1px); }
+.meaning-domain { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.meaning-text { font-size: 18px; font-weight: 700; color: #1a1a2e; line-height: 1.4; margin-bottom: 6px; }
+.meaning-desc { font-size: 12px; color: #6b7280; line-height: 1.5; }
+.meaning-context { display: inline-block; background: #f3f4f6; border-radius: 4px; padding: 2px 8px; font-size: 11px; color: #4b5563; margin-top: 6px; }
 
-.all-meanings-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 12px;
-    margin-top: 1rem;
-}
-
-.synonyms-box {
-    background: #f0f9ff;
-    border: 1px solid #bae6fd;
-    border-radius: 8px;
-    padding: 10px 14px;
-    margin-top: 8px;
-}
-.synonyms-title {
-    font-size: 11px;
-    font-weight: 600;
-    color: #0369a1;
-    margin-bottom: 4px;
-}
-.synonyms-list {
-    font-size: 13px;
-    color: #0c4a6e;
-}
-
-.error-box {
-    background: #fee2e2;
-    border-left: 3px solid #ef4444;
-    border-radius: 0 8px 8px 0;
-    padding: 12px 16px;
-    font-size: 14px;
-    color: #991b1b;
-    margin-bottom: 1rem;
-}
+.error-box { background: #fee2e2; border-left: 3px solid #ef4444; border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 14px; color: #991b1b; margin-bottom: 1rem; }
 
 textarea { border-radius: 8px !important; border: 0.5px solid #d1d5db !important; font-size: 14px !important; }
 </style>
@@ -215,8 +121,9 @@ textarea { border-radius: 8px !important; border: 0.5px solid #d1d5db !important
 st.markdown("""
 <div class="hero">
     <div class="hero-name">HASSAN <span>NASSER</span></div>
-    <div class="hero-sub">MULTI-DOMAIN SMART TRANSLATOR — POWERED BY DEEPL API</div>
+    <div class="hero-sub">VOICE & MULTI-DOMAIN SMART TRANSLATOR — 15+ SPECIALIZED FIELDS</div>
     <div class="hero-pills">
+        <span class="pill pill-active">🎤 Voice Input</span>
         <span class="pill pill-active">Auto-Domain Detect</span>
         <span class="pill pill-muted">DeepL Precision</span>
         <span class="pill pill-muted">Smart Swap</span>
@@ -226,7 +133,7 @@ st.markdown("""
         <span class="ldot"></span><span class="ldot"></span><span class="ldot"></span>
         <span class="ldot"></span><span class="ldot"></span><span class="ldot"></span>
         <span class="ldot"></span><span class="ldot"></span>
-        <span class="lang-bar-txt">8 languages supported — DeepL API only</span>
+        <span class="lang-bar-txt">8 languages — Chrome & Safari supported</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -281,7 +188,20 @@ STYLE_OPTIONS = {
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  DOMAIN KEYWORDS FOR AUTO-DETECTION
+#  LOAD DOMAIN DICTIONARY
+# ═══════════════════════════════════════════════════════════════════════════════
+@st.cache_data
+def load_domain_dictionary():
+    dict_path = Path(__file__).parent / "domain_dict.json"
+    if dict_path.exists():
+        with open(dict_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {}
+
+DOMAIN_SPECIFIC_TRANSLATIONS = load_domain_dictionary()
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  DOMAIN KEYWORDS
 # ═══════════════════════════════════════════════════════════════════════════════
 DOMAIN_KEYWORDS = {
     "political": ["minister", "government", "council", "ministry", "parliament", "political", "diplomatic", "treaty", "election", "vote", "policy", "embassy", "summit", "legislation", "constitution", "foreign affairs", "national security", "coalition", "sanctions", "bilateral", "president", "state", "capital", "وزير", "حكومة", "مجلس", "وزارة", "برلمان", "سياسة", "دبلوماسي", "سفير", "معاهدة", "اتفاقية دولية", "حزب", "انتخابات", "تصويت", "أمن قومي", "استراتيجية وطنية", "بيان", "تصريح", "قمة", "مؤتمر", "جلسة", "تشريع", "دستور", "حقوق", "مواطن", "رئيس", "دولة", "عاصمة"],
@@ -310,113 +230,52 @@ def detect_domains(text):
         if score > 0: scores[domain] = score
     return sorted(scores, key=scores.get, reverse=True) if scores else []
 
+# ═══════════════════════════════════════════════════════════════════════════════
+#  DEEPL API KEY
+# ═══════════════════════════════════════════════════════════════════════════════
+env_key = os.environ.get("0d40f1a7-553b-44eb-9aab-837a828ca913:fx", "")
+if "deepl_api_key" not in st.session_state:
+    st.session_state.deepl_api_key = env_key
 
-# ═══════════════════════════════════════════════════════════════════════════════
-#  LOAD DOMAIN DICTIONARY FROM JSON (CACHED)
-# ═══════════════════════════════════════════════════════════════════════════════
-@st.cache_data
-def load_domain_dictionary():
-    dict_path = Path(__file__).parent / "domain_dict.json"
-    if dict_path.exists():
-        with open(dict_path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    return {}
-
-DOMAIN_SPECIFIC_TRANSLATIONS = load_domain_dictionary()
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  DEEPL API KEY — FROM ENV OR SIDEBAR INPUT
-# ═══════════════════════════════════════════════════════════════════════════════
-# ═══════════════════════════════════════════════════════════════════════════════
-#  DEEPL API KEY — SIDEBAR (COLLAPSIBLE BUT ACCESSIBLE)
-# ═══════════════════════════════════════════════════════════════════════════════
 with st.sidebar:
     st.markdown("### 🔑 DeepL API Key")
-    st.markdown("<div style='font-size:11px;color:#6b7280;margin-bottom:8px;'>Required for translation. Get free at deepl.com/pro-api</div>", unsafe_allow_html=True)
-
-    env_key = os.environ.get("0d40f1a7-553b-44eb-9aab-837a828ca913:fx", "")
-    if "deepl_api_key" not in st.session_state:
-        st.session_state.deepl_api_key = env_key
-
-    DEEPL_API_KEY = st.text_input(
-        "API Key",
-        value=st.session_state.deepl_api_key,
-        type="password",
-        placeholder="Paste key here...",
-        label_visibility="collapsed"
-    )
-    st.session_state.deepl_api_key = DEEPL_API_KEY
-
-    if not DEEPL_API_KEY:
-        st.error("⚠️ Key required", icon="🔴")
+    if not st.session_state.deepl_api_key:
+        st.markdown("<div style='font-size:12px;color:#ef4444;margin-bottom:8px;'>⚠️ Required to translate</div>", unsafe_allow_html=True)
+        key_input = st.text_input("Paste your key", type="password", placeholder="e.g., abc123...xyz9:fx", label_visibility="collapsed")
+        if key_input:
+            st.session_state.deepl_api_key = key_input
+            st.success("✅ Saved! Reloading...")
+            st.rerun()
+        st.markdown("<div style='font-size:10px;color:#9ca3af;'>Get free at deepl.com/pro-api</div>", unsafe_allow_html=True)
     else:
-        st.success("✅ Active", icon="🟢")
-
-    st.markdown("<div style='font-size:10px;color:#9ca3af;'>Session-only. Not stored.</div>", unsafe_allow_html=True)
+        masked = st.session_state.deepl_api_key[:6] + "..." + st.session_state.deepl_api_key[-4:] if len(st.session_state.deepl_api_key) > 10 else "***"
+        st.markdown(f"<div style='font-size:12px;color:#16a34a;font-weight:600;'>✅ Active</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='font-size:10px;color:#6b7280;'>{masked}</div>", unsafe_allow_html=True)
+        if st.button("🔑 Change / Remove Key", use_container_width=True):
+            st.session_state.deepl_api_key = ""
+            st.rerun()
+        st.markdown("<div style='font-size:10px;color:#9ca3af;'>Session-only. Not stored.</div>", unsafe_allow_html=True)
     st.divider()
 
-# ═══════════════════════════════════════════════════════════════════════════════
-#  MAIN BODY — Show warning if no key (mobile-friendly)
-# ═══════════════════════════════════════════════════════════════════════════════
-if not st.session_state.deepl_api_key:
-    st.markdown("""
-    <div style="background:#1a1a2e;border-radius:12px;padding:1.5rem;margin-bottom:1rem;text-align:center;">
-        <div style="font-size:20px;font-weight:700;color:#ffffff;margin-bottom:8px;">🔑 DeepL API Key Required</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:12px;">
-            Please enter your API key in the sidebar to start translating.
-        </div>
-        <div style="font-size:12px;color:#5DCAA5;font-weight:600;">
-            ☰ Tap the arrow (top left) to open the sidebar
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.info("📱 On mobile: tap the ☰ arrow in the top-left corner to open the sidebar and paste your key.")
-
-    # Backup input in main body for mobile convenience
-    mobile_key = st.text_input(
-        "Or enter your key here directly:",
-        type="password",
-        placeholder="Paste DeepL API key...",
-        key="mobile_key_input"
-    )
-    if mobile_key:
-        st.session_state.deepl_api_key = mobile_key
-        st.success("✅ Key saved! Reloading...")
-        st.rerun()
+DEEPL_API_KEY = st.session_state.deepl_api_key
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  TRANSLATION ENGINE — DEEPL ONLY
+#  TRANSLATION ENGINE
 # ═══════════════════════════════════════════════════════════════════════════════
 def translate_deepl(text, source_lang, target_lang):
     if not DEEPL_API_KEY:
         return None, "No API key configured"
-
-    # DeepL language codes
     sl = source_lang.upper()
     tl = target_lang.upper()
     if sl == "AR": sl = "AR"
     elif sl == "ZH": sl = "ZH"
     if tl == "AR": tl = "AR"
     elif tl == "ZH": tl = "ZH"
-
-    endpoints = [
-        "https://api-free.deepl.com/v2/translate",   # Free tier
-        "https://api.deepl.com/v2/translate",        # Pro tier
-    ]
-
+    endpoints = ["https://api-free.deepl.com/v2/translate", "https://api.deepl.com/v2/translate"]
     last_error = None
     for endpoint in endpoints:
         try:
-            resp = requests.post(
-                endpoint,
-                headers={
-                    "Authorization": f"DeepL-Auth-Key {DEEPL_API_KEY}",
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                data={"text": text, "source_lang": sl, "target_lang": tl},
-                timeout=15
-            )
+            resp = requests.post(endpoint, headers={"Authorization": f"DeepL-Auth-Key {DEEPL_API_KEY}", "Content-Type": "application/x-www-form-urlencoded"}, data={"text": text, "source_lang": sl, "target_lang": tl}, timeout=15)
             if resp.status_code == 200:
                 return resp.json()["translations"][0]["text"], None
             elif resp.status_code == 403:
@@ -433,13 +292,11 @@ def translate_deepl(text, source_lang, target_lang):
             last_error = "Connection error — cannot reach DeepL servers"
         except Exception as e:
             last_error = f"Unexpected error: {str(e)}"
-
     return None, last_error
 
 def fetch_ai_translation(text, source_lang, target_lang):
     result, error = translate_deepl(text, source_lang, target_lang)
-    if result:
-        return result, "DeepL"
+    if result: return result, "DeepL"
     return None, error
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -464,7 +321,7 @@ def swap_languages():
     st.session_state.target_lang = old_source
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  UI — LANGUAGE PAIR + STYLE
+#  UI — LANGUAGE + STYLE
 # ═══════════════════════════════════════════════════════════════════════════════
 lang_list = list(languages_dict.keys())
 style_list = list(STYLE_OPTIONS.keys())
@@ -480,74 +337,149 @@ tgt_options = [k for k in lang_list if k != st.session_state.source_lang]
 tgt_idx = tgt_options.index(st.session_state.target_lang) if st.session_state.target_lang in tgt_options else 0
 style_idx = style_list.index(st.session_state.selected_style) if st.session_state.selected_style in style_list else 0
 
-# ── Language Row ──
 left, mid, right = st.columns([1, 0.12, 1])
-
 with left:
     source_lang_name = st.selectbox("From Language", lang_list, index=src_idx)
-
 with mid:
     st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
     st.button("⇄", on_click=swap_languages, help="Swap languages", use_container_width=True)
-
 with right:
     target_lang_name = st.selectbox("To Language", tgt_options, index=tgt_idx)
 
-# ── Style Row ──
-st.markdown("<div style='margin-top: 0.5rem;'></div>", unsafe_allow_html=True)
+st.session_state.source_lang = source_lang_name
+st.session_state.target_lang = target_lang_name
+
+source_lang = languages_dict[source_lang_name]
+target_lang = languages_dict[target_lang_name]
+
 style_col1, style_col2 = st.columns([1, 2])
 with style_col1:
-    selected_style_label = st.selectbox(
-        "Translation Style / Domain",
-        style_list,
-        index=style_idx,
-        help="Choose the tone/domain to prioritize. 'Auto-Detect' lets the app decide based on keywords."
-    )
+    selected_style_label = st.selectbox("Translation Style / Domain", style_list, index=style_idx, help="Choose the tone/domain to prioritize. 'Auto-Detect' lets the app decide.")
 with style_col2:
     selected_domain = STYLE_OPTIONS[selected_style_label]
     if selected_domain and selected_domain != "general":
         dinfo = DOMAINS[selected_domain]
-        st.markdown(
-            f"<div style='margin-top: 28px; font-size: 13px; color: {dinfo['color']}; font-weight: 600;'>"
-            f"{dinfo['emoji']} Priority: {dinfo['name_en']} translations will be shown first"
-            f"</div>",
-            unsafe_allow_html=True
-        )
+        st.markdown(f"<div style='margin-top: 28px; font-size: 13px; color: {dinfo['color']}; font-weight: 600;'>{dinfo['emoji']} Priority: {dinfo['name_en']} translations shown first</div>", unsafe_allow_html=True)
     elif selected_domain == "general":
-        st.markdown(
-            "<div style='margin-top: 28px; font-size: 13px; color: #6B7280;'>"
-            "💬 General / standard translations prioritized"
-            "</div>",
-            unsafe_allow_html=True
-        )
+        st.markdown("<div style='margin-top: 28px; font-size: 13px; color: #6B7280;'>💬 General / standard translations prioritized</div>", unsafe_allow_html=True)
     else:
-        st.markdown(
-            "<div style='margin-top: 28px; font-size: 13px; color: #6B7280;'>"
-            "🔍 Auto-detecting domain from your text..."
-            "</div>",
-            unsafe_allow_html=True
-        )
+        st.markdown("<div style='margin-top: 28px; font-size: 13px; color: #6B7280;'>🔍 Auto-detecting domain from your text...</div>", unsafe_allow_html=True)
 
-st.session_state.source_lang = source_lang_name
-st.session_state.target_lang = target_lang_name
 st.session_state.selected_style = selected_style_label
 
-source_lang = languages_dict[source_lang_name]
-target_lang = languages_dict[target_lang_name]
-selected_domain = STYLE_OPTIONS[selected_style_label]
-
-# Show dictionary stats
 if DOMAIN_SPECIFIC_TRANSLATIONS:
     dict_size = len(DOMAIN_SPECIFIC_TRANSLATIONS)
     total_entries = sum(len(v) for v in DOMAIN_SPECIFIC_TRANSLATIONS.values())
     st.markdown(f'<div class="dict-stats">📚 Dictionary loaded: {dict_size} words with {total_entries} total domain entries</div>', unsafe_allow_html=True)
 
-# Input
-input_text = st.text_area("Enter text to translate", height=140, placeholder="Type or paste text here...", value=st.session_state.input_text, key="input_text_area")
+# ═══════════════════════════════════════════════════════════════════════════════
+#  VOICE INPUT (Web Speech API — Chrome & Safari)
+# ═══════════════════════════════════════════════════════════════════════════════
+st.markdown("""
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:1rem;margin-bottom:1rem;">
+    <div style="font-size:14px;font-weight:700;color:#1a1a2e;margin-bottom:4px;">🎤 Voice Input</div>
+    <div style="font-size:12px;color:#6b7280;">Speak and your voice will be converted to text. <b>Chrome, Edge, Safari only.</b></div>
+</div>
+""", unsafe_allow_html=True)
+
+speech_lang_map = {"ar": "ar-SA", "en": "en-US", "ru": "ru-RU", "zh": "zh-CN", "de": "de-DE", "es": "es-ES", "pt": "pt-PT", "ko": "ko-KR"}
+speech_lang = speech_lang_map.get(source_lang, "en-US")
+
+st.components.v1.html("""
+<div style="font-family:Arial,sans-serif;padding:4px;">
+  <button id="mic-btn" onclick="toggleSpeech()" 
+    style="background:#1a1a2e;color:#fff;border:none;border-radius:8px;padding:14px 28px;font-size:16px;font-weight:700;cursor:pointer;">
+    🎤 Start Speaking
+  </button>
+  <span id="mic-status" style="margin-left:12px;font-size:14px;color:#6b7280;font-weight:500;"></span>
+
+  <div id="result-box" style="display:none;margin-top:12px;background:#f0fdf4;border:2px solid #86efac;border-radius:10px;padding:14px;">
+    <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:6px;">✅ Recognized Text:</div>
+    <div id="result-text" style="font-size:16px;color:#1f2937;font-weight:600;"></div>
+    <div style="font-size:11px;color:#6b7280;margin-top:8px;">📋 Copy this text and paste it into the input box below</div>
+  </div>
+
+  <div id="error-box" style="display:none;margin-top:12px;background:#fee2e2;border:2px solid #fca5a5;border-radius:10px;padding:12px;font-size:14px;color:#991b1b;font-weight:500;"></div>
+</div>
+
+<script>
+  var rec = null;
+  var recording = false;
+
+  function toggleSpeech() {
+    var btn = document.getElementById('mic-btn');
+    var status = document.getElementById('mic-status');
+    var resultBox = document.getElementById('result-box');
+    var resultText = document.getElementById('result-text');
+    var errorBox = document.getElementById('error-box');
+
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      errorBox.style.display = 'block';
+      errorBox.innerHTML = '❌ <b>Your browser does not support speech recognition.</b><br>Please use Chrome, Edge, or Safari.';
+      return;
+    }
+
+    if (recording && rec) {
+      rec.stop();
+      return;
+    }
+
+    rec = new SR();
+    rec.lang = '""" + speech_lang + """';
+    rec.continuous = false;
+    rec.interimResults = false;
+
+    rec.onstart = function() {
+      recording = true;
+      btn.innerHTML = '⏹️ Stop Recording';
+      btn.style.background = '#dc2626';
+      status.innerHTML = '🔴 <b>Listening...</b> Speak now';
+      status.style.color = '#dc2626';
+      errorBox.style.display = 'none';
+    };
+
+    rec.onresult = function(e) {
+      var text = e.results[0][0].transcript;
+      resultText.innerHTML = text;
+      resultBox.style.display = 'block';
+      status.innerHTML = '✅ <b>Done!</b> Copy the green text';
+      status.style.color = '#16a34a';
+    };
+
+    rec.onerror = function(e) {
+      errorBox.style.display = 'block';
+      var msg = e.error;
+      if (msg === 'no-speech') msg = 'No speech detected. Try again.';
+      if (msg === 'audio-capture') msg = 'No microphone found.';
+      if (msg === 'not-allowed') msg = 'Microphone permission denied. Please allow access.';
+      errorBox.innerHTML = '❌ <b>Error:</b> ' + msg;
+      recording = false;
+      btn.innerHTML = '🎤 Start Speaking';
+      btn.style.background = '#1a1a2e';
+      status.innerHTML = '';
+    };
+
+    rec.onend = function() {
+      recording = false;
+      btn.innerHTML = '🎤 Start Speaking';
+      btn.style.background = '#1a1a2e';
+    };
+
+    rec.start();
+  }
+</script>
+""", height=260)
+
+st.caption("🎤 Click → Speak → Copy green text → Paste below → Translate. Chrome/Edge/Safari only. Firefox does not support speech recognition.")
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  TEXT INPUT
+# ═══════════════════════════════════════════════════════════════════════════════
+input_text = st.text_area("Enter text to translate", height=140, placeholder="Type, paste, or copy your voice text here...", value=st.session_state.input_text, key="input_text_area")
 if input_text != st.session_state.input_text:
     st.session_state.input_text = input_text
 
-# Detected domains
 if input_text.strip():
     detected = detect_domains(input_text)
     if detected:
@@ -560,58 +492,36 @@ if input_text.strip():
     else:
         st.markdown('<div class="detected-box">No specific domain detected — using General context.</div>', unsafe_allow_html=True)
 
-# Translate button
+# ═══════════════════════════════════════════════════════════════════════════════
+#  TRANSLATE BUTTON
+# ═══════════════════════════════════════════════════════════════════════════════
 if st.button("Translate", type="primary"):
     if not input_text.strip():
         st.warning("Please enter text to translate.")
     elif not DEEPL_API_KEY:
-        st.markdown(
-            '<div class="error-box">'
-            '<b>🔑 DeepL API Key Required</b><br>'
-            'Please enter your DeepL API key in the sidebar to start translating. '
-            'Get a free key at <a href="https://www.deepl.com/pro-api" target="_blank">deepl.com/pro-api</a>.'
-            '</div>',
-            unsafe_allow_html=True
-        )
+        st.markdown('<div class="error-box"><b>🔑 DeepL API Key Required</b><br>Please enter your key in the sidebar to start translating. Get a free key at <a href="https://www.deepl.com/pro-api" target="_blank">deepl.com/pro-api</a>.</div>', unsafe_allow_html=True)
     else:
         with st.spinner("Translating via DeepL..."):
             base_translation, api_used = fetch_ai_translation(input_text, source_lang, target_lang)
-
             if not base_translation:
-                # Show detailed error
-                st.markdown(
-                    f'<div class="error-box">'
-                    f'<b>❌ Translation Failed</b><br>'
-                    f'{api_used}<br>'
-                    f'<span style="font-size:12px;color:#7f1d1d;">Please check your API key and quota at DeepL dashboard.</span>'
-                    f'</div>',
-                    unsafe_allow_html=True
-                )
+                st.markdown(f'<div class="error-box"><b>❌ Translation Failed</b><br>{api_used}<br><span style="font-size:12px;color:#7f1d1d;">Please check your API key and quota.</span></div>', unsafe_allow_html=True)
             else:
                 api_badge = f'<span class="api-badge api-deepl">{api_used}</span>'
                 st.markdown(f"{api_badge} <b>Base Translation:</b>", unsafe_allow_html=True)
                 st.markdown(f'<div class="rtext">{base_translation}</div>', unsafe_allow_html=True)
 
-                # ═══════════════════════════════════════════════════════════════════
-                #  DICTIONARY LOOKUP
-                # ═══════════════════════════════════════════════════════════════════
+                # DICTIONARY LOOKUP
                 all_meanings = {}
                 lookup_word = input_text.strip().lower()
                 is_single_word = len(lookup_word.split()) == 1
 
-                # 1. Direct lookup
                 if is_single_word and lookup_word in DOMAIN_SPECIFIC_TRANSLATIONS:
                     word_data = DOMAIN_SPECIFIC_TRANSLATIONS[lookup_word]
                     for domain, trans in word_data.items():
                         if domain not in all_meanings:
                             all_meanings[domain] = []
-                        all_meanings[domain].append({
-                            "translation": trans.get(target_lang, trans.get("en", "")),
-                            "desc": trans.get("desc", ""),
-                            "source": f"Direct: '{lookup_word}'"
-                        })
+                        all_meanings[domain].append({"translation": trans.get(target_lang, trans.get("en", "")), "desc": trans.get("desc", ""), "source": f"Direct: '{lookup_word}'"})
 
-                # 2. English lookup (via DeepL, not Google)
                 english_word = None
                 if source_lang != "en":
                     eng_result, eng_err = translate_deepl(input_text.strip(), source_lang, "en")
@@ -628,13 +538,8 @@ if st.button("Translate", type="primary"):
                         existing = [m["translation"] for m in all_meanings.get(domain, [])]
                         t = trans.get(target_lang, trans.get("en", ""))
                         if t not in existing:
-                            all_meanings[domain].append({
-                                "translation": t,
-                                "desc": trans.get("desc", ""),
-                                "source": f"English: '{english_word}'"
-                            })
+                            all_meanings[domain].append({"translation": t, "desc": trans.get("desc", ""), "source": f"English: '{english_word}'"})
 
-                # 3. Fuzzy search
                 if not all_meanings and is_single_word and english_word:
                     for dict_word, word_data in DOMAIN_SPECIFIC_TRANSLATIONS.items():
                         if english_word in dict_word or dict_word in english_word:
@@ -644,22 +549,15 @@ if st.button("Translate", type="primary"):
                                 existing = [m["translation"] for m in all_meanings.get(domain, [])]
                                 t = trans.get(target_lang, trans.get("en", ""))
                                 if t not in existing:
-                                    all_meanings[domain].append({
-                                        "translation": t,
-                                        "desc": trans.get("desc", ""),
-                                        "source": f"Fuzzy: '{dict_word}'"
-                                    })
+                                    all_meanings[domain].append({"translation": t, "desc": trans.get("desc", ""), "source": f"Fuzzy: '{dict_word}'"})
 
-                # ═══════════════════════════════════════════════════════════════════
-                #  DISPLAY ALL POSSIBLE MEANINGS
-                # ═══════════════════════════════════════════════════════════════════
+                # DISPLAY MEANINGS
                 if all_meanings:
                     total_meanings = sum(len(v) for v in all_meanings.values())
                     st.markdown("---")
                     st.markdown(f'<div class="all-meanings-header">📚 All Possible Meanings & Contexts <span class="meaning-count">{total_meanings}</span></div>', unsafe_allow_html=True)
                     st.caption("Showing every domain-specific translation found in dictionary")
 
-                    # Sort: selected domain first, then others, then general
                     domain_keys = [d for d in all_meanings.keys() if d != "general"]
                     if selected_domain and selected_domain in domain_keys:
                         domain_keys.remove(selected_domain)
@@ -667,7 +565,6 @@ if st.button("Translate", type="primary"):
                     if "general" in all_meanings:
                         domain_keys.append("general")
 
-                    # Display in a responsive grid
                     for domain in domain_keys:
                         dinfo = DOMAINS.get(domain, DOMAINS["general"])
                         meanings = all_meanings[domain]
@@ -676,11 +573,9 @@ if st.button("Translate", type="primary"):
                         for meaning in meanings:
                             priority_html = '<span class="priority-badge">★ SELECTED</span>' if is_priority else ''
                             border_color = dinfo["color"]
-
                             st.markdown(
                                 f'<div class="meaning-card" style="border-left: 4px solid {border_color};">' +
-                                f'<div class="meaning-domain" style="color: {border_color};">' +
-                                f'{dinfo["emoji"]} {dinfo["name_en"]}{priority_html}</div>' +
+                                f'<div class="meaning-domain" style="color: {border_color};">{dinfo["emoji"]} {dinfo["name_en"]}{priority_html}</div>' +
                                 f'<div class="meaning-text">{meaning["translation"]}</div>' +
                                 f'<div class="meaning-desc">{meaning["desc"]}</div>' +
                                 f'<div class="meaning-context">Source: {meaning["source"]}</div>' +
@@ -688,12 +583,22 @@ if st.button("Translate", type="primary"):
                                 unsafe_allow_html=True
                             )
 
-                # If no dictionary meanings found, show info
-                if not all_meanings:
+                            # TTS button for each meaning
+                            tts_lang = {"ar": "ar-SA", "en": "en-US", "ru": "ru-RU", "zh": "zh-CN", "de": "de-DE", "es": "es-ES", "pt": "pt-PT", "ko": "ko-KR"}.get(target_lang, "en-US")
+                            safe_text = meaning["translation"].replace("'", "\'")
+                            st.components.v1.html(f"""
+                            <div style="margin-top:4px;margin-bottom:12px;">
+                                <button onclick="(function(){{ if(!('speechSynthesis' in window)) return; window.speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance('{safe_text}'); u.lang='{tts_lang}'; u.rate=0.9; window.speechSynthesis.speak(u); }})()" 
+                                    style="background:#f8fafc;color:#4b5563;border:0.5px solid #d1d5db;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;">
+                                    🔊 Listen
+                                </button>
+                            </div>
+                            """, height=35)
+                else:
                     st.markdown("---")
-                    st.info("ℹ️ No specialized dictionary meanings found for this word. Showing general translation only. Try selecting a specific style above, or add this word to the dictionary.")
+                    st.info("ℹ️ No specialized dictionary meanings found for this word. Showing general translation only.")
 
-                # Always show general translation
+                # General translation with TTS
                 st.markdown("---")
                 st.markdown('<div class="all-meanings-header">💬 General Translation (DeepL)</div>', unsafe_allow_html=True)
                 st.markdown(
@@ -704,3 +609,15 @@ if st.button("Translate", type="primary"):
                     '</div>',
                     unsafe_allow_html=True
                 )
+
+                tts_lang_general = {"ar": "ar-SA", "en": "en-US", "ru": "ru-RU", "zh": "zh-CN", "de": "de-DE", "es": "es-ES", "pt": "pt-PT", "ko": "ko-KR"}.get(target_lang, "en-US")
+                safe_general = base_translation.replace("'", "\'")
+                st.components.v1.html(f"""
+                <div style="margin-top:8px;">
+                    <button onclick="(function(){{ if(!('speechSynthesis' in window)){{ document.getElementById('tts-status').textContent='❌ TTS not supported'; return; }} window.speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance('{safe_general}'); u.lang='{tts_lang_general}'; u.rate=0.9; window.speechSynthesis.speak(u); }})()" 
+                        style="background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;">
+                        🔊 Listen to Translation
+                    </button>
+                    <span id="tts-status" style="margin-left:8px;font-size:12px;color:#6b7280;"></span>
+                </div>
+                """, height=60)
