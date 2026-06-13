@@ -4,7 +4,7 @@ import os
 import json
 from pathlib import Path
 
-st.set_page_config(page_title="HASSAN NASSER | Multi-Domain Translator", page_icon="🏗️", layout="wide")
+st.set_page_config(page_title="HASSAN NASSER | Multi-Domain Multi-Language Translator", page_icon="🌍", layout="wide")
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  CSS
@@ -14,7 +14,7 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 #MainMenu, footer, header { visibility: hidden; }
-.block-container { padding-top: 1.5rem; padding-bottom: 2rem; max-width: 1100px; }
+.block-container { padding-top: 1.5rem; padding-bottom: 2rem; max-width: 1400px; }
 
 .hero {
     background: #1a1a2e;
@@ -78,21 +78,6 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 .detected-box { background: #E6F4F1; border-left: 3px solid #5DCAA5; border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 13px; color: #04342C; margin-bottom: 1rem; }
 .abbrev-box { background: #E3F2FD; border-left: 3px solid #1565C0; border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 13px; color: #0D47A1; margin-bottom: 1rem; }
 
-.swap-btn {
-    background: #f3f4f6 !important; color: #374151 !important; border: 1px solid #d1d5db !important;
-    border-radius: 8px !important; font-weight: 600 !important; font-size: 16px !important;
-    padding: 0.4rem 0.8rem !important; width: auto !important;
-}
-.swap-btn:hover { background: #e5e7eb !important; }
-
-div.stButton > button[kind="primary"] {
-    background: #1a1a2e !important; color: white !important; border: none !important;
-    border-radius: 8px !important; font-weight: 500 !important;
-    font-size: 15px !important; padding: 0.65rem 2rem !important; width: 100% !important;
-}
-div.stButton > button[kind="primary"]:hover { background: #0f0f1e !important; }
-textarea { border-radius: 8px !important; border: 0.5px solid #d1d5db !important; font-size: 14px !important; }
-
 .api-badge {
     display: inline-block; padding: 2px 8px; border-radius: 4px;
     font-size: 10px; font-weight: 600; letter-spacing: 0.04em; margin-right: 4px;
@@ -135,24 +120,59 @@ textarea { border-radius: 8px !important; border: 0.5px solid #d1d5db !important
 .all-meanings-header { font-size: 18px; font-weight: 600; color: #1a1a2e; margin: 1.5rem 0 1rem; }
 .meaning-count { background: #5DCAA5; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-left: 8px; }
 .domain-card { margin-bottom: 12px; }
+.dict-stats { font-size: 11px; color: #6b7280; margin-top: 4px; }
+
+.lang-card {
+    border-radius: 12px;
+    padding: 1.2rem;
+    border: 0.5px solid #e5e7eb;
+    background: #fff;
+    margin-bottom: 1rem;
+}
+.lang-header {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.lang-flag { font-size: 20px; }
+.translation-box {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1f2937;
+    border-left: 3px solid #5DCAA5;
+    margin-bottom: 10px;
+}
+.domain-meanings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+}
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown("""
 <div class="hero">
     <div class="hero-name">HASSAN <span>NASSER</span></div>
-    <div class="hero-sub">MULTI-DOMAIN SMART TRANSLATOR — 15+ SPECIALIZED FIELDS</div>
+    <div class="hero-sub">MULTI-DOMAIN SMART TRANSLATOR — ALL LANGUAGES & ALL MEANINGS</div>
     <div class="hero-pills">
         <span class="pill pill-active">Auto-Domain Detect</span>
         <span class="pill pill-muted">DeepL Precision</span>
-        <span class="pill pill-muted">Smart Swap</span>
+        <span class="pill pill-muted">All 8 Languages</span>
         <span class="pill pill-muted">All Contexts</span>
+        <span class="pill pill-muted">Dictionary Lookup</span>
     </div>
     <div class="lang-bar">
         <span class="ldot"></span><span class="ldot"></span><span class="ldot"></span>
         <span class="ldot"></span><span class="ldot"></span><span class="ldot"></span>
         <span class="ldot"></span><span class="ldot"></span>
-        <span class="lang-bar-txt">8 languages supported</span>
+        <span class="lang-bar-txt">8 languages supported simultaneously</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -163,6 +183,16 @@ st.markdown("""
 languages_dict = {
     "Arabic": "ar", "English": "en", "Russian": "ru", "Chinese": "zh",
     "German": "de", "Spanish": "es", "Portuguese": "pt", "Korean": "ko"
+}
+
+lang_flags = {
+    "ar": "🇸🇦", "en": "🇬🇧", "ru": "🇷🇺", "zh": "🇨🇳",
+    "de": "🇩🇪", "es": "🇪🇸", "pt": "🇵🇹", "ko": "🇰🇷"
+}
+
+lang_names = {
+    "ar": "Arabic", "en": "English", "ru": "Russian", "zh": "Chinese",
+    "de": "German", "es": "Spanish", "pt": "Portuguese", "ko": "Korean"
 }
 
 DOMAINS = {
@@ -232,7 +262,7 @@ def detect_domains(text):
 # ═══════════════════════════════════════════════════════════════════════════════
 #  TRANSLATION ENGINES
 # ═══════════════════════════════════════════════════════════════════════════════
-DEEPL_API_KEY = os.environ.get("BTU8IJVMGLWVs3kvL", "")
+DEEPL_API_KEY = os.environ.get("DEEPL_API_KEY", "")
 
 def translate_deepl(text, source_lang, target_lang):
     if not DEEPL_API_KEY: return None
@@ -271,66 +301,97 @@ def fetch_ai_translation(text, source_lang, target_lang):
     return None, None
 
 # ═══════════════════════════════════════════════════════════════════════════════
+#  DICTIONARY LOOKUP FUNCTION
+# ═══════════════════════════════════════════════════════════════════════════════
+def get_all_meanings(text, source_lang, target_lang):
+    """Get all domain-specific meanings for a word across all languages."""
+    all_meanings = {}
+    lookup_word = text.strip().lower()
+    is_single_word = len(lookup_word.split()) == 1
+
+    if not is_single_word:
+        return {}
+
+    # 1. Direct lookup of original word
+    if lookup_word in DOMAIN_SPECIFIC_TRANSLATIONS:
+        word_data = DOMAIN_SPECIFIC_TRANSLATIONS[lookup_word]
+        for domain, trans in word_data.items():
+            if domain not in all_meanings:
+                all_meanings[domain] = []
+            all_meanings[domain].append({
+                "translation": trans.get(target_lang, trans.get("en", "")),
+                "desc": trans.get("desc", ""),
+                "source": f"Direct: '{lookup_word}'"
+            })
+
+    # 2. Translate to English for lookup
+    english_word = None
+    if source_lang != "en":
+        english_word = translate_google(text.strip(), source_lang, "en")
+        if english_word:
+            english_word = english_word.strip().lower()
+    else:
+        english_word = lookup_word
+
+    # 2a. Lookup English word
+    if english_word and english_word in DOMAIN_SPECIFIC_TRANSLATIONS:
+        word_data = DOMAIN_SPECIFIC_TRANSLATIONS[english_word]
+        for domain, trans in word_data.items():
+            if domain not in all_meanings:
+                all_meanings[domain] = []
+            existing = [m["translation"] for m in all_meanings.get(domain, [])]
+            t = trans.get(target_lang, trans.get("en", ""))
+            if t not in existing:
+                all_meanings[domain].append({
+                    "translation": t,
+                    "desc": trans.get("desc", ""),
+                    "source": f"English: '{english_word}'"
+                })
+
+    # 3. Fuzzy search for partial matches
+    if not all_meanings and english_word:
+        for dict_word, word_data in DOMAIN_SPECIFIC_TRANSLATIONS.items():
+            if english_word in dict_word or dict_word in english_word:
+                for domain, trans in word_data.items():
+                    if domain not in all_meanings:
+                        all_meanings[domain] = []
+                    existing = [m["translation"] for m in all_meanings.get(domain, [])]
+                    t = trans.get(target_lang, trans.get("en", ""))
+                    if t not in existing:
+                        all_meanings[domain].append({
+                            "translation": t,
+                            "desc": trans.get("desc", ""),
+                            "source": f"Fuzzy: '{dict_word}'"
+                        })
+
+    return all_meanings
+
+# ═══════════════════════════════════════════════════════════════════════════════
 #  SESSION STATE
 # ═══════════════════════════════════════════════════════════════════════════════
 if "source_lang" not in st.session_state:
     st.session_state.source_lang = "English"
-if "target_lang" not in st.session_state:
-    st.session_state.target_lang = "Arabic"
 if "input_text" not in st.session_state:
     st.session_state.input_text = ""
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  UI — LANGUAGE PAIR
+#  UI — SOURCE LANGUAGE ONLY
 # ═══════════════════════════════════════════════════════════════════════════════
 lang_list = list(languages_dict.keys())
 
-def update_source():
-    selected = st.session_state.source_lang_select
-    st.session_state.source_lang = selected
-    if st.session_state.target_lang == selected:
-        for lang in lang_list:
-            if lang != selected:
-                st.session_state.target_lang = lang
-                break
-
-def update_target():
-    st.session_state.target_lang = st.session_state.target_lang_select
-
-left, mid, right = st.columns([1, 0.12, 1])
-
-with left:
-    source_lang_name = st.selectbox(
-        "From Language", 
-        lang_list, 
-        index=lang_list.index(st.session_state.source_lang),
-        key="source_lang_select",
-        on_change=update_source
-    )
-
-with mid:
-    st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
-    if st.button("⇄", key="swap_btn", help="Swap languages", use_container_width=True):
-        old_source = st.session_state.source_lang
-        old_target = st.session_state.target_lang
-        st.session_state.source_lang = old_target
-        st.session_state.target_lang = old_source
-        st.rerun()
-
-with right:
-    target_lang_options = [k for k in lang_list if k != source_lang_name]
-    target_index = target_lang_options.index(st.session_state.target_lang) if st.session_state.target_lang in target_lang_options else 0
-
-    target_lang_name = st.selectbox(
-        "To Language", 
-        target_lang_options,
-        index=target_index,
-        key="target_lang_select",
-        on_change=update_target
-    )
-
+source_lang_name = st.selectbox(
+    "Source Language", 
+    lang_list, 
+    index=lang_list.index(st.session_state.source_lang),
+    key="source_lang_select"
+)
 source_lang = languages_dict[source_lang_name]
-target_lang = languages_dict[target_lang_name]
+
+# Show dictionary stats
+if DOMAIN_SPECIFIC_TRANSLATIONS:
+    dict_size = len(DOMAIN_SPECIFIC_TRANSLATIONS)
+    total_entries = sum(len(v) for v in DOMAIN_SPECIFIC_TRANSLATIONS.values())
+    st.markdown(f'<div class="dict-stats">📚 Dictionary loaded: {dict_size} words with {total_entries} total domain entries</div>', unsafe_allow_html=True)
 
 # Input
 input_text = st.text_area("Enter text to translate", height=140, placeholder="Type or paste text here...", value=st.session_state.input_text, key="input_text_area")
@@ -351,134 +412,108 @@ if input_text.strip():
         st.markdown('<div class="detected-box">No specific domain detected — using General context.</div>', unsafe_allow_html=True)
 
 # Translate button
-if st.button("Translate", type="primary"):
+if st.button("🌍 Translate to All Languages", type="primary"):
     if not input_text.strip():
         st.warning("Please enter text to translate.")
     else:
-        with st.spinner("Translating..."):
-            # Get base translation
-            base_translation, api_used = fetch_ai_translation(input_text, source_lang, target_lang)
+        with st.spinner("Translating to all 8 languages..."):
+            # Translate to ALL languages
+            all_translations = {}
+            for lang_name, lang_code in languages_dict.items():
+                if lang_code == source_lang:
+                    continue
+                translation, api_used = fetch_ai_translation(input_text, source_lang, lang_code)
+                all_translations[lang_code] = {
+                    "translation": translation,
+                    "api": api_used,
+                    "lang_name": lang_name
+                }
 
-            if not base_translation:
-                st.error("Translation failed. Please check your internet connection or API keys.")
-            else:
-                # Show base translation
-                api_badge = f'<span class="api-badge api-deepl">{api_used}</span>' if api_used == "DeepL" else f'<span class="api-badge api-google">{api_used}</span>'
-                st.markdown(f"{api_badge} <b>Base Translation:</b>", unsafe_allow_html=True)
-                st.markdown(f'<div class="rtext">{base_translation}</div>', unsafe_allow_html=True)
+            # Show all translations in tabs
+            st.markdown("---")
+            st.markdown('<div class="all-meanings-header">🌍 Translations in All Languages</div>', unsafe_allow_html=True)
 
-                # ═══════════════════════════════════════════════════════════════════
-                #  COMPREHENSIVE DICTIONARY LOOKUP — ALL DOMAINS
-                # ═══════════════════════════════════════════════════════════════════
-                all_meanings = {}
-                lookup_word = input_text.strip().lower()
-                is_single_word = len(lookup_word.split()) == 1
+            # Create tabs for each language
+            lang_codes = [lc for lc in languages_dict.values() if lc != source_lang]
+            tab_labels = [f"{lang_flags[lc]} {lang_names[lc]}" for lc in lang_codes]
+            tabs = st.tabs(tab_labels)
 
-                # 1. Direct lookup of original word
-                if is_single_word and lookup_word in DOMAIN_SPECIFIC_TRANSLATIONS:
-                    word_data = DOMAIN_SPECIFIC_TRANSLATIONS[lookup_word]
-                    for domain, trans in word_data.items():
-                        if domain not in all_meanings:
-                            all_meanings[domain] = []
-                        all_meanings[domain].append({
-                            "translation": trans.get(target_lang, trans.get("en", "")),
-                            "desc": trans.get("desc", ""),
-                            "source": f"Direct: '{lookup_word}'"
-                        })
+            for idx, lang_code in enumerate(lang_codes):
+                with tabs[idx]:
+                    data = all_translations[lang_code]
+                    if data["translation"]:
+                        api_badge = f'<span class="api-badge api-deepl">{data["api"]}</span>' if data["api"] == "DeepL" else f'<span class="api-badge api-google">{data["api"]}</span>'
 
-                # 2. Translate to English for lookup
-                english_word = None
-                if source_lang != "en":
-                    english_word = translate_google(input_text.strip(), source_lang, "en")
-                    if english_word:
-                        english_word = english_word.strip().lower()
-                else:
-                    english_word = lookup_word
+                        # Base translation
+                        st.markdown(f"{api_badge} <b>Translation:</b>", unsafe_allow_html=True)
+                        st.markdown(f'<div class="translation-box">{data["translation"]}</div>', unsafe_allow_html=True)
 
-                # 2a. Lookup English word
-                if english_word and is_single_word and english_word in DOMAIN_SPECIFIC_TRANSLATIONS:
-                    word_data = DOMAIN_SPECIFIC_TRANSLATIONS[english_word]
-                    for domain, trans in word_data.items():
-                        if domain not in all_meanings:
-                            all_meanings[domain] = []
-                        existing = [m["translation"] for m in all_meanings.get(domain, [])]
-                        t = trans.get(target_lang, trans.get("en", ""))
-                        if t not in existing:
-                            all_meanings[domain].append({
-                                "translation": t,
-                                "desc": trans.get("desc", ""),
-                                "source": f"English: '{english_word}'"
-                            })
+                        # Dictionary meanings for this language
+                        meanings = get_all_meanings(input_text, source_lang, lang_code)
+                        if meanings:
+                            total_meanings = sum(len(v) for v in meanings.values())
+                            st.markdown(f'<div style="font-size:16px; font-weight:600; color:#1a1a2e; margin:1rem 0 0.5rem;">📖 All Possible Meanings <span class="meaning-count">{total_meanings}</span></div>', unsafe_allow_html=True)
 
-                # 3. Fuzzy search for partial matches
-                if not all_meanings and is_single_word and english_word:
-                    for dict_word, word_data in DOMAIN_SPECIFIC_TRANSLATIONS.items():
-                        if english_word in dict_word or dict_word in english_word:
-                            for domain, trans in word_data.items():
-                                if domain not in all_meanings:
-                                    all_meanings[domain] = []
-                                existing = [m["translation"] for m in all_meanings.get(domain, [])]
-                                t = trans.get(target_lang, trans.get("en", ""))
-                                if t not in existing:
-                                    all_meanings[domain].append({
-                                        "translation": t,
-                                        "desc": trans.get("desc", ""),
-                                        "source": f"Fuzzy: '{dict_word}'"
-                                    })
+                            sorted_domains = sorted(
+                                [d for d in meanings.keys() if d != "general"],
+                                key=lambda d: len(meanings[d]),
+                                reverse=True
+                            )
+                            if "general" in meanings:
+                                sorted_domains.append("general")
 
-                # ═══════════════════════════════════════════════════════════════════
-                #  DISPLAY ALL DOMAIN-SPECIFIC MEANINGS
-                # ═══════════════════════════════════════════════════════════════════
-                if all_meanings:
-                    total_meanings = sum(len(v) for v in all_meanings.values())
-                    st.markdown("---")
-                    st.markdown(f'<div class="all-meanings-header">🎯 All Domain-Specific Meanings <span class="meaning-count">{total_meanings}</span></div>', unsafe_allow_html=True)
+                            cols = st.columns(3)
+                            col_idx = 0
+                            for domain in sorted_domains:
+                                dinfo = DOMAINS.get(domain, DOMAINS["general"])
+                                domain_meanings = meanings[domain]
 
-                    sorted_domains = sorted(
-                        [d for d in all_meanings.keys() if d != "general"],
-                        key=lambda d: len(all_meanings[d]),
-                        reverse=True
-                    )
-                    if "general" in all_meanings:
-                        sorted_domains.append("general")
+                                with cols[col_idx % 3]:
+                                    for meaning in domain_meanings:
+                                        st.markdown(
+                                            '<div class="rcard rcard-' + domain + ' domain-card">' +
+                                            '<div class="rlabel rlabel-' + domain + '">' + dinfo["emoji"] + ' ' + dinfo["name_en"] + '</div>' +
+                                            '<div class="rtext" style="font-weight:600;">' + meaning["translation"] + '</div>' +
+                                            '<div class="meaning-diff">' + meaning["desc"] + '</div>' +
+                                            '</div>',
+                                            unsafe_allow_html=True
+                                        )
+                                col_idx += 1
+                        else:
+                            # Show detected domain context if no exact match
+                            if detected:
+                                st.markdown('<div style="font-size:16px; font-weight:600; color:#1a1a2e; margin:1rem 0 0.5rem;">🎯 Domain Context</div>', unsafe_allow_html=True)
+                                for domain in detected[:3]:
+                                    dinfo = DOMAINS[domain]
+                                    st.markdown(
+                                        '<div class="rcard rcard-' + domain + ' domain-card">' +
+                                        '<div class="rlabel rlabel-' + domain + '">' + dinfo["emoji"] + ' ' + dinfo["name_en"] + '</div>' +
+                                        '<div class="rtext">' + data["translation"] + '</div>' +
+                                        '<div class="meaning-diff">General translation in ' + dinfo["name_en"] + ' context</div>' +
+                                        '</div>',
+                                        unsafe_allow_html=True
+                                    )
 
-                    cols = st.columns(3)
-                    col_idx = 0
-                    for domain in sorted_domains:
-                        dinfo = DOMAINS.get(domain, DOMAINS["general"])
-                        meanings = all_meanings[domain]
-
-                        with cols[col_idx % 3]:
-                            for meaning in meanings:
-                                st.markdown(
-                                    '<div class="rcard rcard-' + domain + ' domain-card">' +
-                                    '<div class="rlabel rlabel-' + domain + '">' + dinfo["emoji"] + ' ' + dinfo["name_en"] + '</div>' +
-                                    '<div class="rtext" style="font-weight:600;">' + meaning["translation"] + '</div>' +
-                                    '<div class="meaning-diff">' + meaning["desc"] + '</div>' +
-                                    '</div>',
-                                    unsafe_allow_html=True
-                                )
-                        col_idx += 1
-
-                elif detected:
-                    st.markdown("---")
-                    st.markdown('<div class="all-meanings-header">🎯 Domain-Specific Context</div>', unsafe_allow_html=True)
-                    st.caption("No exact dictionary match. Showing detected domain context.")
-                    for domain in detected[:3]:
-                        dinfo = DOMAINS[domain]
+                        # Always show general
+                        st.markdown('<div style="font-size:16px; font-weight:600; color:#1a1a2e; margin:1rem 0 0.5rem;">💬 General Translation</div>', unsafe_allow_html=True)
                         st.markdown(
-                            '<div class="rcard rcard-' + domain + ' domain-card">' +
-                            '<div class="rlabel rlabel-' + domain + '">' + dinfo["emoji"] + ' ' + dinfo["name_en"] + '</div>' +
-                            '<div class="rtext">' + base_translation + '</div>' +
-                            '<div class="meaning-diff">General translation in ' + dinfo["name_en"] + ' context</div>' +
-                            '</div>',
+                            '<div class="rcard rcard-gen"><div class="rlabel rlabel-gen">💬 General</div><div class="rtext">' + data["translation"] + '</div></div>',
                             unsafe_allow_html=True
                         )
+                    else:
+                        st.error(f"Translation to {data['lang_name']} failed.")
 
-                # Always show general translation
-                st.markdown("---")
-                st.markdown('<div class="all-meanings-header">💬 General Translation</div>', unsafe_allow_html=True)
-                st.markdown(
-                    '<div class="rcard rcard-gen"><div class="rlabel rlabel-gen">💬 General</div><div class="rtext">' + base_translation + '</div></div>',
-                    unsafe_allow_html=True
-                )
+            # Summary table at the bottom
+            st.markdown("---")
+            st.markdown('<div class="all-meanings-header">📊 Translation Summary</div>', unsafe_allow_html=True)
+
+            summary_data = []
+            for lang_code in lang_codes:
+                data = all_translations[lang_code]
+                summary_data.append({
+                    "Language": f"{lang_flags[lang_code]} {lang_names[lang_code]}",
+                    "Translation": data["translation"] if data["translation"] else "❌ Failed",
+                    "API": data["api"] if data["api"] else "N/A"
+                })
+
+            st.dataframe(summary_data, use_container_width=True, hide_index=True)
