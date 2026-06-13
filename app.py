@@ -232,7 +232,7 @@ def detect_domains(text):
 # ═══════════════════════════════════════════════════════════════════════════════
 #  TRANSLATION ENGINES
 # ═══════════════════════════════════════════════════════════════════════════════
-DEEPL_API_KEY = os.environ.get("DEEPL_API_KEY", "")
+DEEPL_API_KEY = os.environ.get("BTU8IJVMGLWVs3kvL", "")
 
 def translate_deepl(text, source_lang, target_lang):
     if not DEEPL_API_KEY: return None
