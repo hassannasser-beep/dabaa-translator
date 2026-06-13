@@ -334,7 +334,7 @@ with st.sidebar:
     st.markdown("### 🔑 DeepL API Key")
     st.markdown("<div style='font-size:11px;color:#6b7280;margin-bottom:8px;'>Required for translation. Get free at deepl.com/pro-api</div>", unsafe_allow_html=True)
 
-    env_key = os.environ.get("0d40f1a7-553b-44eb-9aab-837a828ca913:fx", "")
+    env_key = os.environ.get("DEEPL_API_KEY", "")
     if "deepl_api_key" not in st.session_state:
         st.session_state.deepl_api_key = env_key
 
