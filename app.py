@@ -276,7 +276,7 @@ st.sidebar.markdown("### 🔑 DeepL API Configuration")
 st.sidebar.markdown("<div style='font-size:12px;color:#6b7280;margin-bottom:8px;'>The app requires a DeepL API key to translate. Get one free at deepl.com/pro-api.</div>", unsafe_allow_html=True)
 
 # Try env var first, then session state, then empty
-env_key = os.environ.get("BTU8IJVMGLWVs3kvL", "")
+env_key = os.environ.get("0d40f1a7-553b-44eb-9aab-837a828ca913:fx", "")
 if "deepl_api_key" not in st.session_state:
     st.session_state.deepl_api_key = env_key
 
@@ -315,32 +315,41 @@ def translate_deepl(text, source_lang, target_lang):
     if tl == "AR": tl = "AR"
     elif tl == "ZH": tl = "ZH"
 
-    try:
-        resp = requests.post(
-            "https://api-free.deepl.com/v2/translate",
-            headers={
-                "Authorization": f"DeepL-Auth-Key {DEEPL_API_KEY}",
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            data={"text": text, "source_lang": sl, "target_lang": tl},
-            timeout=15
-        )
-        if resp.status_code == 200:
-            return resp.json()["translations"][0]["text"], None
-        elif resp.status_code == 403:
-            return None, "Invalid API key or authentication failed"
-        elif resp.status_code == 429:
-            return None, "Rate limit exceeded (too many requests)"
-        elif resp.status_code == 456:
-            return None, "Quota exceeded — free tier limit reached"
-        else:
-            return None, f"DeepL error {resp.status_code}: {resp.text[:200]}"
-    except requests.exceptions.Timeout:
-        return None, "Request timed out — check your internet connection"
-    except requests.exceptions.ConnectionError:
-        return None, "Connection error — cannot reach DeepL servers"
-    except Exception as e:
-        return None, f"Unexpected error: {str(e)}"
+    endpoints = [
+        "https://api-free.deepl.com/v2/translate",   # Free tier
+        "https://api.deepl.com/v2/translate",        # Pro tier
+    ]
+
+    last_error = None
+    for endpoint in endpoints:
+        try:
+            resp = requests.post(
+                endpoint,
+                headers={
+                    "Authorization": f"DeepL-Auth-Key {DEEPL_API_KEY}",
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                data={"text": text, "source_lang": sl, "target_lang": tl},
+                timeout=15
+            )
+            if resp.status_code == 200:
+                return resp.json()["translations"][0]["text"], None
+            elif resp.status_code == 403:
+                last_error = "Invalid API key — please check your DeepL dashboard"
+            elif resp.status_code == 429:
+                last_error = "Rate limit exceeded — too many requests"
+            elif resp.status_code == 456:
+                last_error = "Quota exceeded — monthly character limit reached"
+            else:
+                last_error = f"DeepL error {resp.status_code}: {resp.text[:200]}"
+        except requests.exceptions.Timeout:
+            last_error = "Request timed out — check your internet connection"
+        except requests.exceptions.ConnectionError:
+            last_error = "Connection error — cannot reach DeepL servers"
+        except Exception as e:
+            last_error = f"Unexpected error: {str(e)}"
+
+    return None, last_error
 
 def fetch_ai_translation(text, source_lang, target_lang):
     result, error = translate_deepl(text, source_lang, target_lang)
